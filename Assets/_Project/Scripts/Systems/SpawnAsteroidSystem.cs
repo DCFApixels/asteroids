@@ -8,9 +8,9 @@ namespace Asteroids.Systems
 {
     internal class SpawnAsteroidSystem : IEcsRun
     {
-        [DI] private StaticData _staticData;
-        [DI] private EcsDefaultWorld _world;
-        [DI] private PoolService _poolService;
+        [DI] StaticData _staticData;
+        [DI] EcsDefaultWorld _world;
+        [DI] PoolService _poolService;
 
         class EventAspect : EcsAspect
         {

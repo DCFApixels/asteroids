@@ -5,7 +5,7 @@ namespace Asteroids.Systems
 {
     internal class SetMoveInfoFromInputDataSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
+        [DI] EcsDefaultWorld _world;
         class InputDataAspect : EcsAspect
         {
             public readonly EcsPool<InputData> InputDatas = Inc;

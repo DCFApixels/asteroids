@@ -6,8 +6,8 @@ namespace Asteroids.Systems
 {
     internal class CycleAroundScreenSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private RuntimeData _runtimeData;
+        [DI] EcsDefaultWorld _world;
+        [DI] RuntimeData _runtimeData;
 
         class Aspect : EcsAspect
         {

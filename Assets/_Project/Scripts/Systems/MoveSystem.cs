@@ -6,7 +6,7 @@ namespace Asteroids.Systems
 {
     internal class MoveSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
+        [DI] EcsDefaultWorld _world;
 
         class Aspect : EcsAspect
         {

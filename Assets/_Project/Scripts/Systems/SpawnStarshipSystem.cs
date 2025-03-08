@@ -7,10 +7,10 @@ namespace Asteroids.Systems
 {
     internal class SpawnStarshipSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private StaticData _staticData;
-        [DI] private SceneData _sceneData;
-        [DI] private PoolService _poolService;
+        [DI] EcsDefaultWorld _world;
+        [DI] StaticData _staticData;
+        [DI] SceneData _sceneData;
+        [DI] PoolService _poolService;
 
         class EventAspect : EcsAspect
         {

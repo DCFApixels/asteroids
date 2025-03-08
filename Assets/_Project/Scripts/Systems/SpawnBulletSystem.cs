@@ -8,14 +8,14 @@ namespace Asteroids.Systems
 {
     internal class SpawnBulletSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private StaticData _staticData;
-        [DI] private PoolService _poolService;
+        [DI] EcsDefaultWorld _world;
+        [DI] StaticData _staticData;
+        [DI] PoolService _poolService;
 
         class StarshipAspect : EcsAspect
         {
             public readonly EcsPool<Starship> Starships = Inc;
-            public readonly EcsPool<MoveInfo> MoveInfoss = Inc;
+            public readonly EcsPool<MoveInfo> MoveInfos = Inc;
             public readonly EcsTagPool<WantShootSignal> WantShootSignals = Inc;
         }
         class BulletAspect : EcsAspect
@@ -35,7 +35,7 @@ namespace Asteroids.Systems
             foreach (var starshipE in _world.Where(out StarshipAspect starshipA))
             {
                 var starshipView = starshipA.Starships.Get(starshipE).View;
-                ref var starshipMoveInfo = ref starshipA.MoveInfoss.Get(starshipE);
+                ref var starshipMoveInfo = ref starshipA.MoveInfos.Get(starshipE);
 
                 var preafb = _staticData.BulletView;
                 var instance = _poolService.Get(preafb, out var id);

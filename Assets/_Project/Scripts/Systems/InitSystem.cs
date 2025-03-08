@@ -7,9 +7,9 @@ namespace Asteroids.Systems
 {
     internal class InitSystem : IEcsInit
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private StaticData _staticData;
-        [DI] private PoolService _poolService;
+        [DI] EcsDefaultWorld _world;
+        [DI] StaticData _staticData;
+        [DI] PoolService _poolService;
 
         public void Init()
         {

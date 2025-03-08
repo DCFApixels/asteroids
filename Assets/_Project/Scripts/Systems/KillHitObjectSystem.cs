@@ -6,8 +6,8 @@ namespace Asteroids.Systems
 {
     internal class KillHitObjectSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private PoolService _poolService;
+        [DI] EcsDefaultWorld _world;
+        [DI] PoolService _poolService;
 
         class Aspect : EcsAspect
         {

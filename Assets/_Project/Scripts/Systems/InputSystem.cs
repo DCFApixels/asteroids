@@ -6,7 +6,7 @@ namespace Asteroids.Systems
 {
     internal class InputSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
+        [DI] EcsDefaultWorld _world;
 
         class Aspect : EcsAspect
         {

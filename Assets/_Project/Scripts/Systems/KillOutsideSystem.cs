@@ -7,10 +7,10 @@ namespace Asteroids.Systems
 {
     internal class KillOutsideSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private RuntimeData _runtimeData;
-        [DI] private StaticData _staticData;
-        [DI] private PoolService _poolService;
+        [DI] EcsDefaultWorld _world;
+        [DI] RuntimeData _runtimeData;
+        [DI] StaticData _staticData;
+        [DI] PoolService _poolService;
 
         class Aspect : EcsAspect
         {

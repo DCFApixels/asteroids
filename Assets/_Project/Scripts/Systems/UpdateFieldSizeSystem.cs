@@ -6,8 +6,8 @@ namespace Asteroids.Systems
 {
     internal class UpdateFieldSizeSystem : IEcsRun
     {
-        [DI] private RuntimeData _runtimeData;
-        [DI] private SceneData _sceneData;
+        [DI] RuntimeData _runtimeData;
+        [DI] SceneData _sceneData;
 
         private float _prevAspect = -1f;
         public void Run()

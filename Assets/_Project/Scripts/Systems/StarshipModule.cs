@@ -6,13 +6,11 @@ namespace Asteroids.Systems
     {
         public void Import(EcsPipeline.Builder b)
         {
-            b
-                .Add(new SpawnStarshipSystem())
-                .Add(new InputSystem())
-                .Add(new SetMoveInfoFromInputDataSystem())
-                .Add(new SpawnBulletSystem())
-                .Add(new RespawnStarShipOnHitSystem())
-                ;
+            b.Add(new SpawnStarshipSystem());
+            b.Add(new InputSystem());
+            b.Add(new SetMoveInfoFromInputDataSystem());
+            b.Add(new SpawnBulletSystem());
+            b.Add(new RespawnStarShipOnHitSystem());
         }
     }
 }

@@ -6,8 +6,8 @@ namespace Asteroids.Systems
 {
     internal class RecalculateSpaceHashSystem : IEcsRun
     {
-        [DI] private RuntimeData _runtimeData;
-        [DI] private EcsDefaultWorld _world;
+        [DI] RuntimeData _runtimeData;
+        [DI] EcsDefaultWorld _world;
 
         class AsteroidAspect : EcsAspect
         {
