@@ -3,7 +3,6 @@ using Asteroids.Data;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
 using JetBrains.Annotations;
-using UnityEngine;
 
 namespace Asteroids.Systems
 {

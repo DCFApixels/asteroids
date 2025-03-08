@@ -1,9 +1,10 @@
-﻿using DCFApixels.DragonECS;
+﻿using Asteroids.Components;
+using DCFApixels.DragonECS;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Asteroids.Data
+namespace Asteroids.Views
 {
     public class LoseScreen : MonoBehaviour
     {

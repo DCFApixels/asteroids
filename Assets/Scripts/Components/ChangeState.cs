@@ -1,7 +1,7 @@
 ﻿using Asteroids.Data;
 using DCFApixels.DragonECS;
 
-namespace Asteroids.Systems
+namespace Asteroids.Components
 {
     struct ChangeState : IEcsComponent
     {

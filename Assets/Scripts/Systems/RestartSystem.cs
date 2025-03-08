@@ -1,11 +1,9 @@
 ﻿using Asteroids.Components;
 using Asteroids.Data;
-using Asteroids.Systems;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
-using TMPro;
 
-namespace Asteroids
+namespace Asteroids.Systems
 {
     internal class RestartSystem : IEcsRun
     {
@@ -19,7 +17,7 @@ namespace Asteroids
 
         private class PoolIdAspect : EcsAspect
         {
-            public EcsPool<PoolId> PoolIds = Inc;
+            public readonly EcsPool<PoolId> PoolIds = Inc;
         }
         
         public void Run()

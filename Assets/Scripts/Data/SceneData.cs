@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Asteroids.Views;
+using UnityEngine;
 
 namespace Asteroids.Data
 {

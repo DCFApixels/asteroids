@@ -1,4 +1,5 @@
-﻿using Asteroids.Data;
+﻿using Asteroids.Components;
+using Asteroids.Data;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
 

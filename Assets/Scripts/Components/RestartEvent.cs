@@ -1,6 +1,6 @@
 ﻿using DCFApixels.DragonECS;
 
-namespace Asteroids.Data
+namespace Asteroids.Components
 {
     internal struct RestartEvent : IEcsTagComponent
     {

@@ -1,7 +1,8 @@
-﻿using TMPro;
+﻿using Asteroids.Systems;
+using TMPro;
 using UnityEngine;
 
-namespace Asteroids.Data
+namespace Asteroids.Views
 {
     public class GameScreen : MonoBehaviour
     {

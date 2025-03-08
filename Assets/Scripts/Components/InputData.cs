@@ -1,6 +1,6 @@
 ﻿using DCFApixels.DragonECS;
 
-namespace Asteroids.Systems
+namespace Asteroids.Components
 {
     internal struct InputData : IEcsComponent
     {

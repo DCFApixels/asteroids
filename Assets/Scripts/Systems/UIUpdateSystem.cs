@@ -1,7 +1,7 @@
 ﻿using Asteroids.Data;
 using DCFApixels.DragonECS;
 
-namespace Asteroids
+namespace Asteroids.Systems
 {
     internal class UIUpdateSystem : IEcsRun
     {

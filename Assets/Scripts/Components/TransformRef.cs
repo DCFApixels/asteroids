@@ -1,7 +1,7 @@
 ﻿using DCFApixels.DragonECS;
 using UnityEngine;
 
-namespace Asteroids.Systems
+namespace Asteroids.Components
 {
     internal struct TransformRef : IEcsComponent
     {

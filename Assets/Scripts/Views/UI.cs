@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Asteroids.Data
+namespace Asteroids.Views
 {
     public class UI : MonoBehaviour
     {

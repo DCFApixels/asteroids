@@ -1,5 +1,4 @@
-﻿using System;
-using Asteroids.Utils;
+﻿using Asteroids.Utils;
 using UnityEngine;
 
 namespace Asteroids.Views

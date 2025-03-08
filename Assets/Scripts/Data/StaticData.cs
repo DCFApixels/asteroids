@@ -1,6 +1,5 @@
 ﻿using Asteroids.Views;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Asteroids.Data
 {
