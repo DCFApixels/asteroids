@@ -10,7 +10,7 @@ namespace Asteroids.Systems
         [DI] private EcsDefaultWorld _world;
         [DI] private RuntimeData _runtimeData;
 
-        class Aspect : EcsAspect
+        private class Aspect : EcsAspect
         {
             public readonly EcsPool<TransformRef> TransformRefs = Inc;
             public readonly EcsPool<MoveInfo> MoveInfos = Inc;
@@ -24,7 +24,14 @@ namespace Asteroids.Systems
                 ref var moveInfo = ref aspect.MoveInfos.Get(e);
 
                 moveInfo.Position += moveInfo.Speed * Time.deltaTime * moveInfo.Forward;
-                moveInfo.Speed += moveInfo.Acceleration * Time.deltaTime;
+                if (moveInfo.Power != 0)
+                {
+                    moveInfo.Speed = Mathf.Clamp(moveInfo.Speed + moveInfo.Power * moveInfo.Acceleration * Time.deltaTime, -moveInfo.MaxSpeed, moveInfo.MaxSpeed);
+                }
+                else
+                {
+                    moveInfo.Speed *= 1 - moveInfo.Friction;
+                }
 
                 transform.position = moveInfo.Position;
 

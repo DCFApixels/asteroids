@@ -34,7 +34,7 @@ namespace Asteroids.Utils
         }
     
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int Ceiling(float value)
+        private static int Ceiling(float value)
         {
             if (value == (int)value)
                 return (int)value;
@@ -113,34 +113,36 @@ namespace Asteroids.Utils
                         var xDiff = xPos - item.X;
                         var yDiff = yPos - item.Y;
                         var sqrDistance = xDiff * xDiff + yDiff * yDiff;
-                        if (sqrDistance <= rSqr)
+                        if (!(sqrDistance <= rSqr))
                         {
-                            var hit = new Hit(item.Id, sqrDistance);
-                            if (hits.Count == 0)
-                            {
-                                hits.Add(hit);
-                            }
-                            else
-                            {
-                                int index = 0, right = hits.Count - 1;
+                            continue;
+                        }
+                        
+                        var hit = new Hit(item.Id, sqrDistance);
+                        if (hits.Count == 0)
+                        {
+                            hits.Add(hit);
+                        }
+                        else
+                        {
+                            int index = 0, right = hits.Count - 1;
 
-                                while (index <= right)
+                            while (index <= right)
+                            {
+                                var mid = index + (right - index) / 2;
+
+                                if (hits[mid].SqrDistance < sqrDistance)
                                 {
-                                    var mid = index + (right - index) / 2;
-
-                                    if (hits[mid].SqrDistance < sqrDistance)
-                                    {
-                                        index = mid + 1;
-                                    }
-                                    else
-                                    {
-                                        right = mid - 1;
-                                    }
+                                    index = mid + 1;
                                 }
-
-                                if (index < 0) index = ~index;
-                                hits.Insert(index, hit);
+                                else
+                                {
+                                    right = mid - 1;
+                                }
                             }
+
+                            if (index < 0) index = ~index;
+                            hits.Insert(index, hit);
                         }
                     }
                 }

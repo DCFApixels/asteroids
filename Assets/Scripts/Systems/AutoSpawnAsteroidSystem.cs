@@ -11,16 +11,19 @@ namespace Asteroids.Systems
         [DI] private EcsDefaultWorld _world;
         [DI] private RuntimeData _runtimeData;
 
-        private int _previousSpawnTime = 0;
+        private int _previousSpawnTime;
+        
         public void Run()
         {
-            var second = (int)Time.time;
-            if (second != _previousSpawnTime && second >= _staticData.SpawnFrequency &&
-                second % _staticData.SpawnFrequency == 0)
+            var gameTime = (int)(Time.time - _runtimeData.LevelStartTime);
+            if (gameTime != _previousSpawnTime && gameTime >= _staticData.SpawnFrequency &&
+                gameTime % _staticData.SpawnFrequency == 0)
             {
-                _previousSpawnTime = second;
+                _previousSpawnTime = gameTime;
 
-                for (int var = 0; var < _staticData.SpawnAmount; var++)
+                var spawnAsteroidEvents = _world.GetPool<SpawnAsteroidEvent>();
+                
+                for (var var = 0; var < _staticData.SpawnAmount; var++)
                 {
                     var size = _runtimeData.FieldSize;
 
@@ -34,7 +37,7 @@ namespace Asteroids.Systems
                         Random.Range(-size.y / 2f - startAsteroidRadius/2f, size.y / 2f + startAsteroidRadius/2f));
 
                     var startRotation = Quaternion.LookRotation(-spawnPosition);
-                    ref var spawnAsteroid = ref _world.GetPool<SpawnAsteroid>().Add(_world.NewEntity());
+                    ref var spawnAsteroid = ref spawnAsteroidEvents.Add(_world.NewEntity());
                     spawnAsteroid.Position = spawnPosition;
                     spawnAsteroid.Rotation = startRotation;
                     spawnAsteroid.DeathsLeft = _staticData.AsteroidDeathLeft;

@@ -5,17 +5,17 @@ namespace Asteroids.Utils
 {
     internal class PoolService
     {
-        private readonly Dictionary<int, List<Component>> Pools = new();
+        private readonly Dictionary<int, List<Component>> _pools = new();
 
         public void PreWarm(Component component, int amount)
         {
             var instanceID = component.GetInstanceID();
-            if (!Pools.TryGetValue(instanceID, out var pool))
+            if (!_pools.TryGetValue(instanceID, out var pool))
             {
-                pool = new List<Component>();
-                Pools.Add(instanceID, pool);
+                pool = new();
+                _pools.Add(instanceID, pool);
             }
-            for (int i = 0; i < amount; i++)
+            for (var i = 0; i < amount; i++)
             {
                 var instance = Object.Instantiate(component);
                 pool.Add(instance);
@@ -25,7 +25,7 @@ namespace Asteroids.Utils
 
         public void Return(int instanceID, Component component)
         {
-            if (Pools.TryGetValue(instanceID, out var pool))
+            if (_pools.TryGetValue(instanceID, out var pool))
             {
                 pool.Add(component);
                 component.gameObject.SetActive(false);
@@ -39,10 +39,10 @@ namespace Asteroids.Utils
         public T Get<T>(T component, out int instanceID) where T : Component
         {
             instanceID = component.GetInstanceID();
-            if (!Pools.TryGetValue(instanceID, out var pool))
+            if (!_pools.TryGetValue(instanceID, out var pool))
             {
-                pool = new List<Component>();
-                Pools.Add(instanceID, pool);
+                pool = new();
+                _pools.Add(instanceID, pool);
             }
 
             if (pool.Count > 0)

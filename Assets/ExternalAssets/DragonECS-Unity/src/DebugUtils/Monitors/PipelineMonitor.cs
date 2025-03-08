@@ -48,7 +48,10 @@ namespace DCFApixels.DragonECS.Unity.Internal
 
         public void Destroy()
         {
-            UnityEngine.Object.Destroy(_monitor);
+            if (_monitor)
+            {
+                UnityEngine.Object.Destroy(_monitor.gameObject);
+            }
         }
     }
 }

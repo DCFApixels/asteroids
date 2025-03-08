@@ -1,0 +1,2 @@
+.footer { height: 45px; line-height: 35px; font-family: Helvetica, Verdana, Arial, sans-serif; font-size: 18px; position: absolute; top: 0; width: 100%; text-align: center; }
+.footer .title {color: white; background-color:#1eaed3; border-radius: 3px; margin: 5px; padding: 0px 10px 0px 10px; margin-right: 10px; float: right; cursor: pointer;}

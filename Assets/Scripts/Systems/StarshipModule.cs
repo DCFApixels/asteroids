@@ -9,6 +9,7 @@ namespace Asteroids.Systems
             b
                 .Add(new SpawnStarshipSystem())
                 .Add(new InputSystem())
+                .Add(new ImmunitySystem())
                 .Add(new SetMoveInfoFromInputDataSystem())
                 .Add(new SpawnBulletSystem())
                 .Add(new RespawnStarShipOnHitSystem())

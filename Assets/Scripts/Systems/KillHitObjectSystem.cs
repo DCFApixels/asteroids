@@ -1,6 +1,7 @@
 ﻿using Asteroids.Components;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
+using JetBrains.Annotations;
 
 namespace Asteroids.Systems
 {
@@ -8,19 +9,19 @@ namespace Asteroids.Systems
     {
         [DI] private EcsDefaultWorld _world;
         [DI] private PoolService _poolService;
-    
-        class AspectPool : EcsAspect
+
+        private class AspectPool : EcsAspect
         {
-            public EcsPool<TransformRef> Transform = Inc;
-            public EcsPool<Hit> Hit = Inc;
-            public readonly EcsPool<PoolId> Pool = Inc;
+            [UsedImplicitly]
+            public EcsPool<HitEvent> HitEvents = Inc;
+            public readonly EcsPool<PoolId> PoolIds = Inc;
         }
     
         public void Run()
         {
             foreach (var e in _world.Where(out AspectPool a))
             {
-                var poolId = a.Pool.Get(e);
+                var poolId = a.PoolIds.Get(e);
                 _poolService.Return(poolId.Id, poolId.Component);
                 _world.DelEntity(e);
             }

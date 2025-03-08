@@ -1,5 +1,6 @@
 using Asteroids.Components;
 using Asteroids.Data;
+using Asteroids.Utils;
 using DCFApixels.DragonECS;
 using UnityEngine;
 
@@ -9,52 +10,60 @@ namespace Asteroids.Systems
     {
         [DI] private RuntimeData _runtimeData;
         [DI] private EcsDefaultWorld _world;
+        [DI] private PoolService _poolService;
+        [DI] private StaticData _staticData;
 
-        class Aspect : EcsAspect
+        private class Aspect : EcsAspect
         {
-            public readonly EcsPool<Asteroid> Asteroid = Inc;
-            public readonly EcsPool<Hit> Hit = Inc;
-            public readonly EcsPool<TransformRef> Transform = Inc;
+            public readonly EcsPool<Asteroid> Asteroids = Inc;
+            public readonly EcsPool<HitEvent> HitEvents = Inc;
+            public readonly EcsPool<MoveInfo> MoveInfos = Inc;
         }
         public void Run()
         {
             foreach (var e in _world.Where(out Aspect a))
             {
-                ref var asteroid = ref a.Asteroid.Get(e);
-            
-                if (asteroid.DeathsLeft > 0)
+                ref var asteroid = ref a.Asteroids.Get(e);
+
+                if (asteroid.DeathsLeft <= 0)
                 {
-                    asteroid.DeathsLeft--;
-
-                    ref var asteroidTransform = ref a.Transform.Get(e).Value;
-
-                    var forward = Vector3.forward;
+                    continue;
+                }
                 
-                    var hitByObjectEntLong = a.Hit.Get(e).ByObject;
-                    if (hitByObjectEntLong.TryUnpack(out var hitByEntity, out short _))
-                    {
-                        var hitByPosition = a.Transform.Get(hitByEntity).Value;
-                        if (hitByPosition.position != asteroidTransform.position)
-                        {
-                            forward = asteroidTransform.position - hitByPosition.position;
-                        }
-                    }
+                asteroid.DeathsLeft--;
+                _runtimeData.Score++;
 
-                    var spawnPool = _world.GetPool<SpawnAsteroid>();
+                ref var asteroidPosition = ref a.MoveInfos.Get(e).Position;
+
+                var explosion = _poolService.Get(_staticData.AsteroidExplosion, out var instanceID);
+                explosion.transform.position = asteroidPosition;
+                explosion.Play(_poolService, instanceID);
+
+                var forward = Vector3.forward;
                 
-                    for (int i = 0; i < 2; i++)
+                var hitByObjectEntLong = a.HitEvents.Get(e).ByObject;
+                if (hitByObjectEntLong.TryUnpack(out var hitByEntity, out short _))
+                {
+                    var hitByPosition = a.MoveInfos.Get(hitByEntity).Position;
+                    if (hitByPosition != asteroidPosition)
                     {
-                        var startForward = Quaternion.Euler(0, 90 + 180 * i, 0) * forward;
-
-                        ref var spawnAsteroid = ref spawnPool.Add(_world.NewEntity());
-                        spawnAsteroid.DeathsLeft = asteroid.DeathsLeft;
-                        spawnAsteroid.Position = asteroidTransform.position;
-                        spawnAsteroid.Rotation = Quaternion.LookRotation(startForward);
-                        spawnAsteroid.StartRadius = asteroid.Radius / 2f;
+                        forward = asteroidPosition - hitByPosition;
                     }
                 }
+
+                var spawnPool = _world.GetPool<SpawnAsteroidEvent>();
+                
+                for (var i = 0; i < 2; i++)
+                {
+                    var startForward = Quaternion.Euler(0, 90 + 180 * i, 0) * forward;
+
+                    ref var spawnAsteroid = ref spawnPool.Add(_world.NewEntity());
+                    spawnAsteroid.DeathsLeft = asteroid.DeathsLeft;
+                    spawnAsteroid.Position = asteroidPosition;
+                    spawnAsteroid.Rotation = Quaternion.LookRotation(startForward);
+                    spawnAsteroid.StartRadius = asteroid.Radius / 2f;
+                }
             }
-        
         }
     }
 }

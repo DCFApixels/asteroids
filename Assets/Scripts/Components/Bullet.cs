@@ -1,10 +1,8 @@
-﻿using Asteroids.Views;
-using DCFApixels.DragonECS;
+﻿using DCFApixels.DragonECS;
 
 namespace Asteroids.Components
 {
-    public struct Bullet : IEcsComponent
+    public struct Bullet : IEcsTagComponent
     {
-        public BulletView View;
     }
 }

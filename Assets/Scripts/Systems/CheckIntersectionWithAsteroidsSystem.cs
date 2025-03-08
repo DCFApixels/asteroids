@@ -12,19 +12,22 @@ namespace Asteroids.Systems
         [DI] private RuntimeData _runtimeData;
         [DI] private StaticData _staticData;
         private readonly List<AreaHash2D<entlong>.Hit> _hits = new(64);
+        private EcsPool<HitEvent> _hitEvents;
 
         private class Aspect : EcsAspect
         {
-            public readonly EcsPool<RequestIntersection> RequestIntersections = Inc;
-            public readonly EcsPool<TransformRef> Transform = Inc;
+            public readonly EcsPool<RequestIntersectionEvent> RequestIntersectionEvents = Inc;
+            public readonly EcsPool<MoveInfo> MoveInfos = Inc;
         }
     
         public void Run()
         {
+            _hitEvents ??= _world.GetPool<HitEvent>();
+            
             foreach (var e in _world.Where(out Aspect a))
             {
-                var wantIntersection = a.RequestIntersections.Get(e);
-                var position = a.Transform.Get(e).Value.position;
+                ref var wantIntersection = ref a.RequestIntersectionEvents.Get(e);
+                var position = a.MoveInfos.Get(e).Position;
                 _runtimeData.AreaHash.FindAllInRadius(position.x, position.z, wantIntersection.CheckRadius, _hits);
 
                 foreach (var hit in _hits)
@@ -38,8 +41,11 @@ namespace Asteroids.Systems
 
                     if (hit.SqrDistance <= currentAsteroidRadius * currentAsteroidRadius)
                     {
-                        ecsWorld.GetPool<Hit>().TryAddOrGet(entity).ByObject = _world.GetEntityLong(e);
-                        ecsWorld.GetPool<Hit>().TryAddOrGet(e).ByObject = hitEntity;
+                        _hitEvents.TryAddOrGet(entity).ByObject = _world.GetEntityLong(e);
+                        if (!ecsWorld.GetPool<Immunity>().Has(e))
+                        {
+                            _hitEvents.TryAddOrGet(e).ByObject = hitEntity;
+                        }
                         break;
                     }
                 }

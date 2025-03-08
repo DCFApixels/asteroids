@@ -1,6 +1,7 @@
 ﻿using Asteroids.Components;
 using Asteroids.Data;
 using DCFApixels.DragonECS;
+using JetBrains.Annotations;
 
 namespace Asteroids.Systems
 {
@@ -9,10 +10,11 @@ namespace Asteroids.Systems
         [DI] private RuntimeData _runtimeData;
         [DI] private EcsDefaultWorld _world;
 
-        class AsteroidAspect : EcsAspect
+        private class AsteroidAspect : EcsAspect
         {
-            public readonly EcsPool<TransformRef> TransformRefs = Inc;
-            public EcsPool<Asteroid> Asteroids = Inc;
+            public readonly EcsPool<MoveInfo> MoveInfos = Inc;
+            [UsedImplicitly]
+            public readonly EcsPool<Asteroid> Asteroids = Inc;
         }
         public void Run()
         {
@@ -20,8 +22,8 @@ namespace Asteroids.Systems
 
             foreach (var e in _world.Where(out AsteroidAspect a))
             {
-                var transform = a.TransformRefs.Get(e).Value;
-                _runtimeData.AreaHash.Add(_world.GetEntityLong(e), transform.position.x, transform.position.z);
+                var position = a.MoveInfos.Get(e).Position;
+                _runtimeData.AreaHash.Add(_world.GetEntityLong(e), position.x, position.z);
             }
         }
     }

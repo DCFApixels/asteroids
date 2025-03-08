@@ -14,7 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   StarshipView: {fileID: 646751663581237465, guid: 863b4d63a5413314197562c04df1f781, type: 3}
   RotationSpeed: 360
-  StarshipSpeed: 10
+  StarshipSpeed: 0
+  StarshipAcceleration: 10
+  StarshipMaxSpeed: 10
+  Lifes: 3
+  StarshipSpawnImmunityTime: 1
+  StarshipFriction: 0.01
   BulletView: {fileID: 4782241617648703718, guid: cfda0d7cd365f48488a2261a96329186, type: 3}
   BulletSpeed: 10
   AsteroidView: {fileID: 4855989034719792431, guid: e5c34071f3d24b642ad1839a2d41ad14, type: 3}
@@ -23,4 +28,5 @@ MonoBehaviour:
   AsteroidMaxSpeed: 1
   AsteroidMinSpeed: 5
   AsteroidDeathLeft: 3
-  AdditionalKillOffset: 1.1
+  AdditionalKillOffset: 1.5
+  AsteroidExplosion: {fileID: 161898772272626303, guid: a7cff06f99c379a4fbb10c4094a4a49d, type: 3}

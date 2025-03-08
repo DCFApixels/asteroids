@@ -10,8 +10,10 @@ namespace Asteroids.Components
         public float Speed;
         public float Acceleration;
         public float RotationSpeed;
+        public float Power;
+        public float Friction;
 
         public float DefaultRotationSpeed;
-        public float DefaultSpeed;
+        public float MaxSpeed;
     }
 }
