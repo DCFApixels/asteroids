@@ -24,7 +24,19 @@
         } else if(element.mozRequestFullscreen) {
           element.mozRequestFullScreen();
         }
+        
       }
+
+      addEventListener("fullscreenchange", 
+        () => {
+          const div = document.getElementById("fullscreen");
+          if (document.fullscreenElement) {
+            div.style.display = "none"; // Hide div in fullscreen
+          } else {
+            div.style.display = "block";
+          }
+        }
+      );
 
       
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
@@ -79,7 +91,7 @@
         }
     </style>
     <div class="footer">
-      <div class="title" onclick="fullScreen()">⛶</div>
+      <div id="fullscreen" class="title" onclick="fullScreen()">⛶</div>
     </div>
 
   </body>

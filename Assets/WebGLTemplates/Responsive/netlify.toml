@@ -1,0 +1,5 @@
+[[headers]]
+  for = "/*.br"
+  [headers.values]
+    Content-Encoding = "br"
+    Cache-Control = "max-age=31536000"
