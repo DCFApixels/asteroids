@@ -2,7 +2,7 @@
 {
     internal enum GameState
     {
-        None,
+        None = 0,
         Play,
         Lose
     }

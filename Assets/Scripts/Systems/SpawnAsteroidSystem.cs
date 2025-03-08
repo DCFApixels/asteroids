@@ -39,9 +39,7 @@ namespace Asteroids.Systems
                 ref var poolId = ref _world.GetPool<PoolId>().Add(entity);
                 poolId.Id = id;
                 poolId.Component = instance;
-
-                //instance.transform.localScale = Vector3.one * spawnAsteroid.StartRadius / instance.Radius;
-            
+                
                 _world.GetPool<TransformRef>().Add(entity).Value = instance.transform;
                 _world.GetPool<KillOutsideMarker>().Add(entity);
             

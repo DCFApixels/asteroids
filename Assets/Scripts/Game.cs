@@ -13,12 +13,12 @@ namespace Asteroids
         private EcsEventWorld _eventWorld;
 
         [SerializeField]
-        private StaticData _staticData;
+        private StaticData StaticData;
 
-        [SerializeField] private SceneData _sceneData;
+        [SerializeField] private SceneData SceneData;
     
         [SerializeField]
-        private RuntimeData _runtimeData;
+        private RuntimeData RuntimeData;
         private void Start()
         {
             _world = new();
@@ -43,9 +43,9 @@ namespace Asteroids
             
                 // Injecting into systems.
                 .Inject(_world)
-                .Inject(_staticData)
-                .Inject(_sceneData)
-                .Inject(_runtimeData)
+                .Inject(StaticData)
+                .Inject(SceneData)
+                .Inject(RuntimeData)
                 .Inject(new PoolService())
                 .AutoInject()
                

@@ -66,15 +66,15 @@ namespace Asteroids.Utils
         private List<Container> GetFromPool()
         {
             var count = _pool.Count;
-            if (count > 0)
+            if (count <= 0)
             {
-                count--;
-                var l = _pool[count];
-                _pool.RemoveAt(count);
-                return l;
+                return new(_startPoolSize);
             }
-
-            return new(_startPoolSize);
+            
+            count--;
+            var l = _pool[count];
+            _pool.RemoveAt(count);
+            return l;
         }
 
         public void Clear()

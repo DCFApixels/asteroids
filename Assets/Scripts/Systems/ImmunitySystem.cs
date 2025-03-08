@@ -8,10 +8,10 @@ namespace Asteroids.Systems
     {
         [DI] private EcsWorld _world;
 
-        class Aspect : EcsAspect
+        private class Aspect : EcsAspect
         {
-            public EcsPool<Starship> Starships = Inc;
-            public EcsPool<Immunity> Immunities = Inc;
+            public readonly EcsPool<Starship> Starships = Inc;
+            public readonly EcsPool<Immunity> Immunities = Inc;
         }
         public void Run()
         {

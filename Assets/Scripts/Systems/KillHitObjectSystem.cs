@@ -13,7 +13,7 @@ namespace Asteroids.Systems
         private class AspectPool : EcsAspect
         {
             [UsedImplicitly]
-            public EcsPool<HitEvent> HitEvents = Inc;
+            public readonly EcsPool<HitEvent> HitEvents = Inc;
             public readonly EcsPool<PoolId> PoolIds = Inc;
         }
     

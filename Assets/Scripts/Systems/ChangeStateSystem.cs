@@ -6,15 +6,16 @@ using UnityEngine;
 
 namespace Asteroids.Systems
 {
-    class ChangeStateSystem : IEcsRun
+    internal class ChangeStateSystem : IEcsRun
     {
         [DI] private SceneData _sceneData;
         [DI] private RuntimeData _runtimeData;
         [DI] private EcsWorld _world;
         [DI] private StaticData _staticData;
-        class Aspect : EcsAspect
+
+        private class Aspect : EcsAspect
         {
-            public EcsPool<ChangeState> ChangeStates = Inc;
+            public readonly EcsPool<ChangeState> ChangeStates = Inc;
         }
         
         public void Run()

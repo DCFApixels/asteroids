@@ -27,6 +27,6 @@ MonoBehaviour:
   SpawnAmount: 1
   AsteroidMaxSpeed: 1
   AsteroidMinSpeed: 5
-  AsteroidDeathLeft: 3
+  AsteroidDeathLeft: 1
   AdditionalKillOffset: 1.5
   AsteroidExplosion: {fileID: 161898772272626303, guid: a7cff06f99c379a4fbb10c4094a4a49d, type: 3}

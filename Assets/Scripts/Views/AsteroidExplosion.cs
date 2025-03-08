@@ -1,4 +1,5 @@
-﻿using Asteroids.Utils;
+﻿using System;
+using Asteroids.Utils;
 using UnityEngine;
 
 namespace Asteroids.Views
@@ -13,12 +14,19 @@ namespace Asteroids.Views
             Time = Explosion.main.duration;
         }
 
-        public async Awaitable Play(PoolService poolService, int poolId)
+        public async void Play(PoolService poolService, int poolId)
         {
-            gameObject.SetActive(true);
-            Explosion.Play();
-            await Awaitable.WaitForSecondsAsync(Time);
-            poolService.Return(poolId, this);
+            try
+            {
+                gameObject.SetActive(true);
+                Explosion.Play();
+                await Awaitable.WaitForSecondsAsync(Time);
+                poolService.Return(poolId, this);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
     }
 }

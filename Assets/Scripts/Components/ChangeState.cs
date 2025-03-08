@@ -3,7 +3,7 @@ using DCFApixels.DragonECS;
 
 namespace Asteroids.Components
 {
-    struct ChangeState : IEcsComponent
+    internal struct ChangeState : IEcsComponent
     {
         public GameState NewState;
     }

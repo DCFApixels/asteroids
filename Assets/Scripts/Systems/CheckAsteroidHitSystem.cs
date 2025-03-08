@@ -24,6 +24,13 @@ namespace Asteroids.Systems
             foreach (var e in _world.Where(out Aspect a))
             {
                 ref var asteroid = ref a.Asteroids.Get(e);
+                ref var asteroidPosition = ref a.MoveInfos.Get(e).Position;
+                
+                var explosion = _poolService.Get(_staticData.AsteroidExplosion, out var instanceID);
+                explosion.transform.position = asteroidPosition;
+                explosion.Play(_poolService, instanceID);
+                
+                _runtimeData.Score++;
 
                 if (asteroid.DeathsLeft <= 0)
                 {
@@ -31,14 +38,7 @@ namespace Asteroids.Systems
                 }
                 
                 asteroid.DeathsLeft--;
-                _runtimeData.Score++;
-
-                ref var asteroidPosition = ref a.MoveInfos.Get(e).Position;
-
-                var explosion = _poolService.Get(_staticData.AsteroidExplosion, out var instanceID);
-                explosion.transform.position = asteroidPosition;
-                explosion.Play(_poolService, instanceID);
-
+                
                 var forward = Vector3.forward;
                 
                 var hitByObjectEntLong = a.HitEvents.Get(e).ByObject;

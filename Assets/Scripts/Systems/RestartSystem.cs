@@ -2,6 +2,7 @@
 using Asteroids.Data;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
+using JetBrains.Annotations;
 
 namespace Asteroids.Systems
 {
@@ -12,7 +13,8 @@ namespace Asteroids.Systems
 
         private class Aspect : EcsAspect
         {
-            public EcsTagPool<RestartEvent> RestartEvents = Inc;
+            [UsedImplicitly]
+            public readonly EcsTagPool<RestartEvent> RestartEvents = Inc;
         }
 
         private class PoolIdAspect : EcsAspect
@@ -22,7 +24,7 @@ namespace Asteroids.Systems
         
         public void Run()
         {
-            foreach (var e in _world.Where(out Aspect a))
+            foreach (var _ in _world.Where(out Aspect _))
             {
                 foreach (var poolE in _world.Where(out PoolIdAspect p))
                 {

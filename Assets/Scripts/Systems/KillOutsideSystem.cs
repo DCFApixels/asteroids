@@ -17,7 +17,7 @@ namespace Asteroids.Systems
         {
             public readonly EcsPool<MoveInfo> MoveInfos = Inc;
             [UsedImplicitly]
-            public EcsTagPool<KillOutsideMarker> KillOutsideEvents = Inc;
+            public readonly EcsTagPool<KillOutsideMarker> KillOutsideEvents = Inc;
             public readonly EcsPool<PoolId> PoolIds = Inc;
         }
     

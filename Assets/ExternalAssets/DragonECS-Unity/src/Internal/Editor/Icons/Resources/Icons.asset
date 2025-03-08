@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ce72fefbf3696f4fb3861773bd997df, type: 3}
+  m_Name: Icons
+  m_EditorClassIdentifier: 
+  _helpIcon: {fileID: 2800000, guid: e135cf23a5d53ce48a75e163b41e39d5, type: 3}
+  _fileIcon: {fileID: 0}
+  _metaIDIcon: {fileID: 0}
+  _repaireIcon: {fileID: 0}
+  _errorIcon: {fileID: 0}
+  _warningIcon: {fileID: 0}
+  _passIcon: {fileID: 0}
+  _unlinkIcon: {fileID: 0}
+  _searchIcon: {fileID: 0}
+  _closeIcon: {fileID: 0}
+  _closeIconOn: {fileID: 0}
+  _auotsetIcon: {fileID: 0}
+  _auotsetCascadeIcon: {fileID: 0}
+  _visibilityIconOn: {fileID: 0}
+  _visibilityIconOff: {fileID: 0}
+  _labelIconType: {fileID: 0}
+  _labelIconMeta: {fileID: 0}
