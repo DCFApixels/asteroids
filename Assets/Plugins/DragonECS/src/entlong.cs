@@ -1,4 +1,7 @@
-﻿#pragma warning disable IDE1006
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+#pragma warning disable IDE1006
 #pragma warning disable CS8981
 using DCFApixels.DragonECS.Internal;
 using System;
@@ -21,7 +24,7 @@ namespace DCFApixels.DragonECS
 #else
     public readonly
 #endif
-        struct entlong : IEquatable<long>, IEquatable<entlong>
+        struct entlong : IEquatable<long>, IEquatable<entlong>, IComparable<entlong>
     {
         public static readonly entlong NULL = default;
         //[DataMember]
@@ -56,8 +59,10 @@ namespace DCFApixels.DragonECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-                if (!IsAlive) { Throw.Ent_ThrowIsNotAlive(this); }
+#if DEBUG
+                if (IsAlive == false) { Throw.Ent_ThrowIsNotAlive(this); }
+#elif DRAGONECS_STABILITY_MODE
+                if (IsAlive == false) { return EcsConsts.NULL_ENTITY_ID; }
 #endif
                 return _id;
             }
@@ -67,8 +72,10 @@ namespace DCFApixels.DragonECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-                if (!IsAlive) { Throw.Ent_ThrowIsNotAlive(this); }
+#if DEBUG
+                if (IsAlive == false) { Throw.Ent_ThrowIsNotAlive(this); }
+#elif DRAGONECS_STABILITY_MODE
+                if (IsAlive == false) { return default; }
 #endif
                 return _gen;
             }
@@ -78,8 +85,8 @@ namespace DCFApixels.DragonECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-                if (!IsAlive) { Throw.Ent_ThrowIsNotAlive(this); }
+#if DEBUG
+                if (IsAlive == false) { Throw.Ent_ThrowIsNotAlive(this); }
 #endif
                 return GetWorld_Internal();
             }
@@ -89,8 +96,10 @@ namespace DCFApixels.DragonECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-                if (!IsAlive) { Throw.Ent_ThrowIsNotAlive(this); }
+#if DEBUG
+                if (IsAlive == false) { Throw.Ent_ThrowIsNotAlive(this); }
+#elif DRAGONECS_STABILITY_MODE
+                if (IsAlive == false) { return EcsConsts.NULL_WORLD_ID; }
 #endif
                 return _world;
             }
@@ -141,8 +150,15 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Unpack(out int id, out EcsWorld world)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (!IsAlive) { Throw.Ent_ThrowIsNotAlive(this); }
+#if DEBUG
+            if (IsAlive == false) { Throw.Ent_ThrowIsNotAlive(this); }
+#elif DRAGONECS_STABILITY_MODE
+            if (IsAlive == false)
+            {
+                world = EcsWorld.GetWorld(EcsConsts.NULL_WORLD_ID);
+                id = EcsConsts.NULL_ENTITY_ID;
+                return;
+            }
 #endif
             world = EcsWorld.GetWorld(_world);
             id = _id;
@@ -150,8 +166,16 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Unpack(out int id, out short gen, out EcsWorld world)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (!IsAlive) { Throw.Ent_ThrowIsNotAlive(this); }
+#if DEBUG
+            if (IsAlive == false) { Throw.Ent_ThrowIsNotAlive(this); }
+#elif DRAGONECS_STABILITY_MODE
+            if (IsAlive == false)
+            {
+                world = EcsWorld.GetWorld(EcsConsts.NULL_WORLD_ID);
+                gen = default;
+                id = EcsConsts.NULL_ENTITY_ID;
+                return;
+            }
 #endif
             world = EcsWorld.GetWorld(_world);
             gen = _gen;
@@ -160,8 +184,15 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Unpack(out int id, out short worldID)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (!IsAlive) { Throw.Ent_ThrowIsNotAlive(this); }
+#if DEBUG
+            if (IsAlive == false) { Throw.Ent_ThrowIsNotAlive(this); }
+#elif DRAGONECS_STABILITY_MODE
+            if (IsAlive == false)
+            {
+                worldID = EcsConsts.NULL_WORLD_ID;
+                id = EcsConsts.NULL_ENTITY_ID;
+                return;
+            }
 #endif
             worldID = _world;
             id = _id;
@@ -169,8 +200,16 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Unpack(out int id, out short gen, out short worldID)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (!IsAlive) { Throw.Ent_ThrowIsNotAlive(this); }
+#if DEBUG
+            if (IsAlive == false) { Throw.Ent_ThrowIsNotAlive(this); }
+#elif DRAGONECS_STABILITY_MODE
+            if (IsAlive == false)
+            {
+                worldID = EcsConsts.NULL_WORLD_ID;
+                gen = default;
+                id = EcsConsts.NULL_ENTITY_ID;
+                return;
+            }
 #endif
             worldID = _world;
             gen = _gen;
@@ -265,10 +304,10 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator entlong((EcsWorld world, int entityID) a) { return Combine_Internal(a.entityID, a.world); }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator entlong((entlong entity, EcsWorld world) a) { return Combine_Internal(a.entity._id, a.world); }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator entlong((EcsWorld world, entlong entity) a) { return Combine_Internal(a.entity._id, a.world); }
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static implicit operator entlong((entlong entity, EcsWorld world) a) { return Combine_Internal(a.entity._id, a.world); }
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static implicit operator entlong((EcsWorld world, entlong entity) a) { return Combine_Internal(a.entity._id, a.world); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static entlong Combine_Internal(int entityID, EcsWorld world)
@@ -293,7 +332,13 @@ namespace DCFApixels.DragonECS
 
         #region Other
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private EcsWorld GetWorld_Internal() { return EcsWorld.GetWorld(_world); }
+        private EcsWorld GetWorld_Internal()
+        {
+#if DRAGONECS_STABILITY_MODE
+            if (IsAlive == false) { EcsWorld.GetWorld(EcsConsts.NULL_WORLD_ID); }
+#endif
+            return EcsWorld.GetWorld(_world);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode() { return unchecked((int)_full) ^ (int)(_full >> 32); }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -304,6 +349,16 @@ namespace DCFApixels.DragonECS
         public bool Equals(entlong other) { return _full == other._full; }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(long other) { return _full == other; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int CompareTo(entlong other)
+        {
+            // NOTE: Because _id cannot be less than 0,
+            // the case “_id - other._id > MaxValue” is impossible.
+            return _id - other._id;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Compare(entlong left, entlong right) { return left.CompareTo(right); }
+
 
         internal class DebuggerProxy
         {

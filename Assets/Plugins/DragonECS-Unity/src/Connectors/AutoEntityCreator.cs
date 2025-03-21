@@ -1,3 +1,6 @@
+#if DISABLE_DEBUG
+#undef DEBUG
+#endif
 using DCFApixels.DragonECS.Unity;
 using UnityEngine;
 
@@ -10,7 +13,7 @@ namespace DCFApixels.DragonECS
     [MetaColor(MetaColor.DragonCyan)]
     [MetaGroup(EcsUnityConsts.PACK_GROUP, EcsUnityConsts.ENTITY_BUILDING_GROUP)]
     [MetaDescription(AUTHOR, nameof(MonoBehaviour) + ". Automatically creates an entity in the selected world and connects it to EcsEntityConnect.")]
-    [MetaID("D699B3809201285A46DDF91BCF0540A7")]
+    [MetaID("DragonECS_D699B3809201285A46DDF91BCF0540A7")]
     public class AutoEntityCreator : MonoBehaviour
     {
         [SerializeField]
@@ -18,7 +21,7 @@ namespace DCFApixels.DragonECS
         [SerializeField]
         private EcsWorldProviderBase _world;
 
-        private bool _created;
+        private bool _started;
 
         #region Properties
         public EcsEntityConnect Connect
@@ -39,10 +42,7 @@ namespace DCFApixels.DragonECS
                 AutoResolveWorldProviderDependensy();
             }
         }
-        private void Start()
-        {
-            CreateEntity();
-        }
+        private void Start() { ManualStart(); }
         #endregion
 
         #region Methods
@@ -56,19 +56,17 @@ namespace DCFApixels.DragonECS
         }
         public void ManualStart()
         {
-            CreateEntity();
+            if (_started) { return; }
+            ManualCreate();
+            _started = true;
         }
-        private void CreateEntity()
+        public void ManualCreate()
         {
-            if (_created) { return; }
-
             if (_world == null)
             {
                 AutoResolveWorldProviderDependensy();
             }
-
             InitConnect(_connect, _world.GetRaw());
-            _created = true;
         }
 
         private void InitConnect(EcsEntityConnect connect, EcsWorld world)

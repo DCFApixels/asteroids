@@ -16,6 +16,19 @@
 
     public class EcsUnityDefines
     {
+
+        public const bool DRAGONECS_ENABLE_UNITY_CONSOLE_SHORTCUT_LINKS =
+#if DRAGONECS_ENABLE_UNITY_CONSOLE_SHORTCUT_LINKS
+            true;
+#else
+            false;
+#endif
+        public const bool ENABLE_IL2CPP =
+#if ENABLE_IL2CPP
+            true;
+#else
+            false;
+#endif
         //        public const bool DISABLE_SERIALIZE_REFERENCE_RECOVERY =
         //#if DISABLE_SERIALIZE_REFERENCE_RECOVERY
         //            true;

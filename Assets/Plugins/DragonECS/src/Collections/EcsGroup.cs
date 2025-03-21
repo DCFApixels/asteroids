@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Internal;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Internal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -231,8 +234,16 @@ namespace DCFApixels.DragonECS
         }
         internal void ReleaseGroup(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (group.World != this) { Throw.World_GroupDoesNotBelongWorld(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (group.World != this)
+            {
+                if (TryGetWorld(group.WorldID, out EcsWorld sourceWorld))
+                {
+                    group.World.ReleaseGroup(group);
+                }
+            }
 #endif
             group._isReleased = true;
             group.Clear();
@@ -304,8 +315,10 @@ namespace DCFApixels.DragonECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
                 if (index < 0 || index >= Count) { Throw.ArgumentOutOfRange(); }
+#elif DRAGONECS_STABILITY_MODE
+                if (index < 0 || index >= Count) { return EcsConsts.NULL_ENTITY_ID; }
 #endif
                 return _dense[++index];
             }
@@ -313,7 +326,7 @@ namespace DCFApixels.DragonECS
             //            set
             //            {
             //                // TODO добавить лок енумератора на изменение
-            //#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+            //#if DEBUG || DRAGONECS_STABILITY_MODE
             //                if (index < 0 || index >= Count) { Throw.ArgumentOutOfRange(); }
             //#endif
             //                var oldValue = _dense[index];
@@ -366,8 +379,10 @@ namespace DCFApixels.DragonECS
         #region Add/Remove
         public void AddUnchecked(int entityID)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (Has(entityID)) { Throw.Group_AlreadyContains(entityID); }
+#elif DRAGONECS_STABILITY_MODE
+            if (Has(entityID)) { return; }
 #endif
             Add_Internal(entityID);
         }
@@ -385,7 +400,7 @@ namespace DCFApixels.DragonECS
         {
             if (++_count >= _dense.Length)
             {
-                Array.Resize(ref _dense, ArrayUtility.NormalizeSizeToPowerOfTwo(_count << 1));
+                Array.Resize(ref _dense, ArrayUtility.NextPow2(_count << 1));
             }
             _dense[_count] = entityID;
 
@@ -410,8 +425,10 @@ namespace DCFApixels.DragonECS
 
         public void RemoveUnchecked(int entityID)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (Has(entityID) == false) { Throw.Group_DoesNotContain(entityID); }
+#elif DRAGONECS_STABILITY_MODE
+            if (Has(entityID) == false) { return; }
 #endif
             Remove_Internal(entityID);
         }
@@ -428,8 +445,8 @@ namespace DCFApixels.DragonECS
         private void ChangeIndexInSparse(int entityID, int index)
         {
             ref PageSlot page = ref _sparsePages[entityID >> PageSlot.SHIFT];
-#if DEBUG && DEV_MODE
-            if (page.Count == 0) { throw new Exception(); }
+#if DEBUG && DRAGONECS_DEEP_DEBUG
+            if (page.Count == 0) { Throw.DeepDebugException(); }
 #endif
             if (page.Count == 1)
             {
@@ -438,8 +455,8 @@ namespace DCFApixels.DragonECS
             else
             {
                 int localEntityID = entityID & PageSlot.MASK;
-#if DEBUG && DEV_MODE
-                if (page.Indexes[localEntityID] == 0) { throw new Exception(); }
+#if DEBUG && DRAGONECS_DEEP_DEBUG
+                if (page.Indexes[localEntityID] == 0) { Throw.DeepDebugException(); }
 #endif
                 page.Indexes[localEntityID] = index;
             }
@@ -514,7 +531,7 @@ namespace DCFApixels.DragonECS
         {
             if (minSize >= _dense.Length)
             {
-                Array.Resize(ref _dense, ArrayUtility.NormalizeSizeToPowerOfTwo_ClampOverflow(minSize));
+                Array.Resize(ref _dense, ArrayUtility.NextPow2_ClampOverflow(minSize));
             }
         }
 
@@ -523,13 +540,16 @@ namespace DCFApixels.DragonECS
         #region CopyFrom/Clone/Slice/ToSpan/ToArray
         public void CopyFrom(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (group.World != _source) { Throw.Group_ArgumentDifferentWorldsException(); }
-#endif
-            if (_count > 0)
+#elif DRAGONECS_STABILITY_MODE
+            if (group.World != _source)
             {
                 Clear();
+                return;
             }
+#endif
+            Clear();
             foreach (var entityID in group)
             {
                 Add_Internal(entityID);
@@ -575,8 +595,11 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EcsSpan Slice(int start, int length)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (start < 0 || start + length > _count) { Throw.ArgumentOutOfRange(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (start < 0) { start = 0; }
+            if (start + length > _count) { length = _count - start; }
 #endif
             return new EcsSpan(WorldID, _dense, start + 1, length);
         }
@@ -595,7 +618,7 @@ namespace DCFApixels.DragonECS
         {
             if (dynamicBuffer.Length < _count)
             {
-                Array.Resize(ref dynamicBuffer, ArrayUtility.NormalizeSizeToPowerOfTwo(_count));
+                Array.Resize(ref dynamicBuffer, ArrayUtility.NextPow2(_count));
             }
             int i = 0;
             foreach (var e in this)
@@ -619,8 +642,10 @@ namespace DCFApixels.DragonECS
         /// <summary>as Union sets</summary>
         public void UnionWith(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source != group._source) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (_source != group._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (_source != group._source) { return; }
 #endif
             foreach (var entityID in group) { UnionWithStep(entityID); }
         }
@@ -630,8 +655,10 @@ namespace DCFApixels.DragonECS
         /// <summary>as Union sets</summary>
         public void UnionWith(EcsSpan span)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source.ID != span.WorldID) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (WorldID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (WorldID != span.WorldID) { return; }
 #endif
             foreach (var entityID in span) { UnionWithStep(entityID); }
         }
@@ -653,8 +680,10 @@ namespace DCFApixels.DragonECS
         /// <summary>as Except sets</summary>
         public void ExceptWith(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (_source != group._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (_source != group._source) { return; }
 #endif
             if (group.Count > Count) //мини оптимизация, итеррируемся по короткому списку
             {
@@ -678,8 +707,10 @@ namespace DCFApixels.DragonECS
         /// <summary>as Except sets</summary>
         public void ExceptWith(EcsSpan span)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source.ID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#if DEBUG
+            if (WorldID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (WorldID != span.WorldID) { return; }
 #endif
             foreach (var entityID in span) { ExceptWithStep_Internal(entityID); }
         }
@@ -701,8 +732,10 @@ namespace DCFApixels.DragonECS
         /// <summary>as Intersect sets</summary>
         public void IntersectWith(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (_source != group._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (_source != group._source) { return; }
 #endif
             for (int i = _count; i > 0; i--)//итерация в обратном порядке исключает ошибки при удалении элементов
             {
@@ -719,8 +752,10 @@ namespace DCFApixels.DragonECS
         /// <summary>as Intersect sets</summary>
         public void IntersectWith(EcsSpan span)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source.ID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#if DEBUG
+            if (WorldID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (WorldID != span.WorldID) { return; }
 #endif
             foreach (var entityID in span)
             {
@@ -762,8 +797,10 @@ namespace DCFApixels.DragonECS
         /// <summary>as Symmetric Except sets</summary>
         public void SymmetricExceptWith(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (_source != group._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (_source != group._source) { return; }
 #endif
             foreach (var entityID in group) { SymmetricExceptWithStep_Internal(entityID); }
         }
@@ -774,8 +811,10 @@ namespace DCFApixels.DragonECS
         /// <summary>as Symmetric Except sets</summary>
         public void SymmetricExceptWith(EcsSpan span)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source.ID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#if DEBUG
+            if (WorldID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (WorldID != span.WorldID) { return; }
 #endif
             foreach (var entityID in span) { SymmetricExceptWithStep_Internal(entityID); }
         }
@@ -824,8 +863,10 @@ namespace DCFApixels.DragonECS
         #region SetEquals
         public bool SetEquals(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source != group.World) { Throw.Group_ArgumentDifferentWorldsException(); }
+#if DEBUG
+            if (_source != group._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (_source != group._source) { return false; }
 #endif
             if (group.Count != Count) { return false; }
             foreach (var entityID in group)
@@ -841,8 +882,10 @@ namespace DCFApixels.DragonECS
         public bool SetEquals(EcsReadonlyGroup group) { return SetEquals(group.GetSource_Internal()); }
         public bool SetEquals(EcsSpan span)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source.ID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#if DEBUG
+            if (WorldID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (WorldID != span.WorldID) { return false; }
 #endif
             if (span.Count != Count) { return false; }
             foreach (var entityID in span)
@@ -871,8 +914,10 @@ namespace DCFApixels.DragonECS
         #region Overlaps
         public bool Overlaps(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source != group.World) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (_source != group._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (_source != group._source) { return false; }
 #endif
             if (group.Count > Count)
             {
@@ -900,8 +945,10 @@ namespace DCFApixels.DragonECS
         public bool Overlaps(EcsReadonlyGroup group) { return Overlaps(group.GetSource_Internal()); }
         public bool Overlaps(EcsSpan span)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source.ID != span.WorldID) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (WorldID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (WorldID != span.WorldID) { return false; }
 #endif
             foreach (var entityID in span)
             {
@@ -928,8 +975,10 @@ namespace DCFApixels.DragonECS
         #region IsSubsetOf/IsProperSubsetOf
         public bool IsSubsetOf(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source != group._source) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (_source != group._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (_source != group._source) { return false; }
 #endif
             if (Count == 0) { return true; }
             if (group.Count < Count) { return false; }
@@ -939,8 +988,10 @@ namespace DCFApixels.DragonECS
         public bool IsSubsetOf(EcsReadonlyGroup group) { return IsSubsetOf(group.GetSource_Internal()); }
         public bool IsSubsetOf(EcsSpan span)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source.ID != span.WorldID) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (WorldID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (WorldID != span.WorldID) { return false; }
 #endif
             if (Count == 0) { return true; }
             if (span.Count < Count) { return false; }
@@ -957,8 +1008,10 @@ namespace DCFApixels.DragonECS
 
         public bool IsProperSubsetOf(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source != group._source) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (_source != group._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (_source != group._source) { return false; }
 #endif
             if (Count == 0) { return true; }
             if (group.Count <= Count) { return false; }
@@ -968,8 +1021,10 @@ namespace DCFApixels.DragonECS
         public bool IsProperSubsetOf(EcsReadonlyGroup group) { return IsProperSubsetOf(group.GetSource_Internal()); }
         public bool IsProperSubsetOf(EcsSpan span)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source.ID != span.WorldID) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (WorldID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (WorldID != span.WorldID) { return false; }
 #endif
             if (Count == 0) { return true; }
             if (span.Count <= Count) { return false; }
@@ -1002,10 +1057,10 @@ namespace DCFApixels.DragonECS
             int uniqueCount = 0;
             foreach (var entityID in span)
             {
+#if DEBUG && DRAGONECS_DEEP_DEBUG
                 HashSet<int> thisHS = new HashSet<int>();
                 ToCollection(thisHS);
-#if DEBUG && DEV_MODE
-                if (thisHS.Contains(entityID) && Has(entityID) == false) { throw new Exception(); }
+                if (thisHS.Contains(entityID) && Has(entityID) == false) { Throw.DeepDebugException(); }
 #endif
                 if (Has(entityID))
                 {
@@ -1032,8 +1087,10 @@ namespace DCFApixels.DragonECS
         #region IsSupersetOf/IsProperSupersetOf
         public bool IsSupersetOf(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source != group._source) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (_source != group._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (_source != group._source) { return false; }
 #endif
             if (group.Count > Count) { return false; }
             return IsSupersetOf_Internal(group);
@@ -1042,8 +1099,10 @@ namespace DCFApixels.DragonECS
         public bool IsSupersetOf(EcsReadonlyGroup group) { return IsSupersetOf(group.GetSource_Internal()); }
         public bool IsSupersetOf(EcsSpan span)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source.ID != span.WorldID) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (WorldID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (WorldID != span.WorldID) { return false; }
 #endif
             if (span.Count > Count) { return false; }
             return IsSupersetOf_Internal(span);
@@ -1058,8 +1117,10 @@ namespace DCFApixels.DragonECS
 
         public bool IsProperSupersetOf(EcsGroup group)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source != group._source) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (_source != group._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (_source != group._source) { return false; }
 #endif
             if (group.Count >= Count) { return false; }
             return IsSupersetOf_Internal(group);
@@ -1068,8 +1129,10 @@ namespace DCFApixels.DragonECS
         public bool IsProperSupersetOf(EcsReadonlyGroup group) { return IsProperSupersetOf(group.GetSource_Internal()); }
         public bool IsProperSupersetOf(EcsSpan span)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (_source.ID != span.WorldID) Throw.Group_ArgumentDifferentWorldsException();
+#if DEBUG
+            if (WorldID != span.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (WorldID != span.WorldID) { return false; }
 #endif
             if (span.Count >= Count) { return false; }
             return IsSupersetOf_Internal(span);
@@ -1126,8 +1189,10 @@ namespace DCFApixels.DragonECS
         /// <returns>new group from pool</returns>
         public static EcsGroup Union(EcsGroup a, EcsGroup b)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (a._source != b._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (a._source != b._source) { return a.World.GetFreeGroup(); }
 #endif
             EcsGroup result = a._source.GetFreeGroup();
             foreach (var entityID in a)
@@ -1150,8 +1215,10 @@ namespace DCFApixels.DragonECS
         /// <returns>new group from pool</returns>
         public static EcsGroup Union(EcsSpan a, EcsSpan b)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (a.WorldID != b.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (a.WorldID != b.WorldID) { return a.World.GetFreeGroup(); }
 #endif
             EcsGroup result = a.World.GetFreeGroup();
             foreach (var entityID in a)
@@ -1171,8 +1238,10 @@ namespace DCFApixels.DragonECS
         /// <returns>new group from pool</returns>
         public static EcsGroup Except(EcsGroup a, EcsGroup b)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (a._source != b._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (a._source != b._source) { return a.World.GetFreeGroup(); }
 #endif
             EcsGroup result = a._source.GetFreeGroup();
             foreach (var entityID in a)
@@ -1188,8 +1257,10 @@ namespace DCFApixels.DragonECS
         /// <returns>new group from pool</returns>
         public static EcsGroup Except(EcsSpan a, EcsGroup b)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (a.WorldID != b._source.ID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#if DEBUG
+            if (a.WorldID != b.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (a.WorldID != b.WorldID) { return a.World.GetFreeGroup(); }
 #endif
             EcsGroup result = b._source.GetFreeGroup();
             foreach (var entityID in a)
@@ -1205,8 +1276,10 @@ namespace DCFApixels.DragonECS
         /// <returns>new group from pool</returns>
         public static EcsGroup Except(EcsSpan a, EcsSpan b)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (a.WorldID != b.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (a.WorldID != b.WorldID) { return a.World.GetFreeGroup(); }
 #endif
             EcsGroup result = a.World.GetFreeGroup();
             result.CopyFrom(a);
@@ -1226,8 +1299,10 @@ namespace DCFApixels.DragonECS
         /// <returns>new group from pool</returns>
         public static EcsGroup Intersect(EcsGroup a, EcsGroup b)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (a._source != b._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (a._source != b._source) { return a.World.GetFreeGroup(); }
 #endif
             EcsGroup result = a._source.GetFreeGroup();
             foreach (var entityID in a)
@@ -1243,8 +1318,10 @@ namespace DCFApixels.DragonECS
         /// <returns>new group from pool</returns>
         public static EcsGroup Intersect(EcsSpan a, EcsGroup b)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            if (a.WorldID != b._source.ID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#if DEBUG
+            if (a.WorldID != b.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (a.WorldID != b.WorldID) { return a.World.GetFreeGroup(); }
 #endif
             EcsGroup result = b._source.GetFreeGroup();
             foreach (var entityID in a)
@@ -1267,8 +1344,10 @@ namespace DCFApixels.DragonECS
         /// <returns>new group from pool</returns>
         public static EcsGroup Intersect(EcsSpan a, EcsSpan b)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (a.WorldID != b.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (a.WorldID != b.WorldID) { return a.World.GetFreeGroup(); }
 #endif
             EcsGroup result = b.World.GetFreeGroup();
             result.CopyFrom(a);
@@ -1288,8 +1367,10 @@ namespace DCFApixels.DragonECS
         /// <returns>new group from pool</returns>
         public static EcsGroup SymmetricExcept(EcsGroup a, EcsGroup b)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (a._source != b._source) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (a._source != b._source) { return a.World.GetFreeGroup(); }
 #endif
             EcsGroup result = a._source.GetFreeGroup();
             foreach (var entityID in a)
@@ -1312,8 +1393,10 @@ namespace DCFApixels.DragonECS
         /// <returns>new group from pool</returns>
         public static EcsGroup SymmetricExcept(EcsSpan a, EcsSpan b)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             if (a.WorldID != b.WorldID) { Throw.Group_ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (a.WorldID != b.WorldID) { return a.World.GetFreeGroup(); }
 #endif
             EcsGroup result = a.World.GetFreeGroup();
             result.CopyFrom(a);
@@ -1399,9 +1482,6 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void MarkEntity_Internal(int entityID)
         {
-            //throw new NotImplementedException();
-            //_sparse[entityID] |= int.MinValue;
-
             _dense[IndexOf(entityID)] |= int.MinValue;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

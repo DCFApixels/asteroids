@@ -205,12 +205,26 @@ namespace DCFApixels.DragonECS.Unity.Editors
             {
                 public VerticalScope(GUILayoutOption[] options) { GUILayout.BeginVertical(options); }
                 public VerticalScope(GUIStyle style, GUILayoutOption[] options) { GUILayout.BeginVertical(style, options); }
+                public VerticalScope(Color backgroundColor, GUILayoutOption[] options)
+                {
+                    using (SetColor(backgroundColor))
+                    {
+                        GUILayout.BeginVertical(UnityEditorUtility.GetWhiteStyle(), options);
+                    }
+                }
                 public void Dispose() { GUILayout.EndVertical(); }
             }
             public struct HorizontalScope : IDisposable
             {
                 public HorizontalScope(GUILayoutOption[] options) { GUILayout.BeginHorizontal(options); }
                 public HorizontalScope(GUIStyle style, GUILayoutOption[] options) { GUILayout.BeginHorizontal(style, options); }
+                public HorizontalScope(Color backgroundColor, GUILayoutOption[] options)
+                {
+                    using (SetColor(backgroundColor))
+                    {
+                        GUILayout.BeginHorizontal(UnityEditorUtility.GetWhiteStyle(), options);
+                    }
+                }
                 public void Dispose() { GUILayout.EndHorizontal(); }
             }
             public struct ScrollViewScope : IDisposable
@@ -221,14 +235,16 @@ namespace DCFApixels.DragonECS.Unity.Editors
             }
 
             public static ScrollViewScope BeginScrollView(ref Vector2 pos) => new ScrollViewScope(ref pos, Array.Empty<GUILayoutOption>());
-            public static HorizontalScope BeginHorizontal() => new HorizontalScope(Array.Empty<GUILayoutOption>());
-            public static VerticalScope BeginVertical() => new VerticalScope(Array.Empty<GUILayoutOption>());
             public static ScrollViewScope BeginScrollView(ref Vector2 pos, params GUILayoutOption[] options) => new ScrollViewScope(ref pos, options);
-            public static HorizontalScope BeginHorizontal(params GUILayoutOption[] options) => new HorizontalScope(options);
-            public static VerticalScope BeginVertical(params GUILayoutOption[] options) => new VerticalScope(options);
             public static ScrollViewScope BeginScrollView(ref Vector2 pos, GUIStyle style, params GUILayoutOption[] options) => new ScrollViewScope(ref pos, style, options);
+            public static HorizontalScope BeginHorizontal() => new HorizontalScope(Array.Empty<GUILayoutOption>());
+            public static HorizontalScope BeginHorizontal(params GUILayoutOption[] options) => new HorizontalScope(options);
             public static HorizontalScope BeginHorizontal(GUIStyle style, params GUILayoutOption[] options) => new HorizontalScope(style, options);
+            public static HorizontalScope BeginHorizontal(Color backgroundColor, params GUILayoutOption[] options) => new HorizontalScope(backgroundColor, options);
+            public static VerticalScope BeginVertical() => new VerticalScope(Array.Empty<GUILayoutOption>());
+            public static VerticalScope BeginVertical(params GUILayoutOption[] options) => new VerticalScope(options);
             public static VerticalScope BeginVertical(GUIStyle style, params GUILayoutOption[] options) => new VerticalScope(style, options);
+            public static VerticalScope BeginVertical(Color backgroundColor, params GUILayoutOption[] options) => new VerticalScope(backgroundColor, options);
         }
         public static CheckChangedScope CheckChanged() => CheckChangedScope.New();
         public static CheckChangedScopeWithAutoApply CheckChanged(SerializedObject serializedObject) => new CheckChangedScopeWithAutoApply(serializedObject);
@@ -402,19 +418,30 @@ namespace DCFApixels.DragonECS.Unity.Editors
         {
             var current = Event.current;
             var hover = IconHoverScan(position, current);
-            using (new ColorScope(new Color(1f, 1f, 1f, hover ? 1f : 0.8f)))
+            if (GUI.enabled)
             {
-                DrawIcon(position, Icons.Instance.FileIcon, hover ? 1f : 2f, "One click - Ping File. Double click - Edit Script");
-            }
-            if (hover)
-            {
-                if (current.type == EventType.MouseUp)
+                using (SetColor(1f, 1f, 1f, hover ? 1f : 0.8f))
                 {
-                    EditorGUIUtility.PingObject(script);
+                    DrawIcon(position, Icons.Instance.FileIcon, hover ? 1f : 2f, "One click - Ping File. Double click - Edit Script");
                 }
-                else if (current.type == EventType.MouseDown && current.clickCount >= 2)
+                if (hover)
                 {
-                    AssetDatabase.OpenAsset(script);
+                    if (current.type == EventType.MouseUp)
+                    {
+                        EditorGUIUtility.PingObject(script);
+                    }
+                    else if (current.type == EventType.MouseDown && current.clickCount >= 2)
+                    {
+                        //UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(); //TODO
+                        AssetDatabase.OpenAsset(script);
+                    }
+                }
+            }
+            else
+            {
+                using (SetColor(0.85f, 0.85f, 0.85f, 0.7f))
+                {
+                    DrawIcon(position, Icons.Instance.FileIcon, 2f, "One click - Ping File. Double click - Edit Script");
                 }
             }
         }
@@ -435,6 +462,10 @@ namespace DCFApixels.DragonECS.Unity.Editors
             }
         }
 
+        public static bool NewEntityButton(Rect position)
+        {
+            return IconButton(position, Icons.Instance.PassIcon, 2f, "Create entity");
+        }
         public static bool ValidateButton(Rect position)
         {
             return IconButton(position, Icons.Instance.RepaireIcon, 2f, "Validate");
@@ -523,15 +554,21 @@ namespace DCFApixels.DragonECS.Unity.Editors
                     using (new EditorGUI.DisabledScope(true))
                     {
                         GUI.Label(idRect, "Entity ID", style);
-                        GUI.Label(genRect, "Generation", style);
-                        GUI.Label(worldRect, "World ID", style);
+                        using (SetAlpha(0.85f))
+                        {
+                            GUI.Label(genRect, "Generation", style);
+                            GUI.Label(worldRect, "World ID", style);
+                        }
                     }
                 }
                 else
                 {
                     EditorGUI.IntField(idRect, id, style);
-                    EditorGUI.IntField(genRect, gen, style);
-                    EditorGUI.IntField(worldRect, world, style);
+                    using (SetAlpha(0.85f))
+                    {
+                        EditorGUI.IntField(genRect, gen, style);
+                        EditorGUI.IntField(worldRect, world, style);
+                    }
                 }
             }
         }
@@ -722,6 +759,18 @@ namespace DCFApixels.DragonECS.Unity.Editors
         #endregion
 
         #region Other Elements
+        public static void ManuallySerializeButton(Rect position, UnityEngine.Object obj)
+        {
+            if (GUI.Button(position, UnityEditorUtility.GetLabel("Manually serialize")))
+            {
+                var so = new SerializedObject(obj);
+                EditorUtility.SetDirty(obj);
+                so.UpdateIfRequiredOrScript();
+                so.ApplyModifiedProperties();
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
+        }
         public static bool AddComponentButton(Rect position, out Rect dropDownRect)
         {
             dropDownRect = RectUtility.AddPadding(position, 20f, 20f, 1f, 1f); ;
@@ -1012,7 +1061,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
             GetReferenceDropDown(sortedPredicateTypes, sortedWithOutTypes).Show(position);
         }
 
-#endregion
+        #endregion
     }
 }
 #endif

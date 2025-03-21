@@ -1,5 +1,10 @@
-﻿using DCFApixels.DragonECS.AutoInjections.Internal;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.AutoInjections.Internal;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace DCFApixels.DragonECS
@@ -8,7 +13,7 @@ namespace DCFApixels.DragonECS
     {
         protected sealed override void Init(Builder b)
         {
-            EcsAspectAutoHelper.Fill(this, b);
+            //EcsAspectAutoHelper.Fill(this, b);
             InitAfterDI(b);
         }
         protected virtual void InitAfterDI(Builder b) { }
@@ -16,90 +21,119 @@ namespace DCFApixels.DragonECS
 
     internal static class EcsAspectAutoHelper
     {
-        public static void Fill(EcsAspect s, EcsAspect.Builder b)
+        private static readonly MethodInfo _incluedMethod;
+        private static readonly MethodInfo _excludeMethod;
+        private static readonly MethodInfo _optionalMethod;
+        private static readonly MethodInfo _combineMethod;
+        private const BindingFlags REFL_FLAGS = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        static EcsAspectAutoHelper()
         {
-            Type builderType = b.GetType();
-            MethodInfo incluedMethod = builderType.GetMethod("IncludePool", BindingFlags.Instance | BindingFlags.Public);
-            MethodInfo excludeMethod = builderType.GetMethod("ExcludePool", BindingFlags.Instance | BindingFlags.Public);
-            MethodInfo optionalMethod = builderType.GetMethod("OptionalPool", BindingFlags.Instance | BindingFlags.Public);
-            MethodInfo includeImplicitMethod = builderType.GetMethod("IncludeImplicit", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            MethodInfo excludeImplicitMethod = builderType.GetMethod("ExcludeImplicit", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            MethodInfo combineMethod = builderType.GetMethod("Combine", BindingFlags.Instance | BindingFlags.Public);
+            Type builderType = typeof(EcsAspect.Builder);
 
-            Type aspectType = s.GetType();
-
-            foreach (var attribute in aspectType.GetCustomAttributes<ImplicitInjectAttribute>())//TODO убрать дублирование кода - вынести в отедльный метод
+            _incluedMethod = builderType.GetMethod("IncludePool", REFL_FLAGS);
+            _excludeMethod = builderType.GetMethod("ExcludePool", REFL_FLAGS);
+            _optionalMethod = builderType.GetMethod("OptionalPool", REFL_FLAGS);
+            _combineMethod = builderType.GetMethod("Combine", REFL_FLAGS);
+        }
+        public static void FillMaskFields(object aspect, EcsMask mask)
+        {
+            foreach (FieldInfo fieldInfo in aspect.GetType().GetFields(REFL_FLAGS))
             {
-                if (attribute is IncImplicitAttribute incImplicit)
+                if (fieldInfo.GetCustomAttribute<MaskAttribute>() == null)
                 {
-                    if (incImplicit.isPool)
-                        incluedMethod.MakeGenericMethod(incImplicit.type).Invoke(b, null);
-                    else
-                        includeImplicitMethod.Invoke(b, new object[] { incImplicit.type });
                     continue;
                 }
-                if (attribute is ExcImplicitAttribute excImplicit)
+
+                if (fieldInfo.FieldType == typeof(EcsMask))
                 {
-                    if (excImplicit.isPool)
-                        excludeMethod.MakeGenericMethod(excImplicit.type).Invoke(b, null);
-                    else
-                        excludeImplicitMethod.Invoke(b, new object[] { excImplicit.type });
-                    continue;
+                    fieldInfo.SetValue(aspect, mask);
                 }
-            }//TODO КОНЕЦ убрать дублирование кода - вынести в отедльный метод
+                else if (fieldInfo.FieldType == typeof(EcsStaticMask))
+                {
+                    fieldInfo.SetValue(aspect, mask.ToStatic());
+                }
+            }
+        }
+        public static void FillFields(object aspect, EcsAspect.Builder builder)
+        {
+            Type aspectType = aspect.GetType();
 
+            var implicitInjectAttributes = (IEnumerable<ImplicitInjectAttribute>)aspectType.GetCustomAttributes<ImplicitInjectAttribute>();
 
-            FieldInfo[] fieldInfos = aspectType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            FieldInfo[] fieldInfos = aspectType.GetFields(REFL_FLAGS);
             foreach (FieldInfo fieldInfo in fieldInfos)
             {
                 Type fieldType = fieldInfo.FieldType;
 
-                foreach (var attribute in fieldInfo.GetCustomAttributes<ImplicitInjectAttribute>())//TODO убрать дублирование кода - вынести в отедльный метод
-                {
-                    if (attribute is IncImplicitAttribute incImplicit)
-                    {
-                        if (incImplicit.isPool)
-                            incluedMethod.MakeGenericMethod(incImplicit.type).Invoke(b, null);
-                        else
-                            includeImplicitMethod.Invoke(b, new object[] { incImplicit.type });
-                        continue;
-                    }
-                    if (attribute is ExcImplicitAttribute excImplicit)
-                    {
-                        if (excImplicit.isPool)
-                            excludeMethod.MakeGenericMethod(excImplicit.type).Invoke(b, null);
-                        else
-                            excludeImplicitMethod.Invoke(b, new object[] { excImplicit.type });
-                        continue;
-                    }
-                }//TODO КОНЕЦ убрать дублирование кода - вынести в отедльный метод
+                implicitInjectAttributes = implicitInjectAttributes.Concat(fieldInfo.GetCustomAttributes<ImplicitInjectAttribute>());
 
-                if (!fieldInfo.TryGetCustomAttribute(out InjectAspectMemberAttribute injectAttribute))
+                if (fieldInfo.TryGetCustomAttribute(out InjectAspectMemberAttribute injectAttribute) == false)
                 {
                     continue;
                 }
+                IEcsPool pool;
+                switch (injectAttribute)
+                {
+                    case IncAttribute incAtr:
+                        if (builder.World.TryFindPoolInstance(fieldType, out pool))
+                        {
+                            builder.SetMaskInclude(fieldType);
+                            fieldInfo.SetValue(aspect, pool);
+                        }
+                        else
+                        {
+                            pool = (IEcsPool)_incluedMethod.MakeGenericMethod(fieldType).Invoke(builder, null);
+                        }
+                        fieldInfo.SetValue(aspect, pool);
+                        break;
+                    case ExcAttribute extAtr:
+                        if (builder.World.TryFindPoolInstance(fieldType, out pool))
+                        {
+                            builder.SetMaskExclude(fieldType);
+                            fieldInfo.SetValue(aspect, pool);
+                        }
+                        else
+                        {
+                            pool = (IEcsPool)_excludeMethod.MakeGenericMethod(fieldType).Invoke(builder, null);
+                        }
+                        fieldInfo.SetValue(aspect, pool);
+                        break;
+                    case OptAttribute optAtr:
+                        if (builder.World.TryFindPoolInstance(fieldType, out pool))
+                        {
+                            fieldInfo.SetValue(aspect, pool);
+                        }
+                        else
+                        {
+                            pool = (IEcsPool)_optionalMethod.MakeGenericMethod(fieldType).Invoke(builder, null);
+                        }
+                        fieldInfo.SetValue(aspect, pool);
+                        break;
+                    case CombineAttribute combineAtr:
+                        pool = builder.World.FindPoolInstance(fieldType);
+                        fieldInfo.SetValue(aspect, _combineMethod.MakeGenericMethod(fieldType).Invoke(builder, new object[] { combineAtr.Order }));
+                        break;
+                    default:
+                        break;
+                }
+            }
 
-                if (injectAttribute is IncAttribute)
+
+            foreach (var attribute in implicitInjectAttributes)
+            {
+                if (attribute is IncImplicitAttribute incImplicitAtr)
                 {
-                    fieldInfo.SetValue(s, incluedMethod.MakeGenericMethod(fieldType).Invoke(b, null));
+                    builder.SetMaskInclude(incImplicitAtr.ComponentType);
                     continue;
                 }
-                if (injectAttribute is ExcAttribute)
+                if (attribute is ExcImplicitAttribute excImplicitAtr)
                 {
-                    fieldInfo.SetValue(s, excludeMethod.MakeGenericMethod(fieldType).Invoke(b, null));
-                    continue;
-                }
-                if (injectAttribute is OptAttribute)
-                {
-                    fieldInfo.SetValue(s, optionalMethod.MakeGenericMethod(fieldType).Invoke(b, null));
-                    continue;
-                }
-                if (injectAttribute is CombineAttribute combAttribute)
-                {
-                    fieldInfo.SetValue(s, combineMethod.MakeGenericMethod(fieldType).Invoke(b, new object[] { combAttribute.order }));
+                    builder.SetMaskExclude(excImplicitAtr.ComponentType);
                     continue;
                 }
             }
+
+
         }
     }
 }

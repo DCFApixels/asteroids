@@ -84,19 +84,20 @@ namespace DCFApixels.DragonECS.Unity.Docs.Editors
 
             GUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
 
-
-            ButtonsScrolPosition = GUILayout.BeginScrollView(ButtonsScrolPosition, UnityEditorUtility.GetStyle(Color.black, 0f), GUILayout.Width(_buttonsWidth));
-            var selectedGroupInfo = DrawGroups();
-            GUILayout.EndScrollView();
+            MetaGroupInfo selectedGroupInfo;
+            using (EcsGUI.Layout.BeginScrollView(ref ButtonsScrolPosition, UnityEditorUtility.GetClearBackgrounStyle(), GUILayout.Width(_buttonsWidth)))
+            {
+                selectedGroupInfo = DrawGroups();
+            }
 
             DrawDragger();
 
             GUILayout.Space(EditorGUIUtility.standardVerticalSpacing * -2f);
 
-
-            DataScrolPosition = GUILayout.BeginScrollView(DataScrolPosition, UnityEditorUtility.GetStyle(Color.black, 0.2f), GUILayout.ExpandWidth(true));
-            DrawSelectedGroupMeta(selectedGroupInfo);
-            GUILayout.EndScrollView();
+            using (EcsGUI.Layout.BeginScrollView(ref DataScrolPosition, UnityEditorUtility.GetTransperentBlackBackgrounStyle(), GUILayout.ExpandWidth(true)))
+            {
+                DrawSelectedGroupMeta(selectedGroupInfo);
+            }
 
             //GUILayout.Space(EditorGUIUtility.standardVerticalSpacing * -2f);
             GUILayout.EndHorizontal();
@@ -251,7 +252,7 @@ namespace DCFApixels.DragonECS.Unity.Docs.Editors
                 Color alphaPanelColor = panelColor;
                 alphaPanelColor.a = EscEditorConsts.COMPONENT_DRAWER_ALPHA;
 
-                using (EcsGUI.Layout.BeginVertical(UnityEditorUtility.GetStyle(alphaPanelColor)))
+                using (EcsGUI.Layout.BeginVertical(alphaPanelColor))
                 {
                     GUILayout.Space(1f);
 
@@ -260,7 +261,7 @@ namespace DCFApixels.DragonECS.Unity.Docs.Editors
                     {
                         GUILayout.TextArea(IsUseCustomNames ? meta.Name : meta.TypeName, EditorStyles.boldLabel, GUILayout.ExpandWidth(false));
 
-                        if (meta.TryGetSourceType(out System.Type targetType) && ScriptsCache.TryGetScriptAsset(targetType, out MonoScript script))
+                        if (meta.TryGetSourceType(out System.Type targetType) && ScriptsCache.TryGetScriptAsset(targetType.ToMeta(), out MonoScript script))
                         {
                             EcsGUI.Layout.ScriptAssetButton(script, GUILayout.Width(18f));
                         }

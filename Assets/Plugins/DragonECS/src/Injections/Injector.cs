@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Internal;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +16,7 @@ namespace DCFApixels.DragonECS
         private Dictionary<Type, InjectionNodeBase> _nodes = new Dictionary<Type, InjectionNodeBase>(32);
         private bool _isInit = false;
 
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
         private HashSet<Type> _requiredInjectionTypes = new HashSet<Type>();
 #endif
 
@@ -47,20 +50,29 @@ namespace DCFApixels.DragonECS
                 branch = new InjectionBranch(this, objType);
                 InitBranch(branch);
 
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
                 foreach (var requiredInjectionType in _requiredInjectionTypes)
                 {
                     if (requiredInjectionType.IsAssignableFrom(objType))
                     {
                         if (_nodes.ContainsKey(requiredInjectionType) == false)
                         {
-                            throw new EcsInjectionException($"A systems in the pipeline implements IEcsInject<{requiredInjectionType.Name}> interface, but no suitable injection node was found in the Injector. To create a node, use Injector.AddNode<{requiredInjectionType.Name}>() or implement the IInjectionUnit interface for type {objType.Name}.");
+                            throw new InjectionException($"A systems in the pipeline implements IEcsInject<{requiredInjectionType.Name}> interface, but no suitable injection node was found in the Injector. To create a node, use Injector.AddNode<{requiredInjectionType.Name}>() or implement the IInjectionUnit interface for type {objType.Name}.");
                         }
                     }
                 }
 #endif
             }
             branch.Inject(raw);
+        }
+        public void ExtractAllTo(object target)
+        {
+            if (target is IEcsInjectProcess == false) { return; }
+
+            foreach (var node in _nodes)
+            {
+                node.Value.ExtractTo(target);
+            }
         }
         public T Extract<T>()
         {
@@ -72,7 +84,7 @@ namespace DCFApixels.DragonECS
             {
                 return node.CurrentInjectedDependencyRaw;
             }
-            throw new EcsInjectionException($"The injection graph is missing a node for {type.Name} type. To create a node, use the Injector.AddNode<{type.Name}>() method directly in the injector or in the implementation of the IInjectionUnit for {type.Name}.");
+            throw new InjectionException($"The injection graph is missing a node for {type.Name} type. To create a node, use the Injector.AddNode<{type.Name}>() method directly in the injector or in the implementation of the IInjectionUnit for {type.Name}.");
         }
         public void AddNode<T>()
         {
@@ -132,7 +144,7 @@ namespace DCFApixels.DragonECS
             }
             _isInit = true;
 
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             var systems = _pipeline.AllSystems;
             var injectType = typeof(IEcsInject<>);
             foreach (var system in systems)
@@ -180,9 +192,9 @@ namespace DCFApixels.DragonECS
             }
             public EcsPipeline.Builder Inject<T>(T obj)
             {
-                if(obj is EcsWorld objWorld)
+                if (obj is EcsWorld objWorld)
                 {
-                    if(_monoWorld == null)
+                    if (_monoWorld == null)
                     {
                         _monoWorld = objWorld;
                     }
@@ -192,11 +204,11 @@ namespace DCFApixels.DragonECS
                         Type objWorldType = objWorld.GetType();
                         if (monoWorldType != objWorldType)
                         {
-                            if(objWorldType == typeof(EcsWorld))
+                            if (objWorldType == typeof(EcsWorld))
                             { // Екземпляр EcsWorld имеет самый больший приоритет.
                                 _monoWorld = objWorld;
                             }
-                            if(objWorldType == typeof(EcsDefaultWorld) &&
+                            if (objWorldType == typeof(EcsDefaultWorld) &&
                                 monoWorldType != typeof(EcsWorld))
                             { // Екземпляр EcsDefaultWorld имеет приоритет больше других типов, но меньше приоритета EcsWorld.
                                 _monoWorld = objWorld;
@@ -220,7 +232,7 @@ namespace DCFApixels.DragonECS
                     }
                 }
                 Throw.UndefinedException();
-                return _source;
+                return default;
             }
             public Injector Build(EcsPipeline pipeline)
             {
@@ -230,12 +242,18 @@ namespace DCFApixels.DragonECS
                     monoWorldSystem.World = _monoWorld;
                 }
 
+
+                var initInjectionCallbacks = pipeline.GetProcess<IOnInitInjectionComplete>();
+                foreach (var system in initInjectionCallbacks)
+                {
+                    system.OnBeforeInitInjection();
+                }
                 _instance.Init(pipeline);
                 foreach (var item in _initInjections)
                 {
                     item.InjectTo(_instance);
                 }
-                foreach (var system in pipeline.GetProcess<IOnInitInjectionComplete>())
+                foreach (var system in initInjectionCallbacks)
                 {
                     system.OnInitInjectionComplete();
                 }

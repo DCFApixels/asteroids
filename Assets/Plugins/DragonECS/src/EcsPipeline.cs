@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Internal;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Internal;
 using DCFApixels.DragonECS.RunnersCore;
 using System;
 using System.Collections;
@@ -11,6 +14,7 @@ using static DCFApixels.DragonECS.EcsConsts;
 namespace DCFApixels.DragonECS
 {
     public interface IEcsMember { }
+    public interface IEcsComponentMember : IEcsMember { }
     public interface INamedMember
     {
         string Name { get; }
@@ -19,7 +23,7 @@ namespace DCFApixels.DragonECS
     [MetaColor(MetaColor.DragonRose)]
     [MetaGroup(PACK_GROUP, OTHER_GROUP)]
     [MetaDescription(AUTHOR, "...")]
-    [MetaID("F064557C92010419AB677453893D00AE")]
+    [MetaID("DragonECS_F064557C92010419AB677453893D00AE")]
     public interface IEcsPipelineMember : IEcsProcess
     {
         EcsPipeline Pipeline { get; set; }
@@ -28,11 +32,10 @@ namespace DCFApixels.DragonECS
     [MetaColor(MetaColor.DragonRose)]
     [MetaGroup(PACK_GROUP, OTHER_GROUP)]
     [MetaDescription(AUTHOR, "Container and engine for systems. Responsible for configuring the execution order of systems, providing a mechanism for messaging between systems, and a dependency injection mechanism.")]
-    [MetaID("9F5A557C9201C5C3D9BCAC2FF1CC07D4")]
+    [MetaID("DragonECS_9F5A557C9201C5C3D9BCAC2FF1CC07D4")]
     public sealed partial class EcsPipeline
     {
         private readonly IConfigContainer _configs;
-        private Injector.Builder _injectorBuilder;
         private Injector _injector;
 
         private IEcsProcess[] _allSystems;
@@ -43,7 +46,7 @@ namespace DCFApixels.DragonECS
         private bool _isInit = false;
         private bool _isDestoryed = false;
 
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
         private static EcsProfilerMarker _initMarker = new EcsProfilerMarker("EcsPipeline.Init");
 #endif
 
@@ -68,7 +71,7 @@ namespace DCFApixels.DragonECS
         {
             get { return _isInit; }
         }
-        public bool IsDestoryed
+        public bool IsDestroyed
         {
             get { return _isDestoryed; }
         }
@@ -79,8 +82,15 @@ namespace DCFApixels.DragonECS
         {
             _configs = configs;
             _allSystems = systems;
-            _injectorBuilder = injectorBuilder;
-            _injectorBuilder.Inject(this);
+            injectorBuilder.Inject(this);
+
+            var members = GetProcess<IEcsPipelineMember>();
+            for (int i = 0; i < members.Length; i++)
+            {
+                members[i].Pipeline = this;
+            }
+
+            _injector = injectorBuilder.Build(this);
         }
         #endregion
 
@@ -130,14 +140,18 @@ namespace DCFApixels.DragonECS
             {
                 return (TRunner)result;
             }
-            TRunner instance = new TRunner();
+            TRunner runnerInstance = new TRunner();
 #if DEBUG
-            EcsRunner.CheckRunnerTypeIsValide(runnerType, instance.Interface);
+            EcsRunner.CheckRunnerTypeIsValide(runnerType, runnerInstance.Interface);
 #endif
-            instance.Init_Internal(this);
-            _runners.Add(runnerType, instance);
-            _runners.Add(instance.Interface, instance);
-            return instance;
+            runnerInstance.Init_Internal(this);
+            _runners.Add(runnerType, runnerInstance);
+            _runners.Add(runnerInstance.Interface, runnerInstance);
+            Injector.ExtractAllTo(runnerInstance);
+
+            // init after.
+            Injector.Inject(runnerInstance);
+            return runnerInstance;
         }
         public T GetRunner<T>() where T : IEcsProcess
         {
@@ -175,16 +189,9 @@ namespace DCFApixels.DragonECS
                 EcsDebug.PrintWarning($"This {nameof(EcsPipeline)} has already been initialized");
                 return;
             }
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             _initMarker.Begin();
 #endif
-            var members = GetProcess<IEcsPipelineMember>();
-            for (int i = 0; i < members.Length; i++)
-            {
-                members[i].Pipeline = this;
-            }
-            _injector = _injectorBuilder.Build(this);
-            _injectorBuilder = null;
 
             GetRunnerInstance<EcsPreInitRunner>().PreInit();
             GetRunnerInstance<EcsInitRunner>().Init();
@@ -193,7 +200,7 @@ namespace DCFApixels.DragonECS
             _isInit = true;
 
             GC.Collect();
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
             _initMarker.End();
 #endif
         }
@@ -201,7 +208,7 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Run()
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG || DRAGONECS_STABILITY_MODE
             if (!_isInit) { Throw.Pipeline_MethodCalledBeforeInitialisation(nameof(Run)); }
             if (_isDestoryed) { Throw.Pipeline_MethodCalledAfterDestruction(nameof(Run)); }
 #endif
@@ -209,7 +216,7 @@ namespace DCFApixels.DragonECS
         }
         public void Destroy()
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG || DRAGONECS_STABILITY_MODE
             if (!_isInit) { Throw.Pipeline_MethodCalledBeforeInitialisation(nameof(Destroy)); }
 #endif
             if (_isDestoryed)
@@ -250,7 +257,7 @@ namespace DCFApixels.DragonECS
     {
         public static bool IsNullOrDestroyed(this EcsPipeline self)
         {
-            return self == null || self.IsDestoryed;
+            return self == null || self.IsDestroyed;
         }
         public static EcsPipeline.Builder Add(this EcsPipeline.Builder self, IEnumerable<IEcsProcess> range, string layerName = null)
         {
@@ -282,7 +289,7 @@ namespace DCFApixels.DragonECS
     [MetaColor(MetaColor.Black)]
     [MetaGroup(PACK_GROUP, OTHER_GROUP)]
     [MetaDescription(AUTHOR, "An auxiliary type of system for dividing a pipeline into layers. This system is automatically added to the EcsPipeline.")]
-    [MetaID("42596C7C9201D0B85D1335E6E4704B57")]
+    [MetaID("DragonECS_42596C7C9201D0B85D1335E6E4704B57")]
     public class SystemsLayerMarkerSystem : IEcsProcess
     {
         public readonly string name;

@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Core;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Core;
 using System;
 
 namespace DCFApixels.DragonECS
@@ -25,6 +28,7 @@ namespace DCFApixels.DragonECS
         {
             get { return string.IsNullOrEmpty(Author) == false; }
         }
+        public MetaDescription(string text) : this(null, text) { }
         public MetaDescription(string author, string text)
         {
             if (author == null) { author = string.Empty; }

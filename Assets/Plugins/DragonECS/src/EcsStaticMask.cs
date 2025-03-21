@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Core;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Core;
 using DCFApixels.DragonECS.Internal;
 using System;
 using System.Collections.Concurrent;
@@ -339,15 +342,19 @@ namespace DCFApixels.DragonECS
             #region Inc/Exc/Combine/Except
             public void Inc(EcsTypeCode typeCode)
             {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-                if (_inc.Contains(typeCode) || _exc.Contains(typeCode)) { Throw.ConstraintIsAlreadyContainedInMask(); }
+#if DEBUG
+                if (_inc.Contains(typeCode) || _exc.Contains(typeCode)) { Throw.ConstraintIsAlreadyContainedInMask(typeCode); }
+#elif DRAGONECS_STABILITY_MODE
+                if (_inc.Contains(typeCode) || _exc.Contains(typeCode)) { return; }
 #endif
                 _inc.Add(typeCode);
             }
             public void Exc(EcsTypeCode typeCode)
             {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-                if (_inc.Contains(typeCode) || _exc.Contains(typeCode)) { Throw.ConstraintIsAlreadyContainedInMask(); }
+#if DEBUG
+                if (_inc.Contains(typeCode) || _exc.Contains(typeCode)) { Throw.ConstraintIsAlreadyContainedInMask(typeCode); }
+#elif DRAGONECS_STABILITY_MODE
+                if (_inc.Contains(typeCode) || _exc.Contains(typeCode)) { return; }
 #endif
                 _exc.Add(typeCode);
             }
@@ -451,7 +458,7 @@ namespace DCFApixels.DragonECS
         #region Debug utils
         private static string CreateLogString(EcsTypeCode[] inc, EcsTypeCode[] exc)
         {
-#if (DEBUG && !DISABLE_DEBUG)
+#if DEBUG
             string converter(EcsTypeCode o) { return EcsTypeCodeManager.FindTypeOfCode(o).ToString(); }
             return $"Inc({string.Join(", ", inc.Select(converter))}) Exc({string.Join(", ", exc.Select(converter))})";
 #else
@@ -491,9 +498,9 @@ namespace DCFApixels.DragonECS
 #if DEBUG
         private static void CheckConstraints(EcsTypeCode[] incs, EcsTypeCode[] excs)
         {
-            if (CheckRepeats(incs)) { throw new EcsFrameworkException("The values in the Include constraints are repeated."); }
-            if (CheckRepeats(excs)) { throw new EcsFrameworkException("The values in the Exclude constraints are repeated."); }
-            if (OverlapsArray(incs, excs)) { throw new EcsFrameworkException("Conflicting Include and Exclude constraints."); }
+            if (CheckRepeats(incs)) { throw new ArgumentException("The values in the Include constraints are repeated."); }
+            if (CheckRepeats(excs)) { throw new ArgumentException("The values in the Exclude constraints are repeated."); }
+            if (OverlapsArray(incs, excs)) { throw new ArgumentException("Conflicting Include and Exclude constraints."); }
         }
         private static bool CheckRepeats(EcsTypeCode[] array)
         {

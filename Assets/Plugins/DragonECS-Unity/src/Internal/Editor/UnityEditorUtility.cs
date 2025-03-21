@@ -1,11 +1,8 @@
-﻿using DCFApixels.DragonECS.Unity.Internal;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
-using UnityObject = UnityEngine.Object;
 
 namespace DCFApixels.DragonECS.Unity.Editors
 {
@@ -102,6 +99,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
 #if UNITY_EDITOR
 namespace DCFApixels.DragonECS.Unity.Editors
 {
+    using DCFApixels.DragonECS.Unity.Internal;
     using UnityEditor;
     using Assembly = System.Reflection.Assembly;
 
@@ -110,11 +108,17 @@ namespace DCFApixels.DragonECS.Unity.Editors
     {
         static UnityEditorUtility()
         {
+            const int PREWARMUP_LIST_SIZE = 64;
+            EcsWorld.ResetStaticState();
+            UnityDebugService.Activate();
+
             _integrationAssembly = typeof(UnityEditorUtility).Assembly;
 
-            colorBoxeStyles = new SparseArray<GUIStyle>();
+            List<Type> serializableTypes = new List<Type>(PREWARMUP_LIST_SIZE);
+            List<TypeMeta> typeWithMetaIDMetas = new List<TypeMeta>(PREWARMUP_LIST_SIZE);
+            List<TypeMeta> serializableTypeWithMetaIDMetas = new List<TypeMeta>(PREWARMUP_LIST_SIZE);
+            List<EntityEditorBlockDrawer> entityEditorBlockDrawers = new List<EntityEditorBlockDrawer>(PREWARMUP_LIST_SIZE);
 
-            List<Type> serializableTypes = new List<Type>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 //var targetTypes = assembly.GetTypes().Where(type =>
@@ -122,20 +126,77 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 //    type.IsSubclassOf(typeof(UnityObject)) == false &&
                 //    type.GetCustomAttribute<SerializableAttribute>() != null);
 
-                var targetTypes = assembly.GetTypes().Where(type =>
-                    (type.IsGenericType || type.IsAbstract || type.IsInterface) == false &&
-                    type.IsSubclassOf(typeof(UnityObject)) == false &&
-                    type.GetConstructor(Type.EmptyTypes) != null);
+                foreach (var type in assembly.GetTypes())
+                {
+                    bool hasMetaID = false;
+                    if (TypeMeta.TryGetCustomMeta(type, out TypeMeta meta) && meta.IsHasMetaID())
+                    {
+                        typeWithMetaIDMetas.Add(meta);
+                        hasMetaID = true;
+                    }
 
-                serializableTypes.AddRange(targetTypes);
+                    if (type.IsConcreteType())
+                    {
+                        if (typeof(EntityEditorBlockDrawer).IsAssignableFrom(type))
+                        {
+                            var drawer = (EntityEditorBlockDrawer)Activator.CreateInstance(type);
+                            entityEditorBlockDrawers.Add(drawer);
+                        }
+
+                        if (type.IsUnityObject() == false && type.GetConstructor(Type.EmptyTypes) != null)
+                        {
+                            serializableTypes.Add(type);
+                            if (hasMetaID)
+                            {
+                                serializableTypeWithMetaIDMetas.Add(meta);
+                            }
+                        }
+                    }
+                }
             }
             _serializableTypes = serializableTypes.ToArray();
-            _serializableTypeWithMetaIDMetas = serializableTypes
-                .Where(TypeMeta.IsHasMetaID)
-                .Select(type => type.ToMeta())
-                .ToArray();
+            _typeWithMetaIDMetas = typeWithMetaIDMetas.ToArray();
+            _serializableTypeWithMetaIDMetas = serializableTypeWithMetaIDMetas.ToArray();
+            _entityEditorBlockDrawers = entityEditorBlockDrawers.ToArray();
 
-            foreach (var item in _serializableTypeWithMetaIDMetas)
+            _metaIDCollisions = MetaID.FindMetaIDCollisions(_typeWithMetaIDMetas);
+            IsHasAnyMetaIDCollision = _metaIDCollisions.IsHasAnyCollision;
+            if (_metaIDCollisions.IsHasAnyCollision)
+            {
+                StringBuilder log = new StringBuilder();
+                log.Append("MetaID identifier collisions detected. Some functions that use MetaID were disabled until the collisions were fixed. List of collisions:\r\n");
+
+                {
+                    int i = 0;
+                    foreach (var collision in _metaIDCollisions)
+                    {
+                        i++;
+                        log.Append('├');
+                        log.Append($"ID: {collision.MetaID}\r\n");
+                        int j = 0;
+                        foreach (var meta in collision)
+                        {
+                            j++;
+                            log.Append('│');
+
+
+                            if (j == collision.Count)
+                            {
+                                log.Append('└');
+                            }
+                            else
+                            {
+                                log.Append('├');
+                            }
+
+                            log.Append($"Type: {meta.TypeName}\r\n");
+                        }
+                    }
+                }
+
+                Debug.LogError(log.ToString());
+            }
+            foreach (var item in _typeWithMetaIDMetas)
             {
                 _metaIDTypePairs[item.MetaID] = item.Type;
             }
@@ -147,9 +208,21 @@ namespace DCFApixels.DragonECS.Unity.Editors
             //}).ToArray();
         }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnLoad()
+        {
+            EcsWorld.ResetStaticState();
+            UnityDebugService.Activate();
+        }
+
         internal static readonly Assembly _integrationAssembly;
         internal static readonly Type[] _serializableTypes;
+        internal static readonly TypeMeta[] _typeWithMetaIDMetas;
         internal static readonly TypeMeta[] _serializableTypeWithMetaIDMetas;
+        internal static readonly EntityEditorBlockDrawer[] _entityEditorBlockDrawers;
+
+        internal static readonly MetaID.CollisionList _metaIDCollisions;
+        public static readonly bool IsHasAnyMetaIDCollision;
         private static readonly Dictionary<string, Type> _metaIDTypePairs = new Dictionary<string, Type>();
 
         public static bool TryGetTypeForMetaID(string metaID, out Type type)
@@ -158,14 +231,10 @@ namespace DCFApixels.DragonECS.Unity.Editors
         }
 
         //private static Type[] _noHiddenSerializableTypes;
-
-        private static SparseArray<GUIStyle> colorBoxeStyles = new SparseArray<GUIStyle>();
         private static GUIContent _singletonIconContent = null;
         private static GUIContent _singletonContent = null;
         private static GUIStyle _inputFieldCenterAnhor = null;
-
-        private static Dictionary<Type, MonoScript> scriptsAssets = new Dictionary<Type, MonoScript>(256);
-
+        private static Dictionary<Type, MonoScript> _scriptsAssets = new Dictionary<Type, MonoScript>(256);
 
         internal static void ResetValues(this SerializedProperty property, bool isExpand = false)
         {
@@ -284,7 +353,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
         }
         internal static bool TryGetScriptAsset(Type type, out MonoScript script)
         {
-            if (scriptsAssets.TryGetValue(type, out script) == false)
+            if (_scriptsAssets.TryGetValue(type, out script) == false)
             {
                 script = null;
                 string name = type.Name;
@@ -303,7 +372,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
                         break;
                     }
                 }
-                scriptsAssets.Add(type, script);
+                _scriptsAssets.Add(type, script);
             }
             return script != null;
         }
@@ -355,34 +424,58 @@ namespace DCFApixels.DragonECS.Unity.Editors
         }
         #endregion
 
-        #region GetStyle
-        public static GUIStyle GetStyle(Color color, float alphaMultiplier)
+        #region GetDefaultStyle
+        private static Texture2D _whiteTexture;
+        private static GUIStyle _whiteStyle;
+        private static GUIStyle _transperentBlackBackgrounStyle;
+        private static GUIStyle _clearBackgrounStyle;
+        public static Texture2D GetWhiteTexture()
         {
-            color.a *= alphaMultiplier;
-            return GetStyle(color);
-        }
-        public static GUIStyle GetStyle(Color32 color32)
-        {
-            int colorCode = new Color32Union(color32).colorCode;
-            if (colorBoxeStyles.TryGetValue(colorCode, out GUIStyle style))
+            if (_whiteTexture == null)
             {
-                if (style == null || style.normal.background == null)
-                {
-                    style = CreateStyle(color32, colorCode);
-                    colorBoxeStyles[colorCode] = style;
-                }
-                return style;
+                _whiteTexture = CreateTexture(2, 2, Color.white);
             }
-
-            style = CreateStyle(color32, colorCode);
-            colorBoxeStyles.Add(colorCode, style);
-            return style;
+            return _whiteTexture;
         }
-        private static GUIStyle CreateStyle(Color32 color32, int colorCode)
+        private static bool IsNotInitializedStyle(GUIStyle style)
         {
+            return style == null || style.normal.background == null;
+        }
+        public static GUIStyle GetWhiteStyle()
+        {
+            if (IsNotInitializedStyle(_whiteStyle))
+            {
+                _whiteStyle = CreateStyle(GetWhiteTexture(), GUI.skin.label);
+            }
+            return _whiteStyle;
+        }
+        public static GUIStyle GetTransperentBlackBackgrounStyle()
+        {
+            if (IsNotInitializedStyle(_transperentBlackBackgrounStyle))
+            {
+                _transperentBlackBackgrounStyle = CreateStyle(CreateTexture(2, 2, new Color(0, 0, 0, 0.2f)), GUI.skin.label);
+            }
+            return _transperentBlackBackgrounStyle;
+        }
+        public static GUIStyle GetClearBackgrounStyle()
+        {
+            if (IsNotInitializedStyle(_clearBackgrounStyle))
+            {
+                _clearBackgrounStyle = CreateStyle(CreateTexture(2, 2, new Color(0, 0, 0, 0)), GUI.skin.label);
+            }
+            return _clearBackgrounStyle;
+        }
+        #endregion
+
+        #region GetStyle
+        private static GUIStyle CreateStyle(Texture2D texture, GUIStyle referenceStyle = null)
+        {
+            if (referenceStyle == null)
+            {
+                referenceStyle = GUI.skin.box;
+            }
             GUIStyle result = new GUIStyle(GUI.skin.box);
-            Color componentColor = color32;
-            Texture2D texture2D = CreateTexture(2, 2, componentColor);
+            Texture2D texture2D = texture;
             result.hover.background = texture2D;
             result.hover.scaledBackgrounds = Array.Empty<Texture2D>();
             result.focused.background = texture2D;
@@ -397,43 +490,13 @@ namespace DCFApixels.DragonECS.Unity.Editors
         {
             var pixels = new Color[width * height];
             for (var i = 0; i < pixels.Length; ++i)
+            {
                 pixels[i] = color;
-
+            }
             var result = new Texture2D(width, height);
             result.SetPixels(pixels);
             result.Apply();
             return result;
-        }
-        #endregion
-
-        #region Utils
-        [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 4)]
-        private readonly ref struct Color32Union
-        {
-            [FieldOffset(0)]
-            public readonly int colorCode;
-            [FieldOffset(0)]
-            public readonly byte r;
-            [FieldOffset(1)]
-            public readonly byte g;
-            [FieldOffset(2)]
-            public readonly byte b;
-            [FieldOffset(3)]
-            public readonly byte a;
-            public Color32Union(byte r, byte g, byte b, byte a) : this()
-            {
-                this.r = r;
-                this.g = g;
-                this.b = b;
-                this.a = a;
-            }
-            public Color32Union(Color32 color) : this()
-            {
-                r = color.r;
-                g = color.g;
-                b = color.b;
-                a = color.a;
-            }
         }
         #endregion
     }

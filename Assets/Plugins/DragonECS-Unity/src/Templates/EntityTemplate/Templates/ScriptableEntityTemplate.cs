@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Unity;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Unity;
 using DCFApixels.DragonECS.Unity.Internal;
 using System;
 using UnityEngine;
@@ -14,7 +17,7 @@ namespace DCFApixels.DragonECS
     [MetaGroup(EcsUnityConsts.PACK_GROUP, EcsUnityConsts.ENTITY_BUILDING_GROUP)]
     [MetaDescription(EcsConsts.AUTHOR, nameof(ScriptableObject) + " implementation of an entity template. Templates are a set of components that are applied to entities.")]
     [CreateAssetMenu(fileName = nameof(ScriptableEntityTemplate), menuName = EcsConsts.FRAMEWORK_NAME + "/" + nameof(ScriptableEntityTemplate), order = 1)]
-    [MetaID("7C4DBA809201D959401A5BDFB6363EC0")]
+    [MetaID("DragonECS_7C4DBA809201D959401A5BDFB6363EC0")]
     public class ScriptableEntityTemplate : ScriptableEntityTemplateBase, IEntityTemplateInternal
     {
         [SerializeReference]

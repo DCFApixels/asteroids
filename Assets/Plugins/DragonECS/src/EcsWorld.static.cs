@@ -1,4 +1,8 @@
-﻿using DCFApixels.DragonECS.Internal;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Core;
+using DCFApixels.DragonECS.Internal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,7 +25,7 @@ namespace DCFApixels.DragonECS
         #endregion
 
         private static EcsWorld[] _worlds = Array.Empty<EcsWorld>();
-        private static IdDispenser _worldIdDispenser = new IdDispenser(4, 0, n => Array.Resize(ref _worlds, n));
+        private static readonly IdDispenser _worldIdDispenser = new IdDispenser(4, 0, n => Array.Resize(ref _worlds, n));
 
         private static StructList<WorldComponentPoolAbstract> _allWorldComponentPools = new StructList<WorldComponentPoolAbstract>(64);
         private StructList<WorldComponentPoolAbstract> _worldComponentPools;
@@ -37,6 +41,15 @@ namespace DCFApixels.DragonECS
         public static EcsWorld GetWorld(short worldID)
         {// ts
             return _worlds[worldID];
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryGetWorld(short worldID, out EcsWorld world)
+        {// ts
+            world = _worlds[worldID];
+            return
+                world != null &&
+                world.IsDestroyed != false &&
+                worldID != 0;
         }
 
         private void ReleaseData(short worldID)
@@ -64,6 +77,22 @@ namespace DCFApixels.DragonECS
         public static ref T GetDataUnchecked<T>(short worldID)
         {
             return ref WorldComponentPool<T>.GetForWorldUnchecked(worldID);
+        }
+
+        public static void ResetStaticState()
+        {
+            for (int i = 1; i < _worlds.Length; i++)
+            {
+                var world = _worlds[i];
+                if (world == null) { continue; }
+
+                if (world.IsDestroyed == false)
+                {
+                    world.Destroy();
+                }
+                world = null;
+            }
+            _worldIdDispenser.ReleaseAll();
         }
 
         #region WorldComponentPool
@@ -127,7 +156,7 @@ namespace DCFApixels.DragonECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static ref T GetForWorldUnchecked(short worldID)
             {// ts
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
                 if (_mapping[worldID] <= 0) { Throw.ArgumentOutOfRange(); }
 #endif
                 return ref _items[_mapping[worldID]];
@@ -168,6 +197,10 @@ namespace DCFApixels.DragonECS
                             {
                                 Array.Resize(ref _items, _items.Length << 1);
                             }
+
+#if DEBUG
+                            AllowedInWorldsAttribute.CheckAllows<T>(_worlds[worldID]);
+#endif
 
                             _interface.Init(ref _items[itemIndex], _worlds[worldID]);
 
@@ -247,10 +280,13 @@ namespace DCFApixels.DragonECS
         }
         #endregion
 
+        #region NullWorld
         private sealed class NullWorld : EcsWorld
         {
             internal NullWorld() : base(new EcsWorldConfig(4, 4, 4, 4, 4), null, 0) { }
         }
+
+        #endregion
 
         #region DebuggerProxy
         protected partial class DebuggerProxy

@@ -1,3 +1,6 @@
+#if DISABLE_DEBUG
+#undef DEBUG
+#endif
 using DCFApixels.DragonECS.AutoInjections;
 using DCFApixels.DragonECS.AutoInjections.Internal;
 using System;
@@ -10,8 +13,8 @@ namespace DCFApixels.DragonECS
     internal class AutoInjectionMap
     {
         private readonly EcsPipeline _source;
-        private Dictionary<Type, List<InjectedPropertyRecord>> _systemProperties;
-        private HashSet<Type> _notInjected;
+        private Dictionary<Type, List<InjectedPropertyRecord>> _injectedTypeToPropertiesMap = new Dictionary<Type, List<InjectedPropertyRecord>>();
+        private HashSet<Type> _notInjected = new HashSet<Type>();
         private bool _isDummyInjected = false;
 
         private bool _isPreInitInjectionComplete = false;
@@ -20,20 +23,19 @@ namespace DCFApixels.DragonECS
         {
             _source = source;
             var allsystems = _source.AllSystems;
-            _systemProperties = new Dictionary<Type, List<InjectedPropertyRecord>>();
-            _notInjected = new HashSet<Type>();
             foreach (var system in allsystems)
             {
                 Type systemType = system.GetType();
                 if (systemType == typeof(AutoInjectSystem)) { continue; }
+
                 foreach (var property in GetAllPropertiesFor(systemType, isAgressiveInjection))
                 {
                     Type propertType = property.PropertyType;
                     List<InjectedPropertyRecord> list;
-                    if (!_systemProperties.TryGetValue(propertType, out list))
+                    if (_injectedTypeToPropertiesMap.TryGetValue(propertType, out list) == false)
                     {
                         list = new List<InjectedPropertyRecord>();
-                        _systemProperties.Add(propertType, list);
+                        _injectedTypeToPropertiesMap.Add(propertType, list);
                     }
                     list.Add(new InjectedPropertyRecord(system, property));
                     if (property.GetAutoInjectAttribute() != DIAttribute.Dummy)
@@ -43,87 +45,99 @@ namespace DCFApixels.DragonECS
                 }
             }
         }
-
-        private static void Do(Type type, List<IInjectedProperty> result, bool isAgressiveInjection)
+        private static List<IInjectedProperty> GetAllPropertiesFor(Type type, bool isAgressiveInjection)
         {
-            const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-            result.AddRange(type.GetFields(bindingFlags)
-                .Where(o => isAgressiveInjection || o.GetCustomAttribute<DIAttribute>() != null)
+            List<IInjectedProperty> result = new List<IInjectedProperty>();
+            GetAllPropertiesFor(type, isAgressiveInjection, result);
+            return result;
+        }
+        private static void GetAllPropertiesFor(Type type, bool isAgressiveInjection, List<IInjectedProperty> result)
+        {
+            const BindingFlags REFL_FLAGS = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+            result.AddRange(type.GetFields(REFL_FLAGS)
+                .Where(o => isAgressiveInjection || o.HasAttribute<DIAttribute>())
                 .Select(o => new InjectedField(o)));
-            result.AddRange(type.GetProperties(bindingFlags)
+
+            result.AddRange(type.GetProperties(REFL_FLAGS)
                 .Where(o =>
                 {
-                    if (!isAgressiveInjection && o.GetCustomAttribute<DIAttribute>() == null)
+                    if (!isAgressiveInjection && o.HasAttribute<DIAttribute>() == false)
                     {
                         return false;
                     }
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
+#if DEBUG
                     if (!isAgressiveInjection && o.CanWrite == false) { Throw.PropertyIsCantWrite(o); }
 #endif
-                    return o.CanWrite == false;
+                    return o.CanWrite;
                 })
                 .Select(o => new InjectedProperty(o)));
-            result.AddRange(type.GetMethods(bindingFlags)
+
+            result.AddRange(type.GetMethods(REFL_FLAGS)
                 .Where(o =>
                 {
-                    if (!isAgressiveInjection && o.GetCustomAttribute<DIAttribute>() == null)
+                    if (!isAgressiveInjection && o.HasAttribute<DIAttribute>() == false)
                     {
                         return false;
                     }
                     var parameters = o.GetParameters();
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
                     if (!isAgressiveInjection)
                     {
+#if DEBUG
                         if (o.IsGenericMethod) { Throw.MethodIsGeneric(o); }
                         if (parameters.Length != 1) { Throw.MethodArgumentsGreater1(o); }
-                    }
 #endif
+                    }
                     return o.IsGenericMethod == false && parameters.Length == 1;
                 })
                 .Select(o => new InjectedMethod(o)));
+
             if (type.BaseType != null)
             {
-                Do(type.BaseType, result, isAgressiveInjection);
+                GetAllPropertiesFor(type.BaseType, isAgressiveInjection, result);
             }
         }
 
-        private static List<IInjectedProperty> GetAllPropertiesFor(Type type, bool isAgressiveInjection)
-        {
-            List<IInjectedProperty> result = new List<IInjectedProperty>();
-            Do(type, result, isAgressiveInjection);
-            return result;
-        }
+        private Type[] _relatedTypesBuffer;
         public void Inject(Type fieldType, object obj)
         {
-            if (!_isPreInitInjectionComplete)
+            if (_isPreInitInjectionComplete == false)
             {
                 _notInjected.Remove(fieldType);
             }
-
-            if (_systemProperties.TryGetValue(fieldType, out List<InjectedPropertyRecord> list))
+            if (_relatedTypesBuffer == null || _relatedTypesBuffer.Length < _injectedTypeToPropertiesMap.Count)
             {
-                string name = string.Empty;
-                if(obj is INamedMember named)
+                _relatedTypesBuffer = new Type[_injectedTypeToPropertiesMap.Count];
+            }
+            int relatedTypesCount = 0;
+            foreach (var pair in _injectedTypeToPropertiesMap)
+            {
+                if (pair.Key == fieldType || pair.Key.IsAssignableFrom(fieldType))
                 {
-                    name = named.Name;
+                    _relatedTypesBuffer[relatedTypesCount++] = pair.Key;
                 }
-                foreach (var item in list)
+            }
+
+            foreach (var type in new ReadOnlySpan<Type>(_relatedTypesBuffer, 0, relatedTypesCount))
+            {
+                if (_injectedTypeToPropertiesMap.TryGetValue(type, out List<InjectedPropertyRecord> list))
                 {
-                    string propertyName = item.Attribute.NamedInjection;
-                    if (string.IsNullOrEmpty(propertyName) || propertyName == name)
+                    string name = string.Empty;
+                    if (obj is INamedMember named)
                     {
-                        item.property.Inject(item.target, obj);
+                        name = named.Name;
+                    }
+                    foreach (var item in list)
+                    {
+                        string propertyName = item.Attribute.NamedInjection;
+                        if (string.IsNullOrEmpty(propertyName) || propertyName == name)
+                        {
+                            item.property.Inject(item.target, obj);
+                        }
                     }
                 }
             }
 
-
-
-            Type baseType = fieldType.BaseType;
-            if (baseType != null)
-            {
-                Inject(baseType, obj);
-            }
         }
 
         public void InjectDummy()
@@ -133,7 +147,7 @@ namespace DCFApixels.DragonECS
             _isDummyInjected = true;
             foreach (var notInjectedItem in _notInjected)
             {
-                foreach (var systemRecord in _systemProperties[notInjectedItem])
+                foreach (var systemRecord in _injectedTypeToPropertiesMap[notInjectedItem])
                 {
                     if (systemRecord.Attribute.NotNullDummyType == null)
                         continue;
@@ -157,7 +171,7 @@ namespace DCFApixels.DragonECS
 #if DEBUG   
             foreach (var item in _notInjected)
             {
-                foreach (var systemRecord in _systemProperties[item])
+                foreach (var systemRecord in _injectedTypeToPropertiesMap[item])
                 {
                     EcsDebug.PrintWarning($"in system {EcsDebugUtility.GetGenericTypeFullName(systemRecord.target.GetType(), 1)} is missing an injection of {EcsDebugUtility.GetGenericTypeFullName(item, 1)}.");
                 }
@@ -187,14 +201,32 @@ namespace DCFApixels.DragonECS
     [MetaColor(MetaColor.Gray)]
     [MetaGroup(EcsAutoInjectionsConsts.PACK_GROUP, EcsConsts.DI_GROUP)]
     [MetaDescription(EcsConsts.AUTHOR, "The system responsible for the processing of automatic injections. The .AutoInject() method adds an AutoInjectSystem to the systems pipelines.")]
-    public class AutoInjectSystem : IEcsInject<object>, IEcsPipelineMember, IOnInitInjectionComplete
+    public class AutoInjectSystem : IEcsInject<object>, IEcsPipelineMember, IOnInitInjectionComplete, IEcsDefaultAddParams
     {
+        public AddParams AddParams => new AddParams(layerName: EcsConsts.PRE_BEGIN_LAYER, isUnique: true);
+
         private EcsPipeline _pipeline;
-        EcsPipeline IEcsPipelineMember.Pipeline { get => _pipeline; set => _pipeline = value; }
         private List<object> _delayedInjects = new List<object>();
         private AutoInjectionMap _autoInjectionMap;
         private bool _isInitInjectionCompleted;
         private bool _isAgressiveInjection;
+
+        static AutoInjectSystem()
+        {
+            EcsAspect.OnInit -= EcsAspect_OnInit;
+            EcsAspect.OnInit += EcsAspect_OnInit;
+            EcsAspect.OnAfterInit -= EcsAspect_OnBuild;
+            EcsAspect.OnAfterInit += EcsAspect_OnBuild;
+        }
+
+        private static void EcsAspect_OnInit(object aspect, EcsAspect.Builder builder)
+        {
+            EcsAspectAutoHelper.FillFields(aspect, builder);
+        }
+        private static void EcsAspect_OnBuild(object aspect, EcsMask mask)
+        {
+            EcsAspectAutoHelper.FillMaskFields(aspect, mask);
+        }
 
         public AutoInjectSystem(bool isAgressiveInjection = false)
         {
@@ -213,6 +245,7 @@ namespace DCFApixels.DragonECS
             }
         }
 
+        public void OnBeforeInitInjection() { }
         public void OnInitInjectionComplete()
         {
             _autoInjectionMap = new AutoInjectionMap(_pipeline, _isAgressiveInjection);
@@ -229,6 +262,8 @@ namespace DCFApixels.DragonECS
             _delayedInjects = null;
             GC.Collect(0);
         }
+
+        EcsPipeline IEcsPipelineMember.Pipeline { get => _pipeline; set => _pipeline = value; }
     }
 
     #region Utils

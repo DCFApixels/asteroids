@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Internal;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Internal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,39 +13,39 @@ namespace DCFApixels.DragonECS
     using static EcsConsts;
     public readonly struct EcsProfilerMarker
     {
-#if ((DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER)
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
         public readonly int id;
 #endif
         internal EcsProfilerMarker(int id)
         {
-#if ((DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER)
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             this.id = id;
 #endif
         }
         public EcsProfilerMarker(string name)
         {
-#if ((DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER)
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             id = DebugService.CurrentThreadInstance.RegisterMark(name);
 #endif
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin()
         {
-#if ((DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER)
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             DebugService.CurrentThreadInstance.ProfilerMarkBegin(id);
 #endif
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void End()
         {
-#if ((DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER)
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             DebugService.CurrentThreadInstance.ProfilerMarkEnd(id);
 #endif
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public AutoScope Auto()
         {
-#if ((DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER)
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             return new AutoScope(id);
 #else
             return default;
@@ -50,13 +53,13 @@ namespace DCFApixels.DragonECS
         }
         public readonly ref struct AutoScope
         {
-#if ((DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER)
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             private readonly int _id;
 #endif
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public AutoScope(int id)
             {
-#if ((DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER)
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
                 _id = id;
                 DebugService.CurrentThreadInstance.ProfilerMarkBegin(id);
 #endif
@@ -64,7 +67,7 @@ namespace DCFApixels.DragonECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Dispose()
             {
-#if ((DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER)
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
                 DebugService.CurrentThreadInstance.ProfilerMarkEnd(_id);
 #endif
             }
@@ -76,7 +79,7 @@ namespace DCFApixels.DragonECS
     [MetaColor(MetaColor.DragonRose)]
     [MetaGroup(PACK_GROUP, DEBUG_GROUP)]
     [MetaDescription(AUTHOR, "Debugging utility. To modify or change the behavior, create a new class inherited from DebugService and set this service using DebugService.Set<T>().")]
-    [MetaID("10A4587C92013B55820D8604D718A1C3")]
+    [MetaID("DragonECS_10A4587C92013B55820D8604D718A1C3")]
     public static class EcsDebug
     {
         public static void Set<T>() where T : DebugService, new()
@@ -88,58 +91,79 @@ namespace DCFApixels.DragonECS
             DebugService.Set(service);
         }
 
+#if UNITY_2021_3_OR_NEWER
+        [UnityEngine.HideInCallstack]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PrintWarning(object v)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             OnPrint(DEBUG_WARNING_TAG, v);
             DebugService.CurrentThreadInstance.PrintWarning(v);
 #endif
         }
+#if UNITY_2021_3_OR_NEWER
+        [UnityEngine.HideInCallstack]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PrintError(object v)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             OnPrint(DEBUG_ERROR_TAG, v);
             DebugService.CurrentThreadInstance.PrintError(v);
 #endif
         }
+#if UNITY_2021_3_OR_NEWER
+        [UnityEngine.HideInCallstack]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PrintErrorAndBreak(object v)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             OnPrint(DEBUG_ERROR_TAG, v);
             DebugService.CurrentThreadInstance.PrintErrorAndBreak(v);
 #endif
         }
+#if UNITY_2021_3_OR_NEWER
+        [UnityEngine.HideInCallstack]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PrintPass(object v)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             OnPrint(DEBUG_PASS_TAG, v);
             DebugService.CurrentThreadInstance.PrintPass(v);
 #endif
         }
+#if UNITY_2021_3_OR_NEWER
+        [UnityEngine.HideInCallstack]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Print()
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             OnPrint(string.Empty, null);
             DebugService.CurrentThreadInstance.Print();
 #endif
         }
+#if UNITY_2021_3_OR_NEWER
+        [UnityEngine.HideInCallstack]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Print(object v)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             OnPrint(string.Empty, v);
             DebugService.CurrentThreadInstance.Print(v);
 #endif
         }
+#if UNITY_2021_3_OR_NEWER
+        [UnityEngine.HideInCallstack]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Print(string tag, object v)
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             OnPrint(tag, v);
             DebugService.CurrentThreadInstance.Print(tag, v);
 #endif
@@ -147,7 +171,7 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Break()
         {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_DEBUGGER
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
             DebugService.CurrentThreadInstance.Break();
 #endif
         }
@@ -204,7 +228,7 @@ namespace DCFApixels.DragonECS
         }
         #endregion
 
-        #region Constructors
+        #region Static Constructor
         static DebugService()
         {
             Set(new DefaultDebugService());
@@ -238,15 +262,17 @@ namespace DCFApixels.DragonECS
                     {
                         service.OnNewProfilerMark(record.Value, record.Key);
                     }
-                    service.OnServiceSetup(oldService);
+                    oldService?.OnDisableBaseService(service);
+                    service.OnEnableBaseService(oldService);
                     OnServiceChanged(service);
                 }
             }
         }
         #endregion
 
-        #region OnServiceSetup/CreateThreadInstance
-        protected virtual void OnServiceSetup(DebugService oldService) { }
+        #region OnEnable/OnDisable/CreateThreadInstance
+        protected virtual void OnEnableBaseService(DebugService prevService) { }
+        protected virtual void OnDisableBaseService(DebugService nextService) { }
         protected abstract DebugService CreateThreadInstance();
         #endregion
 
@@ -325,9 +351,11 @@ namespace DCFApixels.DragonECS
         }
         #endregion
 
-        public static OnServiceChangedHandler OnServiceChanged = delegate { };
+        #region Events
+        public static event OnServiceChangedHandler OnServiceChanged = delegate { };
 
         public delegate void OnServiceChangedHandler(DebugService service);
+        #endregion
     }
     public static class DebugServiceExtensions
     {

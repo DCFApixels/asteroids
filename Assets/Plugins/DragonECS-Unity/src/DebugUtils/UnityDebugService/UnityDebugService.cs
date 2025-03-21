@@ -1,5 +1,8 @@
-﻿using System;
+﻿using DCFApixels.DragonECS.Unity.Internal;
+using System;
+using System.Reflection;
 using Unity.Profiling;
+using UnityEditor;
 using UnityEngine;
 
 #region [InitializeOnLoad]
@@ -12,20 +15,19 @@ namespace DCFApixels.DragonECS
 }
 #endif
 #endregion
-
 namespace DCFApixels.DragonECS
 {
     // Методы юнитевского Debug и ProfilerMarker потоко безопасны
     public partial class UnityDebugService : DebugService
     {
         private ProfilerMarker[] _profilerMarkers = new ProfilerMarker[64];
-
         static UnityDebugService()
         {
             Activate();
         }
         public static void Activate()
         {
+            if (Instance.GetType() == typeof(UnityDebugService)) { return; }
             Set<UnityDebugService>();
         }
 
@@ -33,6 +35,9 @@ namespace DCFApixels.DragonECS
         {
             return new UnityDebugService();
         }
+#if UNITY_2021_3_OR_NEWER
+        [HideInCallstack]
+#endif
         public override void Print(string tag, object v)
         {
             if (v is Exception e)
@@ -40,8 +45,37 @@ namespace DCFApixels.DragonECS
                 Debug.LogException(e);
                 return;
             }
-            string msg = AutoConvertObjectToString(v);
             bool hasTag = string.IsNullOrEmpty(tag) == false;
+            string msg = AutoConvertObjectToString(v);
+
+#if DRAGONECS_ENABLE_UNITY_CONSOLE_SHORTCUT_LINKS
+            string indexedLink = UnityDebugServiceStorage.NewIndexedLink();
+            if (hasTag)
+            {
+                string taglower = tag.ToLower();
+                switch (taglower)
+                {
+                    case "pass":
+                        Debug.Log(
+                            $"{indexedLink}[<color=#00ff00>{tag}</color>] {msg}");
+                        break;
+                    case "warning":
+                        Debug.LogWarning(
+                            $"{indexedLink}[<color=#ffff00>{tag}</color>] {msg}");
+                        break;
+                    case "error":
+                        Debug.LogError(
+                            $"{indexedLink}[<color=#ff4028>{tag}</color>] {msg}");
+                        break;
+                    default:
+                        Debug.Log(
+                            $"{indexedLink}[{tag}] {msg}");
+                        break;
+                }
+                return;
+            }
+            Debug.Log($"{indexedLink}{msg}");
+#else
             if (hasTag)
             {
                 string taglower = tag.ToLower();
@@ -66,7 +100,8 @@ namespace DCFApixels.DragonECS
                 }
                 return;
             }
-            Debug.Log(v);
+            Debug.Log($"{msg}");
+#endif
         }
         public override void Break()
         {

@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Internal;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Internal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -24,7 +27,7 @@ namespace DCFApixels.DragonECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _worldID == 0; }
         }
-        public int WorldID
+        public short WorldID
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _worldID; }
@@ -42,6 +45,11 @@ namespace DCFApixels.DragonECS
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return new EcsLongsSpan(this); }
+        }
+        public bool IsSourceEntities
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return this == EcsWorld.GetWorld(_worldID).GetCurrentEntities_Internal(); }
         }
 #if ENABLE_IL2CPP
         [Il2CppSetOption(Option.ArrayBoundsChecks, true)]
@@ -89,7 +97,7 @@ namespace DCFApixels.DragonECS
         {
             if (dynamicBuffer.Length < _values.Length)
             {
-                Array.Resize(ref dynamicBuffer, ArrayUtility.NormalizeSizeToPowerOfTwo(_values.Length));
+                Array.Resize(ref dynamicBuffer, ArrayUtility.NextPow2(_values.Length));
             }
             int i = 0;
             foreach (var e in this)
@@ -180,7 +188,7 @@ namespace DCFApixels.DragonECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _source.IsNull; }
         }
-        public int WorldID
+        public short WorldID
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _source.WorldID; }
@@ -193,6 +201,11 @@ namespace DCFApixels.DragonECS
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _source.Count; }
+        }
+        public bool IsSourceEntities
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _source.IsSourceEntities; }
         }
 #if ENABLE_IL2CPP
         [Il2CppSetOption(Option.ArrayBoundsChecks, true)]
@@ -233,7 +246,7 @@ namespace DCFApixels.DragonECS
         {
             if (dynamicBuffer.Length < _source.Count)
             {
-                Array.Resize(ref dynamicBuffer, ArrayUtility.NormalizeSizeToPowerOfTwo(_source.Count));
+                Array.Resize(ref dynamicBuffer, ArrayUtility.NextPow2(_source.Count));
             }
             int i = 0;
             foreach (var e in this)

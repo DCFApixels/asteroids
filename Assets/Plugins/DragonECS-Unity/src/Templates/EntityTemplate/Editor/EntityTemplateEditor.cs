@@ -1,9 +1,7 @@
 ﻿#if UNITY_EDITOR
 using DCFApixels.DragonECS.Unity.Internal;
 using DCFApixels.DragonECS.Unity.RefRepairer.Editors;
-using System;
 using UnityEditor;
-using UnityEditor.Graphs;
 using UnityEditorInternal;
 using UnityEngine;
 
@@ -17,6 +15,8 @@ namespace DCFApixels.DragonECS.Unity.Editors
 
         private SerializedProperty _componentsProp;
         private ReorderableList _reorderableComponentsList;
+
+        protected abstract bool IsSO { get; }
 
         //public virtual bool IsStaticData { get { return false; } }
 
@@ -163,6 +163,11 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 return;
             }
 
+            if (IsSO)
+            {
+                EcsGUI.Layout.ManuallySerializeButton(target);
+            }
+
             if (IsMultipleTargets == false && SerializationUtility.HasManagedReferencesWithMissingTypes(target))
             {
                 using (EcsGUI.Layout.BeginHorizontal(EditorStyles.helpBox))
@@ -179,7 +184,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 }
             }
 
-            using (EcsGUI.Layout.BeginVertical(UnityEditorUtility.GetStyle(Color.black, 0.2f)))
+            using (EcsGUI.Layout.BeginVertical(UnityEditorUtility.GetTransperentBlackBackgrounStyle()))
             {
                 DrawTop(Target, _componentsProp);
                 _reorderableComponentsList.DoLayoutList();
@@ -208,11 +213,13 @@ namespace DCFApixels.DragonECS.Unity.Editors
     internal class ScriptableEntityTemplateEditor : EntityTemplateEditorBase
     {
         //public override bool IsStaticData { get { return true; } }
+        protected override bool IsSO => true;
     }
     [CustomEditor(typeof(MonoEntityTemplate), true)]
     internal class MonoEntityTemplateEditor : EntityTemplateEditorBase
     {
         //public override bool IsStaticData { get { return false; } }
+        protected override bool IsSO => false;
     }
 }
 #endif    

@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Internal;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Internal;
 using DCFApixels.DragonECS.RunnersCore;
 using System;
 using System.Collections;
@@ -14,7 +17,7 @@ namespace DCFApixels.DragonECS
     [MetaColor(MetaColor.DragonRose)]
     [MetaGroup(PACK_GROUP, OTHER_GROUP)]
     [MetaDescription(AUTHOR, "...")]
-    [MetaID("FC38597C9201C15D1A14D133237BD67F")]
+    [MetaID("DragonECS_FC38597C9201C15D1A14D133237BD67F")]
     public interface IEcsDefaultAddParams
     {
         AddParams AddParams { get; }
@@ -214,7 +217,7 @@ namespace DCFApixels.DragonECS
                 {
                     case IEcsProcess system: return AddSystem_Internal(system, settedAddParams);
                     case IEcsModule module: return AddModule_Internal(module, settedAddParams);
-                    default: Throw.ArgumentException("Unsupported type"); return this;
+                    default: Throw.ArgumentException($"{raw.GetMeta().TypeName} Unsupported type"); return this;
                 }
             }
             #endregion
@@ -298,13 +301,13 @@ namespace DCFApixels.DragonECS
             #endregion
 
             #region Build
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-            private static EcsProfilerMarker _buildBarker = new EcsProfilerMarker("EcsPipeline.Build");
+#if DEBUG
+            private static EcsProfilerMarker _buildMarker = new EcsProfilerMarker("EcsPipeline.Build");
 #endif
             public EcsPipeline Build()
             {
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-                _buildBarker.Begin();
+#if DEBUG
+                _buildMarker.Begin();
 #endif
                 var it = new LinkedListIterator<SystemNode>(_systemNodes, _systemNodesCount, _startIndex);
 
@@ -369,8 +372,8 @@ namespace DCFApixels.DragonECS
                 {
                     item.Declare(pipeline);
                 }
-#if (DEBUG && !DISABLE_DEBUG) || ENABLE_DRAGONECS_ASSERT_CHEKS
-                _buildBarker.End();
+#if DEBUG
+                _buildMarker.End();
 #endif
                 return pipeline;
             }

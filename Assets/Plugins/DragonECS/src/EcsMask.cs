@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Core;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Core;
 using DCFApixels.DragonECS.Internal;
 using System;
 using System.Collections.Generic;
@@ -162,6 +165,10 @@ namespace DCFApixels.DragonECS
         public static EcsMask FromStatic(EcsWorld world, EcsStaticMask abstractMask)
         {
             return world.Get<WorldMaskComponent>().ConvertFromStatic(abstractMask);
+        }
+        public EcsStaticMask ToStatic()
+        {
+            return _staticMask;
         }
         EcsMask IComponentMask.ToMask(EcsWorld world) { return this; }
         public EcsMaskIterator GetIterator()
@@ -354,7 +361,7 @@ namespace DCFApixels.DragonECS
         #region Debug utils
         private static string CreateLogString(short worldID, int[] inc, int[] exc)
         {
-#if (DEBUG && !DISABLE_DEBUG)
+#if DEBUG
             string converter(int o) { return EcsDebugUtility.GetGenericTypeName(EcsWorld.GetWorld(worldID).AllPools[o].ComponentType, 1); }
             return $"Inc({string.Join(", ", inc.Select(converter))}) Exc({string.Join(", ", exc.Select(converter))})";
 #else
@@ -440,9 +447,10 @@ namespace DCFApixels.DragonECS
 
         public readonly int chunkIndex;
         public readonly int mask;
-        public EcsMaskChunck(int chankIndex, int mask)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public EcsMaskChunck(int chunkIndex, int mask)
         {
-            this.chunkIndex = chankIndex;
+            this.chunkIndex = chunkIndex;
             this.mask = mask;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -480,7 +488,7 @@ namespace DCFApixels.DragonECS
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
 #endif
-    public class EcsMaskIterator
+    public class EcsMaskIterator : IDisposable
     {
         // TODO есть идея перенести эти ChunckBuffer-ы в стек,
         // для этого нужно проработать дизайн так чтобы память в стеке выделялась за пределами итератора и GetEnumerator,
@@ -497,7 +505,10 @@ namespace DCFApixels.DragonECS
         /// <summary> slised _sortIncChunckBuffer </summary>
         private readonly UnsafeArray<EcsMaskChunck> _sortExcChunckBuffer;
 
+        private readonly bool _isSingleIncPoolWithEntityStorage;
+        private readonly bool _isHasAnyEntityStorage;
         private readonly MaskType _maskType;
+
         private enum MaskType : byte
         {
             Empty,
@@ -510,11 +521,6 @@ namespace DCFApixels.DragonECS
         {
             World = source;
             Mask = mask;
-
-            //_sortIncBuffer = UnsafeArray<int>.FromArray(mask._incs);
-            //_sortExcBuffer = UnsafeArray<int>.FromArray(mask._excs);
-            //_sortIncChunckBuffer = UnsafeArray<EcsMaskChunck>.FromArray(mask._incChunckMasks);
-            //_sortExcChunckBuffer = UnsafeArray<EcsMaskChunck>.FromArray(mask._excChunckMasks);
 
             var sortBuffer = new UnsafeArray<int>(mask._incs.Length + mask._excs.Length);
             var sortChunckBuffer = new UnsafeArray<EcsMaskChunck>(mask._incChunckMasks.Length + mask._excChunckMasks.Length);
@@ -529,6 +535,16 @@ namespace DCFApixels.DragonECS
             _sortExcChunckBuffer = sortChunckBuffer.Slice(mask._incChunckMasks.Length, mask._excChunckMasks.Length);
             _sortExcChunckBuffer.CopyFromArray_Unchecked(mask._excChunckMasks);
 
+            _isHasAnyEntityStorage = false;
+            var pools = source.AllPools;
+            for (int i = 0; i < _sortIncBuffer.Length; i++)
+            {
+                var pool = pools[_sortIncBuffer.ptr[i]];
+                _isHasAnyEntityStorage |= pool is IEntityStorage;
+                if (_isHasAnyEntityStorage) { break; }
+            }
+
+            _isSingleIncPoolWithEntityStorage = Mask.Excs.Length <= 0 && Mask.Incs.Length == 1;
             if (_sortExcBuffer.Length <= 0)
             {
                 _maskType = mask.IsEmpty ? MaskType.Empty : MaskType.OnlyInc;
@@ -540,6 +556,15 @@ namespace DCFApixels.DragonECS
         }
         unsafe ~EcsMaskIterator()
         {
+            Cleanup(false);
+        }
+        public void Dispose()
+        {
+            Cleanup(true);
+            GC.SuppressFinalize(this);
+        }
+        private void Cleanup(bool disposing)
+        {
             _sortIncBuffer.ReadonlyDispose();
             //_sortExcBuffer.ReadonlyDispose();// использует общую памяять с _sortIncBuffer;
             _sortIncChunckBuffer.ReadonlyDispose();
@@ -547,7 +572,7 @@ namespace DCFApixels.DragonECS
         }
         #endregion
 
-        #region SortConstraints
+        #region SortConstraints/TryFindEntityStorage
         private unsafe int SortConstraints_Internal()
         {
             UnsafeArray<int> sortIncBuffer = _sortIncBuffer;
@@ -593,12 +618,30 @@ namespace DCFApixels.DragonECS
             // Выражение мало IncCount < (AllEntitesCount - ExcCount) вероятно будет истинным.
             // ExcCount = максимальное количество ентитей с исключеющим ограничением и IncCount = минимальоне количество ентитей с включающим ограничением
             // Поэтому исключающее ограничение игнорируется для maxEntites.
-
             return maxEntites;
+        }
+        private unsafe bool TryFindEntityStorage(out IEntityStorage storage)
+        {
+            if (_isHasAnyEntityStorage)
+            {
+                var pools = World.AllPools;
+                for (int i = 0; i < _sortIncBuffer.Length; i++)
+                {
+                    var pool = pools[_sortIncBuffer.ptr[i]];
+                    storage = pool as IEntityStorage;
+                    if (storage != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+            storage = null;
+            return false;
         }
         #endregion
 
         #region IterateTo
+        //TODO Перемеиноваться в CacheTo
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IterateTo(EcsSpan source, EcsGroup group)
         {
@@ -692,7 +735,6 @@ namespace DCFApixels.DragonECS
             #endregion
 
             #region Enumerator
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Enumerator GetEnumerator()
             {
                 if (_iterator.Mask.IsBroken)
@@ -704,7 +746,14 @@ namespace DCFApixels.DragonECS
                 {
                     return new Enumerator(_span.Slice(0, 0), _iterator);
                 }
-                return new Enumerator(_span, _iterator);
+                if (_iterator.TryFindEntityStorage(out IEntityStorage storage))
+                {
+                    return new Enumerator(storage.ToSpan(), _iterator);
+                }
+                else
+                {
+                    return new Enumerator(_span, _iterator);
+                }
             }
 
 #if ENABLE_IL2CPP
@@ -771,6 +820,7 @@ namespace DCFApixels.DragonECS
         #region Iterate/Enumerable OnlyInc
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public OnlyIncEnumerable IterateOnlyInc(EcsSpan span) { return new OnlyIncEnumerable(this, span); }
+
 #if ENABLE_IL2CPP
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -825,7 +875,6 @@ namespace DCFApixels.DragonECS
             #endregion
 
             #region Enumerator
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Enumerator GetEnumerator()
             {
                 if (_iterator.Mask.IsBroken)
@@ -837,7 +886,14 @@ namespace DCFApixels.DragonECS
                 {
                     return new Enumerator(_span.Slice(0, 0), _iterator);
                 }
-                return new Enumerator(_span, _iterator);
+                if (_iterator.TryFindEntityStorage(out IEntityStorage storage))
+                {
+                    return new Enumerator(storage.ToSpan(), _iterator);
+                }
+                else
+                {
+                    return new Enumerator(_span, _iterator);
+                }
             }
 
 #if ENABLE_IL2CPP

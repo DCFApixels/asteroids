@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+using DCFApixels.DragonECS.Unity.Internal;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
@@ -7,8 +8,11 @@ namespace DCFApixels.DragonECS.Unity.Editors
 {
     internal class MonoScriptsAssetProcessor : AssetPostprocessor
     {
-        private static long _version;
-        public static long Version { get { return _version; } }
+        private static long _timeTicks;
+        public static long Version
+        {
+            get { return _timeTicks; }
+        }
         private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
         {
             _removedScriptGuids.Clear();
@@ -25,10 +29,13 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 RemoveAssetPath(str);
             }
 
+            for (int i = 0; i < movedFromAssetPaths.Length; i++)
+            {
+                RemoveAssetPath(movedFromAssetPaths[i]);
+            }
             for (int i = 0; i < movedAssets.Length; i++)
             {
                 //Debug.Log("Moved Asset: " + movedAssets[i] + " from: " + movedFromAssetPaths[i]);
-                RemoveAssetPath(movedFromAssetPaths[i]);
                 ProcessAssetPath(movedAssets[i]);
             }
 
@@ -38,17 +45,17 @@ namespace DCFApixels.DragonECS.Unity.Editors
             //}
 
 
-            _version = DateTime.Now.Ticks;
+            _timeTicks = DateTime.Now.Ticks;
         }
 
 
         private static List<string> _removedScriptGuids = new List<string>();
         private static List<string> _newScriptIDs = new List<string>();
-        public static IReadOnlyCollection<string> RemovedScriptPaths
+        public static ReadOnlyList<string> RemovedScriptPaths
         {
             get { return _removedScriptGuids; }
         }
-        public static IReadOnlyCollection<string> NewScriptPaths
+        public static ReadOnlyList<string> NewScriptPaths
         {
             get { return _newScriptIDs; }
         }
@@ -71,6 +78,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
 
         private static bool IsScript(string filePath)
         {
+            if (filePath.Length <= 3) { return false; }
             int i = filePath.Length - 3;
             return filePath[i++] == '.'
                 && filePath[i++] == 'c'

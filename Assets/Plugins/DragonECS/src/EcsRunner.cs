@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Internal;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Internal;
 using DCFApixels.DragonECS.RunnersCore;
 using System;
 using System.Linq;
@@ -11,11 +14,12 @@ namespace DCFApixels.DragonECS
     [MetaGroup(EcsConsts.PACK_GROUP, EcsConsts.OTHER_GROUP)]
     [MetaDescription(EcsConsts.AUTHOR, "...")]
     [MetaTags(MetaTags.HIDDEN)]
-    [MetaID("EF8A557C9201E6F04D4A76DC670BDE19")]
+    [MetaID("DragonECS_EF8A557C9201E6F04D4A76DC670BDE19")]
     public interface IEcsProcess : IEcsMember { }
 
     namespace RunnersCore
     {
+        //добавить инъекцию в раннеры
         public abstract class EcsRunner
         {
             internal abstract void Init_Internal(EcsPipeline source);
@@ -23,7 +27,7 @@ namespace DCFApixels.DragonECS
             #region CheckRunnerValide
             public static void CheckRunnerTypeIsValide(Type runnerType, Type processInterfaceType)
             {
-                #region DEBUG
+#if DEBUG
 #pragma warning disable IL2070 // 'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The parameter of method does not have matching annotations.
                 Type targetInterface = processInterfaceType;
                 if (runnerType.IsAbstract || runnerType.IsInterface)
@@ -51,19 +55,21 @@ namespace DCFApixels.DragonECS
 
                 if (!runnerType.GetInterfaces().Any(o => o == targetInterface))
                 {
-                    throw new EcsRunnerImplementationException($"Runner {GetGenericTypeFullName(runnerType, 1)} does not implement interface {GetGenericTypeFullName(baseTypeArgument, 1)}.");
+                    throw new ImplementationException($"Runner {GetGenericTypeFullName(runnerType, 1)} does not implement interface {GetGenericTypeFullName(baseTypeArgument, 1)}.");
                 }
 #pragma warning restore IL2070 // 'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The parameter of method does not have matching annotations.
-                #endregion
+#endif
             }
             #endregion
+
+            public delegate void ActionWithData<in TProcess, T>(TProcess process, ref T Data);
         }
 
         [MetaColor(MetaColor.DragonRose)]
         [MetaGroup(EcsConsts.PACK_GROUP, EcsConsts.OTHER_GROUP)]
         [MetaDescription(EcsConsts.AUTHOR, "...")]
         [MetaTags(MetaTags.HIDDEN)]
-        [MetaID("E49B557C92010E46DF1602972BC988BC")]
+        [MetaID("DragonECS_E49B557C92010E46DF1602972BC988BC")]
         public interface IEcsRunner : IEcsProcess
         {
             EcsPipeline Pipeline { get; }
@@ -71,12 +77,14 @@ namespace DCFApixels.DragonECS
             EcsProcessRaw ProcessRaw { get; }
             bool IsEmpty { get; }
         }
+
+        //TODO инъекция в раннеры
         //TODO добавить функцию фильтрации систем по string, за счет создания отдельных ранеров для отдельных string
         [MetaColor(MetaColor.DragonRose)]
         [MetaGroup(EcsConsts.PACK_GROUP, EcsConsts.OTHER_GROUP)]
         [MetaDescription(EcsConsts.AUTHOR, "...")]
         [MetaTags(MetaTags.HIDDEN)]
-        [MetaID("7DB3557C9201F85E0E1C17D7B19D9CEE")]
+        [MetaID("DragonECS_7DB3557C9201F85E0E1C17D7B19D9CEE")]
         public abstract class EcsRunner<TProcess> : EcsRunner, IEcsRunner, IEcsProcess
             where TProcess : IEcsProcess
         {
@@ -123,11 +131,17 @@ namespace DCFApixels.DragonECS
             protected virtual void OnSetup() { }
             #endregion
 
-            #region Simple
-            public struct RunHelper
+
+            #region RunHelper
+#if DEBUG
+            public
+#else
+            public readonly
+#endif
+                struct RunHelper
             {
                 private readonly EcsProcess<TProcess> _process;
-#if DEBUG && !DISABLE_DEBUG
+#if DEBUG
                 private Delegate _cacheCheck;
                 private bool _cacheCheckInit;
                 private readonly EcsProfilerMarker[] _markers;
@@ -135,7 +149,7 @@ namespace DCFApixels.DragonECS
 
                 #region Constructors
                 public RunHelper(EcsRunner<TProcess> runner) : this(runner,
-#if DEBUG && !DISABLE_DEBUG
+#if DEBUG
                     typeof(TProcess).ToMeta().Name)
 #else
                     string.Empty)
@@ -145,7 +159,7 @@ namespace DCFApixels.DragonECS
                 public RunHelper(EcsRunner<TProcess> runner, string methodName)
                 {
                     _process = runner.Process;
-#if DEBUG && !DISABLE_DEBUG
+#if DEBUG
                     _cacheCheck = null;
                     _cacheCheckInit = false;
                     _markers = new EcsProfilerMarker[_process.Length];
@@ -158,7 +172,7 @@ namespace DCFApixels.DragonECS
                 #endregion
 
                 #region Utils
-#if DEBUG && !DISABLE_DEBUG
+#if DEBUG
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 private void CheckCache(Delegate d)
                 {
@@ -182,11 +196,10 @@ namespace DCFApixels.DragonECS
                 #endregion
 
                 #region Do
-#pragma warning disable CS0162 // Обнаружен недостижимый код
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public void Run(Action<TProcess> translationCallback)
                 {
-#if DEBUG && !DISABLE_DEBUG
+#if DEBUG
                     CheckCache(translationCallback);
                     for (int i = 0, n = _process.Length < _markers.Length ? _process.Length : _markers.Length; i < n; i++)
                     {
@@ -197,7 +210,7 @@ namespace DCFApixels.DragonECS
                         }
                         catch (Exception e)
                         {
-#if DISABLE_CATH_EXCEPTIONS
+#if DRAGONECS_DISABLE_CATH_EXCEPTIONS
                             throw;
 #endif
                             EcsDebug.PrintError(e);
@@ -213,30 +226,31 @@ namespace DCFApixels.DragonECS
                         }
                         catch (Exception e)
                         {
-#if DISABLE_CATH_EXCEPTIONS
-                            throw;
-#endif
+#if DRAGONECS_DISABLE_CATH_EXCEPTIONS
+                            throw e;
+#else
                             EcsDebug.PrintError(e);
+#endif
                         }
                     }
 #endif
                 }
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public void Run<T0>(Action<TProcess, T0> translationCallback, T0 t0)
+                public void Run<TData>(ActionWithData<TProcess, TData> translationCallback, ref TData data)
                 {
-#if DEBUG && !DISABLE_DEBUG
+#if DEBUG
                     CheckCache(translationCallback);
                     for (int i = 0, n = _process.Length < _markers.Length ? _process.Length : _markers.Length; i < n; i++)
                     {
                         _markers[i].Begin();
                         try
                         {
-                            translationCallback(_process[i], t0);
+                            translationCallback(_process[i], ref data);
                         }
                         catch (Exception e)
                         {
-#if DISABLE_CATH_EXCEPTIONS
+#if DRAGONECS_DISABLE_CATH_EXCEPTIONS
                             throw;
 #endif
                             EcsDebug.PrintError(e);
@@ -248,140 +262,220 @@ namespace DCFApixels.DragonECS
                     {
                         try
                         {
-                            translationCallback(item, t0);
+                            translationCallback(item, ref data);
                         }
                         catch (Exception e)
                         {
-#if DISABLE_CATH_EXCEPTIONS
-                            throw;
-#endif
-                            EcsDebug.PrintError(e);
-                        }
-                    }
-#endif
-                }
-
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public void Run<T0, T1>(Action<TProcess, T0, T1> translationCallback, T0 t0, T1 t1)
-                {
-#if DEBUG && !DISABLE_DEBUG
-                    CheckCache(translationCallback);
-                    for (int i = 0, n = _process.Length < _markers.Length ? _process.Length : _markers.Length; i < n; i++)
-                    {
-                        _markers[i].Begin();
-                        try
-                        {
-                            translationCallback(_process[i], t0, t1);
-                        }
-                        catch (Exception e)
-                        {
-#if DISABLE_CATH_EXCEPTIONS
-                            throw;
-#endif
-                            EcsDebug.PrintError(e);
-                        }
-                        _markers[i].End();
-                    }
+#if DRAGONECS_DISABLE_CATH_EXCEPTIONS
+                            throw e;
 #else
-                    foreach (var item in _process)
-                    {
-                        try
-                        {
-                            translationCallback(item, t0, t1);
-                        }
-                        catch (Exception e)
-                        {
-#if DISABLE_CATH_EXCEPTIONS
-                            throw;
-#endif
                             EcsDebug.PrintError(e);
+#endif
                         }
                     }
 #endif
                 }
-
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public void Run<T0, T1, T2>(Action<TProcess, T0, T1, T2> translationCallback, T0 t0, T1 t1, T2 t2)
-                {
-#if DEBUG && !DISABLE_DEBUG
-                    CheckCache(translationCallback);
-                    for (int i = 0, n = _process.Length < _markers.Length ? _process.Length : _markers.Length; i < n; i++)
-                    {
-                        _markers[i].Begin();
-                        try
-                        {
-                            translationCallback(_process[i], t0, t1, t2);
-                        }
-                        catch (Exception e)
-                        {
-#if DISABLE_CATH_EXCEPTIONS
-                            throw;
-#endif
-                            EcsDebug.PrintError(e);
-                        }
-                        _markers[i].End();
-                    }
-#else
-                    foreach (var item in _process)
-                    {
-                        try
-                        {
-                            translationCallback(item, t0, t1, t2);
-                        }
-                        catch (Exception e)
-                        {
-#if DISABLE_CATH_EXCEPTIONS
-                            throw;
-#endif
-                            EcsDebug.PrintError(e);
-                        }
-                    }
-#endif
-                }
-
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public void Run<T0, T1, T2, T3>(Action<TProcess, T0, T1, T2, T3> translationCallback, T0 t0, T1 t1, T2 t2, T3 t3)
-                {
-#if DEBUG && !DISABLE_DEBUG
-                    CheckCache(translationCallback);
-                    for (int i = 0, n = _process.Length < _markers.Length ? _process.Length : _markers.Length; i < n; i++)
-                    {
-                        _markers[i].Begin();
-                        try
-                        {
-                            translationCallback(_process[i], t0, t1, t2, t3);
-                        }
-                        catch (Exception e)
-                        {
-#if DISABLE_CATH_EXCEPTIONS
-                            throw;
-#endif
-                            EcsDebug.PrintError(e);
-                        }
-                        _markers[i].End();
-                    }
-#else
-                    foreach (var item in _process)
-                    {
-                        try
-                        {
-                            translationCallback(item, t0, t1, t2, t3);
-                        }
-                        catch (Exception e)
-                        {
-#if DISABLE_CATH_EXCEPTIONS
-                            throw;
-#endif
-                            EcsDebug.PrintError(e);
-                        }
-                    }
-#endif
-                }
-#pragma warning restore CS0162 // Обнаружен недостижимый код
-                //------------------------
                 #endregion
             }
             #endregion
+
+            #region RunHelperWithFinally
+#if DEBUG
+            public
+#else
+            public readonly
+#endif
+                struct RunHelperWithFinally<TProcessFinally> where TProcessFinally : class, IEcsProcess
+            {
+                private readonly Pair[] _pairs;
+#if DEBUG
+                private Delegate _cacheCheck;
+                private Delegate _cacheCheckF;
+                private bool _cacheCheckInit;
+                private readonly EcsProfilerMarker[] _markers;
+#endif
+
+                #region Constructors
+                public RunHelperWithFinally(EcsRunner<TProcess> runner) : this(runner,
+#if DEBUG
+                    typeof(TProcess).ToMeta().Name)
+#else
+                    string.Empty)
+#endif
+                { }
+
+                public RunHelperWithFinally(EcsRunner<TProcess> runner, string methodName)
+                {
+                    _pairs = new Pair[runner.Process.Length];
+                    for (int i = 0; i < runner.Process.Length; i++)
+                    {
+                        _pairs[i] = new Pair(runner.Process[i]);
+                    }
+#if DEBUG
+                    _cacheCheck = null;
+                    _cacheCheckF = null;
+                    _cacheCheckInit = false;
+                    _markers = new EcsProfilerMarker[_pairs.Length];
+                    for (int i = 0; i < _pairs.Length; i++)
+                    {
+                        _markers[i] = new EcsProfilerMarker($"{_pairs[i].run.GetMeta().Name}.{methodName}");
+                    }
+#endif
+                }
+                #endregion
+
+                #region Utils
+                private readonly struct Pair
+                {
+                    public readonly TProcess run;
+                    public readonly TProcessFinally runFinally;
+                    public Pair(TProcess run)
+                    {
+                        this.run = run;
+                        runFinally = run as TProcessFinally;
+                    }
+                }
+#if DEBUG
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                private void CheckCache(Delegate d, Delegate df)
+                {
+                    if (_cacheCheckInit == false)
+                    {
+                        if (_cacheCheck == null)
+                        {
+                            _cacheCheck = d;
+                            _cacheCheckF = df;
+                        }
+                        else
+                        {
+                            if (ReferenceEquals(_cacheCheck, d) == false || ReferenceEquals(_cacheCheckF, df) == false)
+                            {
+                                EcsDebug.PrintWarning("The delegate is not cached");
+                            }
+                            _cacheCheckInit = true;
+                        }
+                    }
+                }
+#endif
+                #endregion
+
+                #region Do
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public void Run(
+                    Action<TProcess> translationCallback,
+                    Action<TProcessFinally> translationFinnalyCallback)
+                {
+#if DEBUG
+                    CheckCache(translationCallback, translationFinnalyCallback);
+                    for (int i = 0, n = _pairs.Length < _markers.Length ? _pairs.Length : _markers.Length; i < n; i++)
+                    {
+                        var pair = _pairs[i];
+                        _markers[i].Begin();
+                        try
+                        {
+                            translationCallback(pair.run);
+                        }
+                        catch (Exception e)
+                        {
+#if DRAGONECS_DISABLE_CATH_EXCEPTIONS
+                            throw;
+#endif
+                            EcsDebug.PrintError(e);
+                        }
+                        finally
+                        {
+                            if (pair.runFinally != null)
+                            {
+                                translationFinnalyCallback(pair.runFinally);
+                            }
+                        }
+                        _markers[i].End();
+                    }
+#else
+                    foreach (var item in _pairs)
+                    {
+                        try
+                        {
+                            translationCallback(item.run);
+                        }
+                        catch (Exception e)
+                        {
+#if DRAGONECS_DISABLE_CATH_EXCEPTIONS
+                            throw e;
+#else
+                            EcsDebug.PrintError(e);
+#endif
+                        }
+                        finally
+                        {
+                            translationFinnalyCallback(item.runFinally);
+                        }
+                    }
+#endif
+                }
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public void Run<TData>(
+                    ActionWithData<TProcess, TData> translationCallback,
+                    ActionWithData<TProcessFinally, TData> translationFinnalyCallback,
+                    ref TData data)
+                {
+#if DEBUG
+                    CheckCache(translationCallback, translationFinnalyCallback);
+                    for (int i = 0, n = _pairs.Length < _markers.Length ? _pairs.Length : _markers.Length; i < n; i++)
+                    {
+                        var pair = _pairs[i];
+                        _markers[i].Begin();
+                        try
+                        {
+                            translationCallback(pair.run, ref data);
+                        }
+                        catch (Exception e)
+                        {
+#if DRAGONECS_DISABLE_CATH_EXCEPTIONS
+                            throw;
+#endif
+                            EcsDebug.PrintError(e);
+                        }
+                        finally
+                        {
+                            if (pair.runFinally != null)
+                            {
+                                translationFinnalyCallback(pair.runFinally, ref data);
+                            }
+                        }
+                        _markers[i].End();
+                    }
+#else
+                    foreach (var pair in _pairs)
+                    {
+                        try
+                        {
+                            translationCallback(pair.run, ref data);
+                        }
+                        catch (Exception e)
+                        {
+#if DRAGONECS_DISABLE_CATH_EXCEPTIONS
+                            throw e;
+#else
+                            EcsDebug.PrintError(e);
+#endif
+                        }
+                        finally
+                        {
+                            if (pair.runFinally != null)
+                            {
+                                translationFinnalyCallback(pair.runFinally, ref data);
+                            }
+                        }
+                    }
+#endif
+                }
+                #endregion
+            }
+            #endregion
+
+            //----
         }
     }
 

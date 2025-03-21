@@ -16,6 +16,20 @@ namespace DCFApixels.DragonECS.Unity.Editors
     {
         public static partial class Layout
         {
+
+            public static void ManuallySerializeButton(UnityObject obj)
+            {
+                if (GUILayout.Button(UnityEditorUtility.GetLabel("Manually serialize")))
+                {
+                    var so = new SerializedObject(obj);
+                    EditorUtility.SetDirty(obj);
+                    so.UpdateIfRequiredOrScript();
+                    so.ApplyModifiedProperties();
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
+                }
+            }
+
             public static void ScriptAssetButton(MonoScript script, params GUILayoutOption[] options)
             {
                 EcsGUI.ScriptAssetButton(GUILayoutUtility.GetRect(UnityEditorUtility.GetLabelTemp(), EditorStyles.miniButton, options), script);
@@ -91,7 +105,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
             {
                 bool isNull = world == null || world.IsDestroyed || world.ID == 0;
                 if (isNull) { return; }
-                using (BeginVertical(UnityEditorUtility.GetStyle(Color.black, 0.2f)))
+                using (BeginVertical(UnityEditorUtility.GetTransperentBlackBackgrounStyle()))
                 {
                     IsShowRuntimeComponents = EditorGUILayout.BeginFoldoutHeaderGroup(IsShowRuntimeComponents, "RUNTIME COMPONENTS", EditorStyles.foldout);
                     EditorGUILayout.EndFoldoutHeaderGroup();
@@ -127,37 +141,38 @@ namespace DCFApixels.DragonECS.Unity.Editors
                             }
 
                             Color panelColor = SelectPanelColor(meta, index, total);
-                            GUILayout.BeginVertical(UnityEditorUtility.GetStyle(panelColor, EscEditorConsts.COMPONENT_DRAWER_ALPHA));
-                            EditorGUI.BeginChangeCheck();
-
-                            ////Close button
-                            //optionButton.xMin = optionButton.xMax - HeadIconsRect.width;
-                            //if (CloseButton(optionButton))
-                            //{
-                            //    cmp.Del(worldID);
-                            //    return;
-                            //}
-
-                            //Edit script button
-                            if (ScriptsCache.TryGetScriptAsset(meta, out MonoScript script))
+                            using (BeginVertical(panelColor.SetAlpha(EscEditorConsts.COMPONENT_DRAWER_ALPHA)))
                             {
-                                optionButton = HeadIconsRect.MoveTo(optionButton.center - (Vector2.right * optionButton.width));
-                                EcsGUI.ScriptAssetButton(optionButton, script);
-                            }
-                            //Description icon
-                            if (string.IsNullOrEmpty(meta.Description.Text) == false)
-                            {
-                                optionButton = HeadIconsRect.MoveTo(optionButton.center - (Vector2.right * optionButton.width));
-                                DescriptionIcon(optionButton, meta.Description.Text);
-                            }
+                                EditorGUI.BeginChangeCheck();
 
-                            RuntimeComponentReflectionCache.FieldInfoData componentInfoData = new RuntimeComponentReflectionCache.FieldInfoData(null, componentType, meta.Name);
-                            if (DrawRuntimeData(ref componentInfoData, UnityEditorUtility.GetLabel(meta.Name), expandMatrix, data, out object resultData))
-                            {
-                                cmp.SetRaw(worldID, resultData);
-                            }
+                                ////Close button
+                                //optionButton.xMin = optionButton.xMax - HeadIconsRect.width;
+                                //if (CloseButton(optionButton))
+                                //{
+                                //    cmp.Del(worldID);
+                                //    return;
+                                //}
 
-                            GUILayout.EndVertical();
+                                //Edit script button
+                                if (ScriptsCache.TryGetScriptAsset(meta, out MonoScript script))
+                                {
+                                    optionButton = HeadIconsRect.MoveTo(optionButton.center - (Vector2.right * optionButton.width));
+                                    EcsGUI.ScriptAssetButton(optionButton, script);
+                                }
+                                //Description icon
+                                if (string.IsNullOrEmpty(meta.Description.Text) == false)
+                                {
+                                    optionButton = HeadIconsRect.MoveTo(optionButton.center - (Vector2.right * optionButton.width));
+                                    DescriptionIcon(optionButton, meta.Description.Text);
+                                }
+
+                                RuntimeComponentReflectionCache.FieldInfoData componentInfoData = new RuntimeComponentReflectionCache.FieldInfoData(null, componentType, meta.Name);
+                                if (DrawRuntimeData(ref componentInfoData, UnityEditorUtility.GetLabel(meta.Name), expandMatrix, data, out object resultData))
+                                {
+                                    cmp.SetRaw(worldID, resultData);
+                                }
+
+                            }
                         }
                     }
                 }
@@ -214,7 +229,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
             private static List<IEcsPool> _componentPoolsBuffer;
             public static void DrawRuntimeComponents(int entityID, EcsWorld world, bool isWithFoldout = true)
             {
-                using (BeginVertical(UnityEditorUtility.GetStyle(Color.black, 0.2f)))
+                using (BeginVertical(UnityEditorUtility.GetTransperentBlackBackgrounStyle()))
                 {
                     if (isWithFoldout)
                     {
@@ -228,7 +243,10 @@ namespace DCFApixels.DragonECS.Unity.Editors
                             RuntimeComponentsUtility.GetAddComponentGenericMenu(world).Open(dropDownRect, entityID);
                         }
 
-                        GUILayout.Box("", UnityEditorUtility.GetStyle(GUI.color, 0.16f), GUILayout.ExpandWidth(true));
+                        using (SetBackgroundColor(GUI.color.SetAlpha(0.16f)))
+                        {
+                            GUILayout.Box("", UnityEditorUtility.GetWhiteStyle(), GUILayout.ExpandWidth(true));
+                        }
                         IsShowHidden = EditorGUI.Toggle(GUILayoutUtility.GetLastRect(), "Show Hidden", IsShowHidden);
 
                         if (_componentPoolsBuffer == null)
@@ -270,38 +288,38 @@ namespace DCFApixels.DragonECS.Unity.Editors
                     }
 
                     Color panelColor = SelectPanelColor(meta, index, total);
-                    GUILayout.BeginVertical(UnityEditorUtility.GetStyle(panelColor, EscEditorConsts.COMPONENT_DRAWER_ALPHA));
-                    EditorGUI.BeginChangeCheck();
 
-                    //Close button
-                    optionButton.xMin = optionButton.xMax - HeadIconsRect.width;
-                    if (CloseButton(optionButton))
+                    using (BeginVertical(panelColor.SetAlpha(EscEditorConsts.COMPONENT_DRAWER_ALPHA)))
                     {
-                        pool.Del(entityID);
-                        return;
-                    }
-                    //Edit script button
-                    if (ScriptsCache.TryGetScriptAsset(meta, out MonoScript script))
-                    {
-                        optionButton = HeadIconsRect.MoveTo(optionButton.center - (Vector2.right * optionButton.width));
-                        EcsGUI.ScriptAssetButton(optionButton, script);
-                    }
-                    //Description icon
-                    if (string.IsNullOrEmpty(meta.Description.Text) == false)
-                    {
-                        optionButton = HeadIconsRect.MoveTo(optionButton.center - (Vector2.right * optionButton.width));
-                        DescriptionIcon(optionButton, meta.Description.Text);
-                    }
+                        EditorGUI.BeginChangeCheck();
 
-                    RuntimeComponentReflectionCache.FieldInfoData componentInfoData = new RuntimeComponentReflectionCache.FieldInfoData(null, componentType, meta.Name);
+                        //Close button
+                        optionButton.xMin = optionButton.xMax - HeadIconsRect.width;
+                        if (CloseButton(optionButton))
+                        {
+                            pool.Del(entityID);
+                            return;
+                        }
+                        //Edit script button
+                        if (ScriptsCache.TryGetScriptAsset(meta, out MonoScript script))
+                        {
+                            optionButton = HeadIconsRect.MoveTo(optionButton.center - (Vector2.right * optionButton.width));
+                            EcsGUI.ScriptAssetButton(optionButton, script);
+                        }
+                        //Description icon
+                        if (string.IsNullOrEmpty(meta.Description.Text) == false)
+                        {
+                            optionButton = HeadIconsRect.MoveTo(optionButton.center - (Vector2.right * optionButton.width));
+                            DescriptionIcon(optionButton, meta.Description.Text);
+                        }
 
-                    if (DrawRuntimeData(ref componentInfoData, UnityEditorUtility.GetLabel(meta.Name), expandMatrix, data, out object resultData))
-                    {
-                        pool.SetRaw(entityID, resultData);
+                        RuntimeComponentReflectionCache.FieldInfoData componentInfoData = new RuntimeComponentReflectionCache.FieldInfoData(null, componentType, meta.Name);
+
+                        if (DrawRuntimeData(ref componentInfoData, UnityEditorUtility.GetLabel(meta.Name), expandMatrix, data, out object resultData))
+                        {
+                            pool.SetRaw(entityID, resultData);
+                        }
                     }
-
-
-                    GUILayout.EndVertical();
                 }
             }
 

@@ -1,12 +1,23 @@
-﻿using DCFApixels.DragonECS.PoolsCore;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.PoolsCore;
 
 namespace DCFApixels.DragonECS
 {
     public sealed class EmptyAspect : EcsAspect { }
 
-    public sealed class SingleAspect<TPool> : EcsAspect where TPool : IEcsPoolImplementation, new()
+    public sealed class SinglePoolAspect<TPool> : EcsAspect where TPool : IEcsPoolImplementation, new()
     {
         public readonly TPool pool = B.IncludePool<TPool>();
+    }
+    public sealed class SingleTagAspect<TComponent> : EcsAspect where TComponent : struct, IEcsTagComponent
+    {
+        public readonly EcsTagPool<TComponent> pool = B.IncludePool<EcsTagPool<TComponent>>();
+    }
+    public sealed class SingleAspect<TComponent> : EcsAspect where TComponent : struct, IEcsComponent
+    {
+        public readonly EcsPool<TComponent> pool = B.IncludePool<EcsPool<TComponent>>();
     }
     public sealed class CombinedAspect<A0, A1> : EcsAspect
         where A0 : EcsAspect, new()

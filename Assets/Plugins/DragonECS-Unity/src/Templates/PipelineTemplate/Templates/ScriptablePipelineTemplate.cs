@@ -1,4 +1,7 @@
-﻿using DCFApixels.DragonECS.Unity;
+﻿#if DISABLE_DEBUG
+#undef DEBUG
+#endif
+using DCFApixels.DragonECS.Unity;
 using DCFApixels.DragonECS.Unity.Internal;
 using System;
 using System.Linq;
@@ -21,7 +24,7 @@ namespace DCFApixels.DragonECS
         private string[] _layers = DefaultLayers.ToArray();
 
         [SerializeField]
-        private AddParams _parameters;
+        private AddParams _parameters = default;
 
         [SerializeField]
         [ArrayElement]
