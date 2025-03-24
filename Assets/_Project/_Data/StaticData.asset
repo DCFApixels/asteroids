@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba97e458a25344c280a0827ee9766510, type: 3}
   m_Name: StaticData
   m_EditorClassIdentifier: 
+  PlayerStarshipTemplate: {fileID: 11400000, guid: a07793aad9fb8d64c8c9b3990441be23, type: 2}
   StarshipView: {fileID: 646751663581237465, guid: 863b4d63a5413314197562c04df1f781, type: 3}
   RotationSpeed: 360
   StarshipSpeed: 0
@@ -20,8 +21,10 @@ MonoBehaviour:
   Lifes: 3
   StarshipSpawnImmunityTime: 1
   StarshipFriction: 0.01
+  BulletTemplate: {fileID: 11400000, guid: 8957ee73d8334d548949bba0ad54d7f6, type: 2}
   BulletView: {fileID: 4782241617648703718, guid: cfda0d7cd365f48488a2261a96329186, type: 3}
   BulletSpeed: 10
+  AsteroidTemplate: {fileID: 11400000, guid: 1a284c43d739dad4e9278d5003d95887, type: 2}
   AsteroidView: {fileID: 4855989034719792431, guid: e5c34071f3d24b642ad1839a2d41ad14, type: 3}
   SpawnFrequency: 1
   SpawnAmount: 1

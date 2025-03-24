@@ -1,5 +1,6 @@
 ﻿using Asteroids.Components;
 using Asteroids.Data;
+using Asteroids.MovementFeature;
 using DCFApixels.DragonECS;
 using JetBrains.Annotations;
 
@@ -12,7 +13,7 @@ namespace Asteroids.Systems
 
         private class AsteroidAspect : EcsAspect
         {
-            public readonly EcsPool<MoveInfo> MoveInfos = Inc;
+            public readonly EcsPool<TransformData> TransformDatas = Inc;
             [UsedImplicitly]
             public readonly EcsPool<Asteroid> Asteroids = Inc;
         }
@@ -22,7 +23,7 @@ namespace Asteroids.Systems
 
             foreach (var e in _world.Where(out AsteroidAspect a))
             {
-                var position = a.MoveInfos.Get(e).Position;
+                var position = a.TransformDatas[e].position;
                 _runtimeData.AreaHash.Add(_world.GetEntityLong(e), position.x, position.z);
             }
         }

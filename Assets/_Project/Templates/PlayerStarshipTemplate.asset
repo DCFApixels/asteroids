@@ -10,28 +10,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3d2b62f9703592042befb46ac1fee09c, type: 3}
-  m_Name: PlayerShipTemplate
+  m_Name: PlayerStarshipTemplate
   m_EditorClassIdentifier: 
   _templates:
   - {fileID: 11400000, guid: c52a3ae0148d0e545b28a3f233f55d08, type: 2}
-  _components:
-  - rid: 1520753774466695191
-  - rid: 1520753776426484645
+  _componentTemplates:
+  - rid: 1520753779500646422
+  - rid: 1520753779500646423
   references:
     version: 2
     RefIds:
-    - rid: 1520753774466695191
-      type: {class: Template_50752EB99501945F2BDC43F6F3BFA134, ns: Asteroids.ControlsFeature, asm: Assembly-CSharp}
-      data:
-        component:
-          Axis: {x: 0, y: 0, z: 0}
-        _offset: 0
-    - rid: 1520753776426484645
-      type: {class: Template_89922AB99501C6637E5655E8ABB1F04A, ns: Asteroids.ShipMovementFeature, asm: Assembly-CSharp}
+    - rid: 1520753779500646422
+      type: {class: Template_89922AB99501C6637E5655E8ABB1F04A, ns: Asteroids.StarshipMovmentFeature, asm: Assembly-CSharp}
       data:
         component:
           MaxSpeed: 10
           MaxRotationSpeed: 360
           Acceleration: 10
           Power: 0
+        _offset: 0
+    - rid: 1520753779500646423
+      type: {class: Template_50752EB99501945F2BDC43F6F3BFA134, ns: Asteroids.ControlsFeature, asm: Assembly-CSharp}
+      data:
+        component:
+          Axis: {x: 0, y: 0, z: 0}
         _offset: 0

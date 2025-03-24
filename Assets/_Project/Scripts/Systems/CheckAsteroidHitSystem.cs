@@ -1,5 +1,6 @@
 using Asteroids.Components;
 using Asteroids.Data;
+using Asteroids.MovementFeature;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
 using UnityEngine;
@@ -17,17 +18,17 @@ namespace Asteroids.Systems
         {
             public readonly EcsPool<Asteroid> Asteroids = Inc;
             public readonly EcsPool<HitEvent> HitEvents = Inc;
-            public readonly EcsPool<MoveInfo> MoveInfos = Inc;
+            public readonly EcsPool<TransformData> TransformDatas = Inc;
         }
         public void Run()
         {
             foreach (var e in _world.Where(out Aspect a))
             {
-                ref var asteroid = ref a.Asteroids.Get(e);
-                ref var asteroidPosition = ref a.MoveInfos.Get(e).Position;
+                ref var asteroid = ref a.Asteroids[e];
+                ref var asteroidTransformData = ref a.TransformDatas[e];
                 
                 var explosion = _poolService.Get(_staticData.AsteroidExplosion, out var instanceID);
-                explosion.transform.position = asteroidPosition;
+                explosion.transform.position = asteroidTransformData.position;
                 explosion.Play(_poolService, instanceID);
                 
                 _runtimeData.Score++;
@@ -41,13 +42,13 @@ namespace Asteroids.Systems
                 
                 var forward = Vector3.forward;
                 
-                var hitByObjectEntLong = a.HitEvents.Get(e).ByObject;
+                var hitByObjectEntLong = a.HitEvents[e].ByObject;
                 if (hitByObjectEntLong.TryUnpack(out var hitByEntity, out short _))
                 {
-                    var hitByPosition = a.MoveInfos.Get(hitByEntity).Position;
-                    if (hitByPosition != asteroidPosition)
+                    var hitByTransformData = a.TransformDatas[hitByEntity];
+                    if (hitByTransformData.position != asteroidTransformData.position)
                     {
-                        forward = asteroidPosition - hitByPosition;
+                        forward = asteroidTransformData.position - hitByTransformData.position;
                     }
                 }
 
@@ -57,9 +58,9 @@ namespace Asteroids.Systems
                 {
                     var startForward = Quaternion.Euler(0, 90 + 180 * i, 0) * forward;
 
-                    ref var spawnAsteroid = ref spawnPool.Add(_world.NewEntity());
+                    ref var spawnAsteroid = ref spawnPool.NewEntity();
                     spawnAsteroid.DeathsLeft = asteroid.DeathsLeft;
-                    spawnAsteroid.Position = asteroidPosition;
+                    spawnAsteroid.Position = asteroidTransformData.position;
                     spawnAsteroid.Rotation = Quaternion.LookRotation(startForward);
                     spawnAsteroid.StartRadius = asteroid.Radius / 2f;
                 }

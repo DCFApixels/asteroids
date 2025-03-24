@@ -1,5 +1,6 @@
 ﻿using Asteroids.Components;
 using Asteroids.Data;
+using Asteroids.MovementFeature;
 using DCFApixels.DragonECS;
 
 namespace Asteroids.Systems
@@ -11,7 +12,7 @@ namespace Asteroids.Systems
 
         private class Aspect : EcsAspect
         {
-            public readonly EcsPool<MoveInfo> MoveInfos = Inc;
+            public readonly EcsPool<TransformData> TransformDatas = Inc;
             public readonly EcsPool<WrapAroundScreenMarker> WrapAroundScreenMarkers = Inc;
         }
 
@@ -19,10 +20,10 @@ namespace Asteroids.Systems
         {
             foreach (var e in _world.Where(out Aspect a))
             {
-                ref var moveInfo = ref a.MoveInfos.Get(e);
+                ref var transformData = ref a.TransformDatas.Get(e);
                 var marker = a.WrapAroundScreenMarkers.Get(e);
 
-                var position = moveInfo.Position;
+                var position = transformData.position;
                 var fieldSize = _runtimeData.FieldSize;
                 
                 if (position.x < -fieldSize.x / 2f - marker.Offset)
@@ -49,7 +50,7 @@ namespace Asteroids.Systems
                     }
                 }
 
-                moveInfo.Position = position;
+                transformData.position = position;
             }
         }
     }

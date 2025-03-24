@@ -1,4 +1,5 @@
 ﻿using Asteroids.Views;
+using DCFApixels.DragonECS;
 using UnityEngine;
 
 namespace Asteroids.Data
@@ -6,6 +7,8 @@ namespace Asteroids.Data
     [CreateAssetMenu]
     internal class StaticData : ScriptableObject
     {
+        [Header("Player")]
+        public ScriptableEntityTemplateBase PlayerStarshipTemplate;
         public StarshipView StarshipView;
         public float RotationSpeed = 10;
         public float StarshipSpeed = 10;
@@ -17,10 +20,12 @@ namespace Asteroids.Data
         public float StarshipFriction = 0.01f;
     
         [Header("Bullets")]
+        public ScriptableEntityTemplateBase BulletTemplate;
         public BulletView BulletView;
         public float BulletSpeed = 10;
     
         [Header("Asteroid")]
+        public ScriptableEntityTemplateBase AsteroidTemplate;
         public AsteroidView AsteroidView;
         public int SpawnFrequency = 3;
         public int SpawnAmount = 10;
@@ -31,5 +36,6 @@ namespace Asteroids.Data
         public float AdditionalKillOffset = 1.1f;
 
         public AsteroidExplosion AsteroidExplosion;
+
     }
 }

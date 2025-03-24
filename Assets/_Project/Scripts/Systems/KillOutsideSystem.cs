@@ -1,5 +1,6 @@
 using Asteroids.Components;
 using Asteroids.Data;
+using Asteroids.MovementFeature;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
 using JetBrains.Annotations;
@@ -15,7 +16,7 @@ namespace Asteroids.Systems
 
         private class Aspect : EcsAspect
         {
-            public readonly EcsPool<MoveInfo> MoveInfos = Inc;
+            public readonly EcsPool<TransformData> TransformDatas = Inc;
             [UsedImplicitly]
             public readonly EcsTagPool<KillOutsideMarker> KillOutsideEvents = Inc;
             public readonly EcsPool<PoolId> PoolIds = Inc;
@@ -25,7 +26,7 @@ namespace Asteroids.Systems
         {
             foreach (var e in _world.Where(out Aspect a))
             {
-                var position = a.MoveInfos.Get(e).Position;
+                var position = a.TransformDatas[e].position;
                 var fieldSize = _runtimeData.FieldSize * _staticData.AdditionalKillOffset;
                 if (position.x <= -fieldSize.x / 2f || position.x > fieldSize.x / 2f ||
                     position.z <= -fieldSize.y / 2f || position.z > fieldSize.y / 2f)

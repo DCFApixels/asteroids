@@ -1,6 +1,7 @@
 ﻿using Asteroids.Components;
 using Asteroids.Data;
 using DCFApixels.DragonECS;
+using UnityEngine;
 
 namespace Asteroids.Systems
 {
@@ -11,7 +12,7 @@ namespace Asteroids.Systems
 
         class Aspect : EcsAspect
         {
-            public readonly EcsPool<TransformRef> TransformRefs = Inc;
+            public readonly EcsPool<UnityComponent<Transform>> Transforms = Inc;
             public readonly EcsPool<Cycle> CycleAroundScreens = Inc;
         }
 
@@ -19,7 +20,7 @@ namespace Asteroids.Systems
         {
             foreach (var e in _world.Where(out Aspect a))
             {
-                var transform = a.TransformRefs.Get(e).Value;
+                var transform = a.Transforms.Get(e).obj;
                 var cycle = a.CycleAroundScreens.Get(e);
                 var position = transform.position;
                 if (position.x < -_runtimeData.FieldSize.x / 2f - cycle.CycleOffset)

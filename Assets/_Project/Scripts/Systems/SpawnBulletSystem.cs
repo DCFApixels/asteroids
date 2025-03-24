@@ -1,9 +1,10 @@
-﻿using System;
-using Asteroids.Components;
+﻿using Asteroids.Components;
 using Asteroids.Data;
+using Asteroids.MovementFeature;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
-using JetBrains.Annotations;
+using System;
+using UnityEngine;
 
 namespace Asteroids.Systems
 {
@@ -13,46 +14,54 @@ namespace Asteroids.Systems
         [DI] private StaticData _staticData;
         [DI] private PoolService _poolService;
 
-        private class Aspect : EcsAspect
+        private class StashipAspect : EcsAspect
         {
-            [UsedImplicitly]
             public readonly EcsPool<Starship> Starships = Inc;
-            public readonly EcsPool<TransformRef> TransformRefs = Inc;
+            public readonly EcsPool<UnityComponent<Transform>> Transforms = Inc;
             public readonly EcsTagPool<ShootEvent> ShootEvents = Inc;
-            public readonly EcsPool<MoveInfo> MoveInfos = Inc;
+            public readonly EcsPool<TransformData> TransformDatas = Inc;
+            public readonly EcsPool<Velocity> Velocities = Inc;
         }
-    
+        private class BulletAspect : EcsAspect
+        {
+            public readonly EcsPool<Starship> Starships = Inc;
+            public readonly EcsPool<UnityComponent<Transform>> Transforms = Inc;
+            public readonly EcsTagPool<ShootEvent> ShootEvents = Inc;
+            public readonly EcsPool<TransformData> TransformDatas = Inc;
+            public readonly EcsPool<Velocity> Velocities = Inc;
+        }
+
         public void Run()
         {
-            foreach (var e in _world.Where(out Aspect a))
+            var bulletA = _world.GetAspect<BulletAspect>();
+            foreach (var stashipE in _world.Where(out StashipAspect stashipA))
             {
-                var transform = a.TransformRefs.Get(e).Value;
+                var stashipTransformData = stashipA.TransformDatas.Get(stashipE);
             
-                var instance = _poolService.Get(_staticData.BulletView, out var id);
-                instance.transform.position = transform.position;
-                instance.transform.rotation = transform.rotation;
+                var bulletViewInstance = _poolService.Get(_staticData.BulletView, out var bulletViewInstanceID);
 
-                var entity = _world.NewEntity();
-                _world.GetPool<Bullet>().Add(entity);
-                _world.GetPool<TransformRef>().Add(entity).Value = instance.transform;
-                ref var moveInfo = ref _world.GetPool<MoveInfo>().Add(entity);
-                moveInfo.Speed = moveInfo.MaxSpeed = _staticData.BulletSpeed + Math.Abs(a.MoveInfos.Get(e).Speed);
-                moveInfo.Position = instance.transform.position;
-                moveInfo.Forward = instance.transform.forward;
-                moveInfo.Power = 1;
-            
-                ref var poolId = ref _world.GetPool<PoolId>().Add(entity);
-                poolId.Id = id;
-                poolId.Component = instance;
+                var bulletE = _world.NewEntity(_staticData.BulletTemplate);
+                _world.GetPool<Bullet>().Add(bulletE);
+                bulletViewInstance.Connect((_world, bulletE), false);
+                //_world.GetPool<UnityComponent<Transform>>().Add(bulletE).obj = bulletViewInstance.transform;
+                ref var bulletTransformData = ref _world.GetPool<TransformData>().TryAddOrGet(bulletE);
+                ref var bulletVelocity = ref _world.GetPool<Velocity>().TryAddOrGet(bulletE);
+                bulletTransformData.position = stashipTransformData.position;
+                bulletTransformData.rotation = stashipTransformData.rotation;
+                bulletVelocity.lineral = bulletViewInstance.transform.forward * (_staticData.BulletSpeed + Math.Abs(stashipA.Velocities[stashipE].lineral.magnitude));
 
-                _world.GetPool<WrapAroundScreenMarker>().Add(entity);
-                _world.GetPool<KillOutsideMarker>().Add(entity);
+                ref var poolId = ref _world.GetPool<PoolId>().TryAddOrGet(bulletE);
+                poolId.Id = bulletViewInstanceID;
+                poolId.Component = bulletViewInstance;
+
+                _world.GetPool<WrapAroundScreenMarker>().TryAddOrGet(bulletE);
+                _world.GetPool<KillOutsideMarker>().Add(bulletE);
                 
-                ref var asteroid = ref _world.GetPool<RequestIntersectionEvent>().Add(entity);
-                asteroid.CheckRadius = _staticData.AsteroidView.Radius + instance.Radius;
-                asteroid.ObjectRadius = instance.Radius;
+                ref var asteroid = ref _world.GetPool<RequestIntersectionEvent>().TryAddOrGet(bulletE);
+                asteroid.CheckRadius = _staticData.AsteroidView.Radius + bulletViewInstance.Radius;
+                asteroid.ObjectRadius = bulletViewInstance.Radius;
 
-                a.ShootEvents.Del(e);
+                stashipA.ShootEvents.Del(stashipE);
             }
         }
     }

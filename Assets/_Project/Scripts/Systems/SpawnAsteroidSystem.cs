@@ -1,5 +1,6 @@
 ﻿using Asteroids.Components;
 using Asteroids.Data;
+using Asteroids.MovementFeature;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
 using UnityEngine;
@@ -13,43 +14,40 @@ namespace Asteroids.Systems
         [DI] private RuntimeData _runtimeData;
         [DI] private PoolService _poolService;
 
-        private class Aspect : EcsAspect
+        private class EventAspect : EcsAspect
         {
             public readonly EcsPool<SpawnAsteroidEvent> SpawnAsteroidEvents = Inc;
         }
 
         public void Run()
         {
-            foreach (var e in _world.Where(out Aspect a))
+            foreach (var eventE in _world.Where(out EventAspect eventA))
             {
-                var spawnAsteroid = a.SpawnAsteroidEvents.Get(e);
+                var spawnAsteroidEvent = eventA.SpawnAsteroidEvents.Get(eventE);
             
-                var prefab = _staticData.AsteroidView;
+                var asteroidViewInstance = _poolService.Get(_staticData.AsteroidView, out var asteroidViewInstanceID);
+                asteroidViewInstance.SetRadius(spawnAsteroidEvent.StartRadius);
 
-                var instance = _poolService.Get(prefab, out var id);
-                instance.transform.position = spawnAsteroid.Position;
-                instance.transform.rotation = spawnAsteroid.Rotation;
-                instance.SetRadius(spawnAsteroid.StartRadius);
-
-                var entity = _world.NewEntity();
-                ref var asteroid = ref _world.GetPool<Asteroid>().Add(entity);
+                var asteroidE = _world.NewEntity(_staticData.AsteroidTemplate);
+                ref var asteroid = ref _world.GetPool<Asteroid>().TryAddOrGet(asteroidE);
               
-                asteroid.DeathsLeft = spawnAsteroid.DeathsLeft;
-                asteroid.Radius = spawnAsteroid.StartRadius;
-                ref var poolId = ref _world.GetPool<PoolId>().Add(entity);
-                poolId.Id = id;
-                poolId.Component = instance;
-                
-                _world.GetPool<TransformRef>().Add(entity).Value = instance.transform;
-                _world.GetPool<KillOutsideMarker>().Add(entity);
+                asteroid.DeathsLeft = spawnAsteroidEvent.DeathsLeft;
+                asteroid.Radius = spawnAsteroidEvent.StartRadius;
+                ref var poolId = ref _world.GetPool<PoolId>().TryAddOrGet(asteroidE);
+                poolId.Id = asteroidViewInstanceID;
+                poolId.Component = asteroidViewInstance;
+
+                asteroidViewInstance.Connect((_world, asteroidE), false);
+                //_world.GetPool<UnityComponent<Transform>>().Add(asteroidE).obj = asteroidViewInstance.transform;
+                _world.GetPool<KillOutsideMarker>().TryAdd(asteroidE);
             
-                ref var moveInfo = ref _world.GetPool<MoveInfo>().Add(entity);
-                moveInfo.MaxSpeed = moveInfo.Speed = Random.Range(_staticData.AsteroidMinSpeed, _staticData.AsteroidMaxSpeed);
-                moveInfo.Position = instance.transform.position;
-                moveInfo.Forward = instance.transform.forward;
-                moveInfo.Power = 1;
+                ref var transformData = ref _world.GetPool<TransformData>().TryAddOrGet(asteroidE);
+                ref var velocity = ref _world.GetPool<Velocity>().TryAddOrGet(asteroidE);
+                transformData.position = spawnAsteroidEvent.Position;
+                transformData.rotation = spawnAsteroidEvent.Rotation;
+                velocity.lineral = asteroidViewInstance.transform.forward * Random.Range(_staticData.AsteroidMinSpeed, _staticData.AsteroidMaxSpeed);
             
-                a.SpawnAsteroidEvents.Del(e);
+                eventA.SpawnAsteroidEvents.Del(eventE);
             }
         }
 

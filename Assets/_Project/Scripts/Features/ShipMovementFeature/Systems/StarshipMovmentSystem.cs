@@ -3,17 +3,17 @@ using Asteroids.MovementFeature;
 using DCFApixels.DragonECS;
 using UnityEngine;
 
-namespace Asteroids.ShipMovementFeature
+namespace Asteroids.StarshipMovmentFeature
 {
-    [MetaGroup(ShipMovementModule.META_GROUP)]
-    [MetaColor(ShipMovementModule.META_COLOR)]
-    public class ShipMovmentSystem : IEcsRun
+    [MetaGroup(StarshipMovmentModule.META_GROUP)]
+    [MetaColor(StarshipMovmentModule.META_COLOR)]
+    public class StarshipMovmentSystem : IEcsRun
     {
         class Aspect : EcsAspect
         {
             public EcsPool<TransformData> transformDatas = Inc;
             public EcsPool<Velocity> velocities = Inc;
-            public EcsPool<ShipMovementData> movementDatas = Inc;
+            public EcsPool<StarshipMovmentData> movementDatas = Inc;
             public EcsPool<AxisControlData> axisControlDatas = Inc;
         }
         [DI] EcsDefaultWorld _world;

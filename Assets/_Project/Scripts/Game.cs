@@ -1,7 +1,7 @@
 using Asteroids.ControlsFeature;
 using Asteroids.Data;
 using Asteroids.MovementFeature;
-using Asteroids.ShipMovementFeature;
+using Asteroids.StarshipMovmentFeature;
 using Asteroids.Systems;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
@@ -45,7 +45,7 @@ namespace Asteroids
                 .Add(new RestartSystem())
 
                 .AddModule(new ControlsModule())
-                .AddModule(new ShipMovementModule())
+                .AddModule(new StarshipMovmentModule())
                 .AddModule(new MovementModule())
 
                 // Injecting into systems.
