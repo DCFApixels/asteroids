@@ -1,4 +1,7 @@
+using Asteroids.ControlsFeature;
 using Asteroids.Data;
+using Asteroids.MovementFeature;
+using Asteroids.ShipMovementFeature;
 using Asteroids.Systems;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
@@ -21,26 +24,30 @@ namespace Asteroids
         private RuntimeData RuntimeData;
         private void Start()
         {
-            _world = new();
-            _eventWorld = new();
-            
+            _world = new EcsDefaultWorld();
+            _eventWorld = new EcsEventWorld();
+
             _pipeline = EcsPipeline.New()
                 .AddUnityDebug(_world, _eventWorld)
                 // Adding systems.
                 .Add(new InitSystem())
                 .Add(new ChangeStateSystem())
                 .Add(new UpdateFieldSizeSystem())
-            
+
                 .AddModule(new StarshipModule())
                 .AddModule(new AsteroidModule())
-            
+
                 .Add(new MoveSystem())
                 .Add(new KillHitObjectSystem())
                 .Add(new WrapAroundScreenSystem())
                 .Add(new KillOutsideSystem())
                 .Add(new UIUpdateSystem())
                 .Add(new RestartSystem())
-            
+
+                .AddModule(new ControlsModule())
+                .AddModule(new ShipMovementModule())
+                .AddModule(new MovementModule())
+
                 // Injecting into systems.
                 .Inject(_world)
                 .Inject(StaticData)

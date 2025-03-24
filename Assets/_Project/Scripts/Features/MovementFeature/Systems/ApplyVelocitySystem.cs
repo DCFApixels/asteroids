@@ -3,13 +3,11 @@ using UnityEngine;
 
 namespace Asteroids.MovementFeature
 {
-    [MetaGroup(nameof(MovementModule), EcsConsts.SYSTEMS_GROUP)]
-    [MetaColor(MetaColor.Cyan)]
+    [MetaGroup(MovementModule.META_GROUP)]
+    [MetaColor(MovementModule.META_COLOR)]
     internal class ApplyVelocitySystem : IEcsRun, IEcsDefaultAddParams, IEcsFixedRunProcess
     {
         public AddParams AddParams => EcsConsts.END_LAYER;
-
-
         class VeloctityDragAspect : EcsAspect
         {
             public EcsPool<Velocity> velocities = Inc;

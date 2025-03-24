@@ -2,8 +2,8 @@
 
 namespace Asteroids.MovementFeature
 {
-    [MetaGroup(nameof(MovementModule), EcsConsts.SYSTEMS_GROUP)]
-    [MetaColor(MetaColor.Cyan)]
+    [MetaGroup(MovementModule.META_GROUP)]
+    [MetaColor(MovementModule.META_COLOR)]
     public partial class ApplyTransformSystem : IEcsRun, IEcsDefaultAddParams
     {
         public AddParams AddParams => EcsConsts.POST_END_LAYER;

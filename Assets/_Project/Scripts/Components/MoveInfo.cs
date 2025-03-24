@@ -1,8 +1,10 @@
 ﻿using DCFApixels.DragonECS;
+using System;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Asteroids.Components
 {
+    [Serializable]
     internal struct MoveInfo : IEcsComponent
     {
         public Vector3 Position;

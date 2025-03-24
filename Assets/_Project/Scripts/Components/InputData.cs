@@ -1,4 +1,5 @@
 ﻿using DCFApixels.DragonECS;
+using System.Numerics;
 
 namespace Asteroids.Components
 {
@@ -6,5 +7,6 @@ namespace Asteroids.Components
     {
         public float Horizontal;
         public float Vertical;
+        public Vector2 Axis;
     }
 }

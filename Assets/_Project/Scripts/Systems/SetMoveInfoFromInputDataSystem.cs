@@ -20,7 +20,7 @@ namespace Asteroids.Systems
                 var inputData = a.InputDatas.Get(e);
                 ref var move = ref a.MoveInfos.Get(e);
 
-                move.Power = inputData.Vertical ;
+                move.Power = inputData.Vertical;
                 move.RotationSpeed = inputData.Horizontal * move.DefaultRotationSpeed;
             }
         }
