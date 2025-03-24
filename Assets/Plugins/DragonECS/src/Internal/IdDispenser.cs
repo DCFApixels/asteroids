@@ -365,7 +365,7 @@ namespace DCFApixels.DragonECS.Internal
             }
             public bool IsValid => _target.IsValid();
             public int Count => _target.Count;
-            public int Size => _target.Capacity;
+            public int Capacity => _target.Capacity;
             public int NullID => _target._nullID;
             internal readonly struct ID
             {
