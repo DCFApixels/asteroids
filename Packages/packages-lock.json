@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.dcfa_pixels.debugx": {
+      "version": "https://github.com/DCFApixels/Unity-DebugX.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "e8f55b42bcd3150bc8e3510fb3146dd0738b9016"
+    },
     "com.unity.ext.nunit": {
       "version": "2.0.5",
       "depth": 1,

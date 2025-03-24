@@ -45,7 +45,7 @@ namespace DCFApixels.DragonECS
         private const string NULL_NAME = "NULL";
         public static readonly TypeMeta NullTypeMeta;
 
-        private static object _lock = new object();
+        private static readonly object _lock = new object();
         private static readonly Dictionary<Type, TypeMeta> _metaCache = new Dictionary<Type, TypeMeta>();
         private static int _increment = 1;
 
@@ -84,9 +84,9 @@ namespace DCFApixels.DragonECS
 
                 _name = NULL_NAME,
                 _typeName = NULL_NAME,
-                _color = new MetaColor(MetaColor.Black),
+                _color = MetaColor.Black,
                 _description = new MetaDescription("", NULL_NAME),
-                _group = new MetaGroup(""),
+                _group = MetaGroup.Empty,
                 _tags = Array.Empty<string>(),
                 _metaID = string.Empty,
                 _typeCode = EcsTypeCodeManager.Get(typeof(void)),
@@ -508,7 +508,6 @@ namespace DCFApixels.DragonECS
             #endregion
 
             #region GetColor
-
             private static MetaColor AutoColor(TypeMeta meta)
             {
                 int hash;
@@ -529,7 +528,7 @@ namespace DCFApixels.DragonECS
                 return (isCustom ? atr.color : AutoColor(meta), isCustom);
 #else
                 EcsDebug.PrintWarning($"Reflection is not available, the {nameof(MetaGenerator)}.{nameof(GetColor)} method does not work.");
-                return (AutoColor(type), false);
+                return (MetaColor.White, false);
 #endif
             }
             #endregion
@@ -538,7 +537,14 @@ namespace DCFApixels.DragonECS
             public static MetaGroup GetGroup(Type type)
             {
 #if DEBUG || !REFLECTION_DISABLED //в дебажных утилитах REFLECTION_DISABLED только в релизном билде работает
-                return type.TryGetAttribute(out MetaGroupAttribute atr) ? atr.Data : MetaGroup.FromNameSpace(type);
+                if (type.TryGetAttribute(out MetaGroupAttribute atr))
+                {
+                    return MetaGroup.FromName(atr.Name);
+                }
+                else
+                {
+                    return MetaGroup.FromNameSpace(type);
+                }
 #else
                 EcsDebug.PrintWarning($"Reflection is not available, the {nameof(MetaGenerator)}.{nameof(GetGroup)} method does not work.");
                 return MetaGroup.Empty;
