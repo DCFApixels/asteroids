@@ -17,7 +17,6 @@ namespace Asteroids.Systems
         private class StashipAspect : EcsAspect
         {
             public readonly EcsPool<Starship> Starships = Inc;
-            public readonly EcsPool<UnityComponent<Transform>> Transforms = Inc;
             public readonly EcsTagPool<ShootEvent> ShootEvents = Inc;
             public readonly EcsPool<TransformData> TransformDatas = Inc;
             public readonly EcsPool<Velocity> Velocities = Inc;
@@ -25,7 +24,6 @@ namespace Asteroids.Systems
         private class BulletAspect : EcsAspect
         {
             public readonly EcsPool<Starship> Starships = Inc;
-            public readonly EcsPool<UnityComponent<Transform>> Transforms = Inc;
             public readonly EcsTagPool<ShootEvent> ShootEvents = Inc;
             public readonly EcsPool<TransformData> TransformDatas = Inc;
             public readonly EcsPool<Velocity> Velocities = Inc;
@@ -48,7 +46,7 @@ namespace Asteroids.Systems
                 ref var bulletVelocity = ref _world.GetPool<Velocity>().TryAddOrGet(bulletE);
                 bulletTransformData.position = stashipTransformData.position;
                 bulletTransformData.rotation = stashipTransformData.rotation;
-                bulletVelocity.lineral = bulletViewInstance.transform.forward * (_staticData.BulletSpeed + Math.Abs(stashipA.Velocities[stashipE].lineral.magnitude));
+                bulletVelocity.lineral = stashipTransformData.rotation * Vector3.forward * (_staticData.BulletSpeed + Math.Abs(stashipA.Velocities[stashipE].lineral.magnitude));
 
                 ref var poolId = ref _world.GetPool<PoolId>().TryAddOrGet(bulletE);
                 poolId.Id = bulletViewInstanceID;

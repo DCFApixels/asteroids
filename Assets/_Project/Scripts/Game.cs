@@ -59,6 +59,11 @@ namespace Asteroids
                 .BuildAndInit();
            
         }
+
+        private void FixedUpdate()
+        {
+            _pipeline.FixedRun();
+        }
         private void Update()
         {
             _pipeline.Run();

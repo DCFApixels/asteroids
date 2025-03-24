@@ -1,5 +1,5 @@
-﻿using DCFApixels.DragonECS;
-using UnityEngine;
+﻿using Asteroids.Components;
+using DCFApixels.DragonECS;
 
 namespace Asteroids.ControlsFeature
 {
@@ -10,6 +10,7 @@ namespace Asteroids.ControlsFeature
         class Aspect : EcsAspect
         {
             public EcsPool<AxisControlData> axisControlDatas = Inc;
+            public EcsPool<InputData> InputDatas = Inc;
         }
         [DI] EcsDefaultWorld _world;
         public void Run()
@@ -17,8 +18,9 @@ namespace Asteroids.ControlsFeature
             foreach (var e in _world.Where(out Aspect a))
             {
                 ref var axisControlData = ref a.axisControlDatas[e];
-                axisControlData.Axis.x = Mathf.Sign(Input.GetAxis("Horizontal"));
-                axisControlData.Axis.y = Mathf.Sign(Input.GetAxis("Vertical"));
+                ref var inputData = ref a.InputDatas[e];
+                axisControlData.Axis.x = inputData.Horizontal;
+                axisControlData.Axis.y = inputData.Vertical;
             }
         }
     }

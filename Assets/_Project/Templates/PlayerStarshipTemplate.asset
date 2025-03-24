@@ -17,6 +17,7 @@ MonoBehaviour:
   _componentTemplates:
   - rid: 1520753779500646422
   - rid: 1520753779500646423
+  - rid: 1520753779500646621
   references:
     version: 2
     RefIds:
@@ -26,7 +27,7 @@ MonoBehaviour:
         component:
           MaxSpeed: 10
           MaxRotationSpeed: 360
-          Acceleration: 10
+          Acceleration: 5
           Power: 0
         _offset: 0
     - rid: 1520753779500646423
@@ -34,4 +35,12 @@ MonoBehaviour:
       data:
         component:
           Axis: {x: 0, y: 0, z: 0}
+        _offset: 0
+    - rid: 1520753779500646621
+      type: {class: Template_E2272BB99501499999DA540D0B04344B, ns: Asteroids.MovementFeature, asm: Assembly-CSharp}
+      data:
+        component:
+          lineralDrag: 0.3
+          angularDrag: 0.05
+          mass: 1
         _offset: 0
