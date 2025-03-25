@@ -37,7 +37,6 @@ namespace Asteroids
                 .AddModule(new StarshipModule())
                 .AddModule(new AsteroidModule())
 
-                .Add(new MoveSystem())
                 .Add(new KillHitObjectSystem())
                 .Add(new WrapAroundScreenSystem())
                 .Add(new KillOutsideSystem())

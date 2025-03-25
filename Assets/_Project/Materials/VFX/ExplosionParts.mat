@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Explosion
-  m_Shader: {fileID: 4800000, guid: cc00dca7fe64dde42bf2cfea2aee6058, type: 3}
+  m_Name: ExplosionParts
+  m_Shader: {fileID: 4800000, guid: 263f91e4c1b3c1e439d87056fe4767c7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -71,7 +71,10 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
+    - _Offset: 0.3
     - _Parallax: 0.02
+    - _Power1: 1
+    - _Power2: 1.2
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

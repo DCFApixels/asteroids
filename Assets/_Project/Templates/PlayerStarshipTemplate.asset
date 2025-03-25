@@ -27,7 +27,7 @@ MonoBehaviour:
       data:
         component:
           MaxSpeed: 10
-          MaxRotationSpeed: 360
+          MaxRotationSpeed: 270
           Acceleration: 5
           Power: 0
         _offset: 0

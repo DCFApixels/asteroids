@@ -840,7 +840,7 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 1
   scriptingDefineSymbols:
-    Standalone: DRAGONECS_DEEP_DEBUG;DRAGONECS_ENABLE_UNITY_CONSOLE_SHORTCUT_LINKS
+    Standalone: DRAGONECS_DEEP_DEBUG;DRAGONECS_ENABLE_UNITY_CONSOLE_SHORTCUT_LINKS;DEBUGX_DISABLE_INBUILD
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
