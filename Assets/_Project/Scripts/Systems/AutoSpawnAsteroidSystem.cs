@@ -27,7 +27,7 @@ namespace Asteroids.Systems
                 {
                     var size = _runtimeData.FieldSize;
 
-                    var startAsteroidRadius = _staticData.AsteroidView.Radius;
+                    var startAsteroidRadius = _staticData.AsteroidViewPrefab.Radius;
                
                     var spawnPosition = new Vector3(
                         Random.value > 0.5f

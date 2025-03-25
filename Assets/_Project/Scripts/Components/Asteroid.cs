@@ -2,7 +2,8 @@
 
 namespace Asteroids.Components
 {
-    internal struct Asteroid : IEcsComponent
+    [System.Serializable]
+    public struct Asteroid : IEcsComponent
     {
         public int DeathsLeft;
         public float Radius;

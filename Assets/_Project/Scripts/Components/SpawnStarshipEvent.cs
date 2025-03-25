@@ -2,7 +2,5 @@
 
 namespace Asteroids.Components
 {
-    internal struct SpawnStarshipEvent : IEcsTagComponent
-    {
-    }
+    internal struct SpawnStarshipEvent : IEcsTagComponent { }
 }

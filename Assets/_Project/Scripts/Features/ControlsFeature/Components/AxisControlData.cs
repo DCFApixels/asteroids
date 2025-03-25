@@ -11,5 +11,4 @@ namespace Asteroids.ControlsFeature
     {
         public Vector3 Axis;
     }
-    public class Template_50752EB99501945F2BDC43F6F3BFA134 : ComponentTemplate<AxisControlData> { }
 }

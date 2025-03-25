@@ -13,45 +13,41 @@ namespace Asteroids.Systems
         [DI] private SceneData _sceneData;
         [DI] private PoolService _poolService;
 
-        private class EventAspect : EcsAspect
+        class EventAspect : EcsAspect
         {
             public readonly EcsTagPool<SpawnStarshipEvent> SpawnStarships = Inc;
         }
-    
+        class SpawnAspect : EcsAspect
+        {
+            public readonly EcsPool<PoolID> PoolIDs = Inc;
+            public readonly EcsPool<TransformData> TransformDatas = Inc;
+            public readonly EcsPool<Starship> Starships = Inc;
+            public readonly EcsPool<InputData> InputDatas = Inc;
+            public readonly EcsPool<Immunity> Immunities = Inc;
+            public readonly EcsPool<WrapAroundScreenMarker> WrapAroundScreenMarkers = Inc;
+            public readonly EcsPool<RequestIntersectionEvent> RequestIntersectionEvents = Inc;
+        }
+
         public void Run()
         {
+            var spawnA = _world.GetAspect<SpawnAspect>();
             foreach (var eventE in _world.Where(out EventAspect eventA))
             {
-                var startshipInstance = _poolService.Get(_staticData.StarshipView, out var startshipInstanceID);
-                
-                var startshipE = _world.NewEntity(_staticData.PlayerStarshipTemplate);
+                var newE = _world.NewEntity(_staticData.PlayerStarshipTemplate);
+                var newViewInstance = _poolService.Get(_staticData.StarshipViewPrefab, out spawnA.PoolIDs.TryAddOrGet(newE));
+                newViewInstance.Connect((_world, newE), false);
+                spawnA.Apply(_world, newE);
 
-                ref var poolId = ref _world.GetPool<PoolId>().TryAddOrGet(startshipE);
-                poolId.Id = startshipInstanceID;
-                poolId.Component = startshipInstance;
-            
-                _world.GetPool<Starship>().TryAddOrGet(startshipE).View = startshipInstance;
-                startshipInstance.Connect((_world, startshipE), false);
-                //_world.GetPool<UnityComponent<Transform>>().Add(entity).obj = instance.transform;
-                _world.GetPool<Immunity>().TryAddOrGet(startshipE).TimeLeft = _staticData.StarshipSpawnImmunityTime;
+                spawnA.Starships[newE].View = newViewInstance;
+                spawnA.Immunities[newE].TimeLeft = _staticData.StarshipSpawnImmunityTime;
 
-                ref var transformData = ref _world.GetPool<TransformData>().TryAddOrGet(startshipE);
-                transformData.position = _sceneData.SpawnPosition.position;
-                transformData.rotation = _sceneData.SpawnPosition.rotation;
-                //ref var moveInfo = ref _world.GetPool<MoveInfo>().Add(entity);
-                //moveInfo.DefaultRotationSpeed = _staticData.RotationSpeed;
-                //moveInfo.Speed = _staticData.StarshipSpeed;
-                //moveInfo.Position = instance.transform.position;
-                //moveInfo.Forward = instance.transform.forward;
-                //moveInfo.MaxSpeed = _staticData.StarshipMaxSpeed;
-                //moveInfo.Acceleration = _staticData.StarshipAcceleration;
-                //moveInfo.Friction = _staticData.StarshipFriction;
+                ref var newTransformData = ref spawnA.TransformDatas[newE];
+                newTransformData.position = _sceneData.SpawnPosition.position;
+                newTransformData.rotation = _sceneData.SpawnPosition.rotation;
 
-                _world.GetPool<InputData>().TryAddOrGet(startshipE);
-                _world.GetPool<WrapAroundScreenMarker>().TryAddOrGet(startshipE);
-                ref var wantIntersectionWithAsteroid = ref _world.GetPool<RequestIntersectionEvent>().TryAddOrGet(startshipE);
-                wantIntersectionWithAsteroid.CheckRadius = _staticData.AsteroidView.Radius + startshipInstance.Radius;
-                wantIntersectionWithAsteroid.ObjectRadius = startshipInstance.Radius;
+                ref var newWantIntersectionWithAsteroid = ref spawnA.RequestIntersectionEvents[newE];
+                newWantIntersectionWithAsteroid.CheckRadius = _staticData.AsteroidViewPrefab.Radius + newViewInstance.Radius;
+                newWantIntersectionWithAsteroid.ObjectRadius = newViewInstance.Radius;
             
                 eventA.SpawnStarships.Del(eventE);
             }

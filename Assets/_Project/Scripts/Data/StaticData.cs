@@ -9,7 +9,7 @@ namespace Asteroids.Data
     {
         [Header("Player")]
         public ScriptableEntityTemplateBase PlayerStarshipTemplate;
-        public StarshipView StarshipView;
+        public StarshipView StarshipViewPrefab;
         public float RotationSpeed = 10;
         public float StarshipSpeed = 10;
         public float StarshipAcceleration = 10;
@@ -21,12 +21,12 @@ namespace Asteroids.Data
     
         [Header("Bullets")]
         public ScriptableEntityTemplateBase BulletTemplate;
-        public BulletView BulletView;
+        public BulletView BulletViewPrefab;
         public float BulletSpeed = 10;
     
         [Header("Asteroid")]
         public ScriptableEntityTemplateBase AsteroidTemplate;
-        public AsteroidView AsteroidView;
+        public AsteroidView AsteroidViewPrefab;
         public int SpawnFrequency = 3;
         public int SpawnAmount = 10;
         public float AsteroidMaxSpeed = 1;

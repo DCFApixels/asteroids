@@ -2,7 +2,8 @@
 
 namespace Asteroids.Components
 {
-    internal struct WrapAroundScreenMarker : IEcsComponent
+    [System.Serializable]
+    public struct WrapAroundScreenMarker : IEcsComponent
     {
         public float Offset;
     }

@@ -3,7 +3,8 @@ using DCFApixels.DragonECS;
 
 namespace Asteroids.Components
 {
-    internal struct Starship : IEcsComponent
+    [System.Serializable]
+    public struct Starship : IEcsComponent
     {
         public StarshipView View;
     }

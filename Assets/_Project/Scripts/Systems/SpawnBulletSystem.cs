@@ -14,50 +14,43 @@ namespace Asteroids.Systems
         [DI] private StaticData _staticData;
         [DI] private PoolService _poolService;
 
-        private class StashipAspect : EcsAspect
+        class StashipAspect : EcsAspect
         {
             public readonly EcsPool<Starship> Starships = Inc;
             public readonly EcsTagPool<ShootEvent> ShootEvents = Inc;
             public readonly EcsPool<TransformData> TransformDatas = Inc;
             public readonly EcsPool<Velocity> Velocities = Inc;
         }
-        private class BulletAspect : EcsAspect
+        class SpawnAspect : EcsAspect
         {
-            public readonly EcsPool<Starship> Starships = Inc;
-            public readonly EcsTagPool<ShootEvent> ShootEvents = Inc;
-            public readonly EcsPool<TransformData> TransformDatas = Inc;
+            public readonly EcsPool<PoolID> PoolIDs = Inc;
             public readonly EcsPool<Velocity> Velocities = Inc;
+            public readonly EcsPool<TransformData> TransformDatas = Inc;
+            public readonly EcsPool<RequestIntersectionEvent> RequestIntersectionEvents = Inc;
         }
 
         public void Run()
         {
-            var bulletA = _world.GetAspect<BulletAspect>();
+            var spawnA = _world.GetAspect<SpawnAspect>();
             foreach (var stashipE in _world.Where(out StashipAspect stashipA))
             {
                 var stashipTransformData = stashipA.TransformDatas.Get(stashipE);
-            
-                var bulletViewInstance = _poolService.Get(_staticData.BulletView, out var bulletViewInstanceID);
 
-                var bulletE = _world.NewEntity(_staticData.BulletTemplate);
-                _world.GetPool<Bullet>().Add(bulletE);
-                bulletViewInstance.Connect((_world, bulletE), false);
-                //_world.GetPool<UnityComponent<Transform>>().Add(bulletE).obj = bulletViewInstance.transform;
-                ref var bulletTransformData = ref _world.GetPool<TransformData>().TryAddOrGet(bulletE);
-                ref var bulletVelocity = ref _world.GetPool<Velocity>().TryAddOrGet(bulletE);
-                bulletTransformData.position = stashipTransformData.position;
-                bulletTransformData.rotation = stashipTransformData.rotation;
-                bulletVelocity.lineral = stashipTransformData.rotation * Vector3.forward * (_staticData.BulletSpeed + Math.Abs(stashipA.Velocities[stashipE].lineral.magnitude));
+                var newE = _world.NewEntity(_staticData.BulletTemplate); 
+                var newViewInstance = _poolService.Get(_staticData.BulletViewPrefab, out spawnA.PoolIDs.TryAddOrGet(newE));
+                newViewInstance.Connect((_world, newE), false);
+                spawnA.Apply(_world, newE);
 
-                ref var poolId = ref _world.GetPool<PoolId>().TryAddOrGet(bulletE);
-                poolId.Id = bulletViewInstanceID;
-                poolId.Component = bulletViewInstance;
+                ref var newTransformData = ref spawnA.TransformDatas[newE];
+                newTransformData.position = stashipTransformData.position;
+                newTransformData.rotation = stashipTransformData.rotation;
 
-                _world.GetPool<WrapAroundScreenMarker>().TryAddOrGet(bulletE);
-                _world.GetPool<KillOutsideMarker>().Add(bulletE);
-                
-                ref var asteroid = ref _world.GetPool<RequestIntersectionEvent>().TryAddOrGet(bulletE);
-                asteroid.CheckRadius = _staticData.AsteroidView.Radius + bulletViewInstance.Radius;
-                asteroid.ObjectRadius = bulletViewInstance.Radius;
+                ref var newVelocity = ref spawnA.Velocities[newE];
+                newVelocity.lineral = newTransformData.CalcLocalVector(Vector3.forward) * (_staticData.BulletSpeed + Math.Abs(stashipA.Velocities[stashipE].lineral.magnitude));
+
+                ref var newRequestIntersectionEvent = ref spawnA.RequestIntersectionEvents[newE];
+                newRequestIntersectionEvent.CheckRadius = _staticData.AsteroidViewPrefab.Radius + newViewInstance.Radius;
+                newRequestIntersectionEvent.ObjectRadius = newViewInstance.Radius;
 
                 stashipA.ShootEvents.Del(stashipE);
             }

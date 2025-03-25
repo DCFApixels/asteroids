@@ -2,7 +2,7 @@
 
 namespace Asteroids.Views
 {
-    internal class StarshipView : MonoBehaviour
+    public class StarshipView : MonoBehaviour
     {
         public LineRenderer LineRenderer;
         public Color MinColor;

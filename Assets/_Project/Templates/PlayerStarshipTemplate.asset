@@ -18,11 +18,12 @@ MonoBehaviour:
   - rid: 1520753779500646422
   - rid: 1520753779500646423
   - rid: 1520753779500646621
+  - rid: 1520753779500646648
   references:
     version: 2
     RefIds:
     - rid: 1520753779500646422
-      type: {class: Template_89922AB99501C6637E5655E8ABB1F04A, ns: Asteroids.StarshipMovmentFeature, asm: Assembly-CSharp}
+      type: {class: Template_89922AB99501C6637E5655E8ABB1F04A, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
           MaxSpeed: 10
@@ -31,16 +32,22 @@ MonoBehaviour:
           Power: 0
         _offset: 0
     - rid: 1520753779500646423
-      type: {class: Template_50752EB99501945F2BDC43F6F3BFA134, ns: Asteroids.ControlsFeature, asm: Assembly-CSharp}
+      type: {class: Template_50752EB99501945F2BDC43F6F3BFA134, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
           Axis: {x: 0, y: 0, z: 0}
         _offset: 0
     - rid: 1520753779500646621
-      type: {class: Template_E2272BB99501499999DA540D0B04344B, ns: Asteroids.MovementFeature, asm: Assembly-CSharp}
+      type: {class: Template_E2272BB99501499999DA540D0B04344B, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
           lineralDrag: 0.3
           angularDrag: 0.05
           mass: 1
+        _offset: 0
+    - rid: 1520753779500646648
+      type: {class: Template_AACF2FCB950110F7165389DD708F1671, ns: ComponentTemplates, asm: Assembly-CSharp}
+      data:
+        component:
+          View: {fileID: 0}
         _offset: 0

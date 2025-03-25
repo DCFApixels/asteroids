@@ -19,7 +19,7 @@ namespace Asteroids.Systems
 
         private class PoolIdAspect : EcsAspect
         {
-            public readonly EcsPool<PoolId> PoolIds = Inc;
+            public readonly EcsPool<PoolID> PoolIds = Inc;
         }
         
         public void Run()

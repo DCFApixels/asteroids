@@ -21,7 +21,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 1520753779500646426
-      type: {class: Template_E2272BB99501499999DA540D0B04344B, ns: Asteroids.MovementFeature, asm: Assembly-CSharp}
+      type: {class: Template_E2272BB99501499999DA540D0B04344B, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
           lineralDrag: 0.05
@@ -29,14 +29,14 @@ MonoBehaviour:
           mass: 1
         _offset: 0
     - rid: 1520753779500646427
-      type: {class: Template_986A2BB9950107332FCFF43280030220, ns: Asteroids.MovementFeature, asm: Assembly-CSharp}
+      type: {class: Template_986A2BB9950107332FCFF43280030220, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
           lineral: {x: 0, y: 0, z: 0}
           angular: {x: 0, y: 0, z: 0}
         _offset: 0
     - rid: 1520753779500646428
-      type: {class: Template_E9522BB9950115AD62A48B42DEA0B5ED, ns: Asteroids.MovementFeature, asm: Assembly-CSharp}
+      type: {class: Template_E9522BB9950115AD62A48B42DEA0B5ED, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
           position: {x: 0, y: 0, z: 0}

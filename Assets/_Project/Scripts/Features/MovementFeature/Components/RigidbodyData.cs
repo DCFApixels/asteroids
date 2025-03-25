@@ -19,5 +19,4 @@ namespace Asteroids.MovementFeature
 
         public float mass;
     }
-    public class Template_E2272BB99501499999DA540D0B04344B : ComponentTemplate<RigidbodyData> { }
 }

@@ -2,7 +2,6 @@ using DCFApixels.DragonECS;
 
 namespace Asteroids.Components
 {
-    internal struct KillOutsideMarker : IEcsTagComponent
-    {
-    }
+    [System.Serializable]
+    public struct KillOutsideMarker : IEcsTagComponent { }
 }

@@ -12,5 +12,4 @@ namespace Asteroids.MovementFeature
         public Vector3 lineral;
         public Vector3 angular;
     }
-    public class Template_986A2BB9950107332FCFF43280030220 : ComponentTemplate<Velocity> { }
 }

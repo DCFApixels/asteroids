@@ -14,7 +14,7 @@ namespace Asteroids.Systems
         {
             [UsedImplicitly]
             public readonly EcsPool<HitEvent> HitEvents = Inc;
-            public readonly EcsPool<PoolId> PoolIds = Inc;
+            public readonly EcsPool<PoolID> PoolIds = Inc;
         }
     
         public void Run()

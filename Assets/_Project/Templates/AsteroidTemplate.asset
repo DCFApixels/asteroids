@@ -16,14 +16,27 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c52a3ae0148d0e545b28a3f233f55d08, type: 2}
   _componentTemplates:
   - rid: 1520753779500646430
+  - rid: 1520753779500646644
+  - rid: 1520753779500646646
   references:
     version: 2
     RefIds:
     - rid: 1520753779500646430
-      type: {class: Template_E2272BB99501499999DA540D0B04344B, ns: Asteroids.MovementFeature, asm: Assembly-CSharp}
+      type: {class: Template_E2272BB99501499999DA540D0B04344B, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
           lineralDrag: 0
           angularDrag: 0
           mass: 1
+        _offset: 0
+    - rid: 1520753779500646644
+      type: {class: Template_4A1123CB9501B7933D75AA7248F28132, ns: ComponentTemplates, asm: Assembly-CSharp}
+      data:
+        _offset: 0
+    - rid: 1520753779500646646
+      type: {class: Template_2A352BCB9501428C5C1093F487E54C83, ns: ComponentTemplates, asm: Assembly-CSharp}
+      data:
+        component:
+          DeathsLeft: 0
+          Radius: 0
         _offset: 0

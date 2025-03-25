@@ -6,14 +6,11 @@ namespace Asteroids.Systems
     {
         public void Import(EcsPipeline.Builder b)
         {
-            b
-                .Add(new RecalculateSpaceHashSystem())
-                .Add(new CheckIntersectionWithAsteroidsSystem())
-                .Add(new CheckAsteroidHitSystem())
-                .Add(new AutoSpawnAsteroidSystem())
-                .Add(new SpawnAsteroidSystem())
-                ;
-
+            b.Add(new RecalculateSpaceHashSystem());
+            b.Add(new CheckIntersectionWithAsteroidsSystem());
+            b.Add(new CheckAsteroidHitSystem());
+            b.Add(new AutoSpawnAsteroidSystem());
+            b.Add(new SpawnAsteroidSystem());
         }
     }
 }

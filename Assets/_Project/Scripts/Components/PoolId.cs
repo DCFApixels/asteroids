@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Asteroids.Components
 {
-    internal struct PoolId : IEcsComponent
+    internal struct PoolID : IEcsComponent
     {
         public Component Component;
         public int Id;

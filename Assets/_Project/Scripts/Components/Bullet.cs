@@ -2,7 +2,7 @@
 
 namespace Asteroids.Components
 {
-    public struct Bullet : IEcsTagComponent
-    {
-    }
+    [System.Serializable]
+    public struct Bullet : IEcsTagComponent { }
+
 }

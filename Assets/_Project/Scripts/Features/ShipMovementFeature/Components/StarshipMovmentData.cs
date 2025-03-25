@@ -21,5 +21,4 @@ namespace Asteroids.StarshipMovmentFeature
         public float Power;
 
     }
-    public class Template_89922AB99501C6637E5655E8ABB1F04A : ComponentTemplate<StarshipMovmentData> { }
 }

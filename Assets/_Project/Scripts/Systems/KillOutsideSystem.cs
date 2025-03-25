@@ -19,7 +19,7 @@ namespace Asteroids.Systems
             public readonly EcsPool<TransformData> TransformDatas = Inc;
             [UsedImplicitly]
             public readonly EcsTagPool<KillOutsideMarker> KillOutsideEvents = Inc;
-            public readonly EcsPool<PoolId> PoolIds = Inc;
+            public readonly EcsPool<PoolID> PoolIds = Inc;
         }
     
         public void Run()

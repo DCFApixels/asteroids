@@ -24,8 +24,10 @@ namespace Asteroids.MovementFeature
         [Header("Last")]
         public Vector3 lastPosition;
         public Quaternion lastRotation;
+
+        public Vector3 CalcLocalVector(Vector3 vector)
+        {
+            return rotation * vector;
+        }
     }
-
-
-    public class Template_E9522BB9950115AD62A48B42DEA0B5ED : ComponentTemplate<TransformData> { }
 }
