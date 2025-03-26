@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Nebula
+  m_Shader: {fileID: 4800000, guid: dae447e1647b99140af4002414a00ce8, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _ColorContrast: 0.113
+    - _ColorOffset: 0.2
+    - _Frequency: 1.2
+    - _FrequencyA: 2
+    - _FrequencyX: 0
+    - _NoiseX: 0
+    - _Offset: 0
+    - _OffsetA: 15
+    - _OffsetAMultiplier: 0.8
+    - _OffsetB: 10
+    - _OffsetG: 5
+    - _OffsetR: 0
+    - _Power: 0.11
+    - _Power1: 1
+    - _Power2: 1
+    - _Speed: 0.008
+    m_Colors:
+    - _Color: {r: 0.735849, g: 0.735849, b: 0.735849, a: 0.62352943}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
