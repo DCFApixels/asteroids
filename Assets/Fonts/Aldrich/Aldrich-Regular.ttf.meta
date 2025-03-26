@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: c76bb026e92184944a7f44c96264c0a0
+guid: 986a94715a27ff8418c1231523f26c90
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Doto
+  - Aldrich
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
