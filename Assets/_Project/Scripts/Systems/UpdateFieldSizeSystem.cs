@@ -41,6 +41,7 @@ namespace Asteroids.Systems
 
             DebugX.Draw().WireQuad(Vector3.zero, Quaternion.LookRotation(Vector3.up), size);
             _runtimeData.FieldSize = size + Vector2.one * _staticData.ScreenBorderOffset;
+            DebugX.Draw().WireQuad(Vector3.zero, Quaternion.LookRotation(Vector3.up), _runtimeData.FieldSize);
             _runtimeData.AreaHash = new(size.x / 4, -size.x / 2f, -size.y / 2f, size.x / 2f, size.y / 2f);
         }
     }

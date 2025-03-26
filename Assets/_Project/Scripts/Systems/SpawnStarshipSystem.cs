@@ -1,5 +1,6 @@
 ﻿using Asteroids.Components;
 using Asteroids.Data;
+using Asteroids.GameFieldFueature;
 using Asteroids.MovementFeature;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
@@ -24,7 +25,7 @@ namespace Asteroids.Systems
             public readonly EcsPool<Starship> Starships = Inc;
             public readonly EcsPool<InputData> InputDatas = Inc;
             public readonly EcsPool<Immunity> Immunities = Inc;
-            public readonly EcsPool<WrapAroundScreenMarker> WrapAroundScreenMarkers = Inc;
+            public readonly EcsTagPool<WrapAroundGameFieldMarker> WrapAroundScreenMarkers = Inc;
             public readonly EcsPool<RequestIntersectionEvent> RequestIntersectionEvents = Inc;
         }
 

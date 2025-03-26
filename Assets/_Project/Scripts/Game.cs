@@ -1,6 +1,8 @@
+using Asteroids.BulletsFeature;
 using Asteroids.CameraSmoothFollowFeature;
 using Asteroids.ControlsFeature;
 using Asteroids.Data;
+using Asteroids.GameFieldFueature;
 using Asteroids.MovementFeature;
 using Asteroids.StarshipMovmentFeature;
 using Asteroids.Systems;
@@ -39,15 +41,15 @@ namespace Asteroids
                 .AddModule(new AsteroidModule())
 
                 .Add(new KillHitObjectSystem())
-                .Add(new WrapAroundScreenSystem())
-                .Add(new KillOutsideSystem())
                 .Add(new UIUpdateSystem())
                 .Add(new RestartSystem())
 
+                .AddModule(new CameraSmoothFollowModule())
                 .AddModule(new ControlsModule())
                 .AddModule(new StarshipMovmentModule())
                 .AddModule(new MovementModule())
-                .AddModule(new CameraSmoothFollowModule())
+                .AddModule(new BulletsModule())
+                .AddModule(new GameFieldModule())
 
                 // Injecting into systems.
                 .Inject(_world)

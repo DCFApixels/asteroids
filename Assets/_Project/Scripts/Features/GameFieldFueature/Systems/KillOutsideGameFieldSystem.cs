@@ -3,23 +3,21 @@ using Asteroids.Data;
 using Asteroids.MovementFeature;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
-using JetBrains.Annotations;
 
-namespace Asteroids.Systems
+namespace Asteroids.GameFieldFueature
 {
-    internal class KillOutsideSystem : IEcsRun
+    internal class KillOutsideGameFieldSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private RuntimeData _runtimeData;
-        [DI] private StaticData _staticData;
-        [DI] private PoolService _poolService;
+        [DI] EcsDefaultWorld _world;
+        [DI] RuntimeData _runtimeData;
+        [DI] StaticData _staticData;
+        [DI] PoolService _poolService;
 
         private class Aspect : EcsAspect
         {
-            public readonly EcsPool<TransformData> TransformDatas = Inc;
-            [UsedImplicitly]
-            public readonly EcsTagPool<KillOutsideMarker> KillOutsideEvents = Inc;
-            public readonly EcsPool<PoolID> PoolIds = Inc;
+            public EcsPool<TransformData> TransformDatas = Inc;
+            public EcsTagPool<KillOutsideGameFieldMarker> KillOutsideEvents = Inc;
+            public EcsPool<PoolID> PoolIds = Inc;
         }
     
         public void Run()

@@ -17,7 +17,6 @@ MonoBehaviour:
   _componentTemplates:
   - rid: 1520753779500646429
   - rid: 1520753779500646629
-  - rid: 1520753779500646640
   - rid: 1520753779500646641
   references:
     version: 2
@@ -33,14 +32,11 @@ MonoBehaviour:
     - rid: 1520753779500646629
       type: {class: Template_CB79ECCA950122BC3E7CE6C8397659EB, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
-        _offset: 0
-    - rid: 1520753779500646640
-      type: {class: Template_4A1123CB9501B7933D75AA7248F28132, ns: ComponentTemplates, asm: Assembly-CSharp}
-      data:
+        component:
+          lifeTimeMax: 5
+          lifeTime: 5
         _offset: 0
     - rid: 1520753779500646641
       type: {class: Template_35CA21CB95018BE256CAA78659C23B59, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
-        component:
-          Offset: 0
         _offset: 0

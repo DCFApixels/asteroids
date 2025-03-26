@@ -2,6 +2,7 @@ Shader "Asteroids/Nebula"
 {
     Properties
     {
+        _Seed ("Seed", Float) = 1
         _Color ("Color", Color) = (1,1,1,1)
         _OffsetR ("OffsetR", Float) = 0
         _OffsetG ("OffsetG", Float) = 0
@@ -14,8 +15,8 @@ Shader "Asteroids/Nebula"
         _Power ("Power", Float) = 1
         _ColorOffset ("ColorOffset", Float) = 0
 
-        _NoiseX ("NoiseX", Float) = 0
-        _FrequencyX ("FrequencyX", Float) = 0
+        //_NoiseX ("NoiseX", Float) = 0
+        //_FrequencyX ("FrequencyX", Float) = 0
         _ColorContrast ("ColorContrast", Float) = 0
     }
     SubShader
@@ -50,6 +51,7 @@ Shader "Asteroids/Nebula"
                 float4 vertex : SV_POSITION;
             };
 
+            float1 _Seed;
             float4 _Color;
             float _OffsetR;
             float _OffsetG;
@@ -62,8 +64,8 @@ Shader "Asteroids/Nebula"
             float _Power;
             float _ColorOffset;
 
-            float _NoiseX;
-            float _FrequencyX;
+            //float _NoiseX;
+            //float _FrequencyX;
             float _ColorContrast;
 
 
@@ -123,16 +125,16 @@ Shader "Asteroids/Nebula"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float time = _Time.y * _Speed;
+                float time = _Time.y * _Speed + _Seed;
 
                 float r = BitangentNoise3D(float3(i.uv * _Frequency, _OffsetR + time))  * _Power + _ColorOffset;
                 float g = BitangentNoise3D(float3(i.uv * _Frequency, _OffsetG + time))  * _Power + _ColorOffset;
                 float b = BitangentNoise3D(float3(i.uv * _Frequency, _OffsetB + time))  * _Power + _ColorOffset;
                 float a = BitangentNoise3D(float3(i.uv * _FrequencyA, _OffsetA + time)) * _Power + _ColorOffset;
 
-                float noiseX = BitangentNoise3D(float3(i.uv * _NoiseX, 100 + time));
-                float frequencyX = BitangentNoise3D(float3(i.uv * _FrequencyX, 200 + time));
-                float XXX = smoothstep(noiseX + frequencyX, 0, 1);
+                //float noiseX = BitangentNoise3D(float3(i.uv * _NoiseX, 100 + time));
+                //float frequencyX = BitangentNoise3D(float3(i.uv * _FrequencyX, 200 + time));
+                //float XXX = smoothstep(noiseX + frequencyX, 0, 1);
 
                 float4 color = float4(r, g, b, a);
                 color = smoothstep(color, 0, 1);

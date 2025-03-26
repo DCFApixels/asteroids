@@ -7,12 +7,12 @@ namespace Asteroids.ControlsFeature
     [MetaColor(ControlsModule.META_COLOR)]
     public class InputToAxisControlSystem : IEcsRun
     {
+        [DI] EcsDefaultWorld _world;
         class Aspect : EcsAspect
         {
             public EcsPool<AxisControlData> axisControlDatas = Inc;
             public EcsPool<InputData> InputDatas = Inc;
         }
-        [DI] EcsDefaultWorld _world;
         public void Run()
         {
             foreach (var e in _world.Where(out Aspect a))

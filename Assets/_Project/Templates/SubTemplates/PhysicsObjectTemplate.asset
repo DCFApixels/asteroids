@@ -17,6 +17,7 @@ MonoBehaviour:
   - rid: 1520753779500646426
   - rid: 1520753779500646427
   - rid: 1520753779500646428
+  - rid: 1520753799220166827
   references:
     version: 2
     RefIds:
@@ -43,4 +44,10 @@ MonoBehaviour:
           rotation: {x: 0, y: 0, z: 0, w: 1}
           lastPosition: {x: 0, y: 0, z: 0}
           lastRotation: {x: 0, y: 0, z: 0, w: 1}
+        _offset: 0
+    - rid: 1520753799220166827
+      type: {class: Template_395668D195011D0C128ED015E17731C5, ns: ComponentTemplates, asm: Assembly-CSharp}
+      data:
+        component:
+          radius: 0.5
         _offset: 0
