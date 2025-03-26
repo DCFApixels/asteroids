@@ -13,6 +13,10 @@ Shader "Asteroids/Nebula"
         _Speed ("Speed", Float) = 1
         _Power ("Power", Float) = 1
         _ColorOffset ("ColorOffset", Float) = 0
+
+        _NoiseX ("NoiseX", Float) = 0
+        _FrequencyX ("FrequencyX", Float) = 0
+        _ColorContrast ("ColorContrast", Float) = 0
     }
     SubShader
     {
@@ -58,6 +62,11 @@ Shader "Asteroids/Nebula"
             float _Power;
             float _ColorOffset;
 
+            float _NoiseX;
+            float _FrequencyX;
+            float _ColorContrast;
+
+
             v2f vert (appdata v)
             {
                 v2f o;
@@ -99,6 +108,19 @@ Shader "Asteroids/Nebula"
                 return 1.0 - absCos;
             }
 
+            float4 UpContrast(float4 rgb) {
+                float minChannel = min(min(rgb.r, rgb.g), rgb.b);
+                float maxChannel = max(max(rgb.r, rgb.g), rgb.b);
+                float factor = 1.0 / (maxChannel - minChannel + 1e-5); // +1e-5 чтобы избежать деления на 0
+    
+                return float4(
+                    (rgb.r - minChannel) * factor,
+                    (rgb.g - minChannel) * factor,
+                    (rgb.b - minChannel) * factor,
+                    rgb.a
+                );
+            }
+
             fixed4 frag (v2f i) : SV_Target
             {
                 float time = _Time.y * _Speed;
@@ -108,9 +130,13 @@ Shader "Asteroids/Nebula"
                 float b = BitangentNoise3D(float3(i.uv * _Frequency, _OffsetB + time))  * _Power + _ColorOffset;
                 float a = BitangentNoise3D(float3(i.uv * _FrequencyA, _OffsetA + time)) * _Power + _ColorOffset;
 
+                float noiseX = BitangentNoise3D(float3(i.uv * _NoiseX, 100 + time));
+                float frequencyX = BitangentNoise3D(float3(i.uv * _FrequencyX, 200 + time));
+                float XXX = smoothstep(noiseX + frequencyX, 0, 1);
+
                 float4 color = float4(r, g, b, a);
                 color = smoothstep(color, 0, 1);
-
+                color = lerp(color, UpContrast(color), _ColorContrast);
 
                 float x = smoothstep(color.r + color.g + color.b, 0, 1);
                 x = abscos(x);

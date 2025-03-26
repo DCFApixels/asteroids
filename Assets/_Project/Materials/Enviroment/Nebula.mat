@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Asteroids_FakeLight
+  m_Name: Nebula
   m_Shader: {fileID: 4800000, guid: dae447e1647b99140af4002414a00ce8, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -25,20 +25,23 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _ColorContrast: 0.113
     - _ColorOffset: 0.2
-    - _Frequency: 1.6
+    - _Frequency: 1.2
     - _FrequencyA: 2
+    - _FrequencyX: 0
+    - _NoiseX: 0
     - _Offset: 0
     - _OffsetA: 15
     - _OffsetAMultiplier: 0.8
     - _OffsetB: 10
     - _OffsetG: 5
     - _OffsetR: 0
-    - _Power: 0.1
+    - _Power: 0.11
     - _Power1: 1
     - _Power2: 1
-    - _Speed: 0.01
+    - _Speed: 0.008
     m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 0.62352943}
+    - _Color: {r: 0.735849, g: 0.735849, b: 0.735849, a: 0.62352943}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
