@@ -35,7 +35,6 @@ namespace Asteroids
                 // Adding systems.
                 .Add(new InitSystem())
                 .Add(new ChangeStateSystem())
-                .Add(new UpdateFieldSizeSystem())
 
                 .AddModule(new StarshipModule())
                 .AddModule(new AsteroidModule())

@@ -5,13 +5,15 @@ using UnityEngine;
 
 namespace Asteroids.Systems
 {
-    internal class UpdateFieldSizeSystem : IEcsRun
+    internal class UpdateFieldSizeSystem : IEcsRun, IEcsDefaultAddParams
     {
-        [DI] private RuntimeData _runtimeData;
-        [DI] private SceneData _sceneData;
-        [DI] private StaticData _staticData;
+        public AddParams AddParams => EcsConsts.PRE_BEGIN_LAYER;
 
-        private float _prevAspect = -1f;
+        [DI] RuntimeData _runtimeData;
+        [DI] SceneData _sceneData;
+        [DI] StaticData _staticData;
+        float _prevAspect = -1f;
+
         public void Run()
         {
             var camera = _sceneData.Camera;

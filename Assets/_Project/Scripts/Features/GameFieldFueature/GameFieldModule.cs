@@ -1,4 +1,5 @@
-﻿using DCFApixels.DragonECS;
+﻿using Asteroids.Systems;
+using DCFApixels.DragonECS;
 
 namespace Asteroids.GameFieldFueature
 {
@@ -6,6 +7,7 @@ namespace Asteroids.GameFieldFueature
     {
         public void Import(EcsPipeline.Builder b)
         {
+            b.Add(new UpdateFieldSizeSystem());
             b.Add(new CheckAroundGameFieldSystem());
             b.Add(new WrapAroundGameFieldSystem());
             b.Add(new KillOutsideGameFieldSystem());

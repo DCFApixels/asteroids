@@ -7,11 +7,11 @@ namespace Asteroids.Systems
 {
     public class AutoSpawnAsteroidSystem : IEcsRun
     {
-        [DI] private StaticData _staticData;
-        [DI] private EcsDefaultWorld _world;
-        [DI] private RuntimeData _runtimeData;
+        [DI] StaticData _staticData;
+        [DI] EcsDefaultWorld _world;
+        [DI] RuntimeData _runtimeData;
 
-        private int _previousSpawnTime;
+        int _previousSpawnTime;
         
         public void Run()
         {

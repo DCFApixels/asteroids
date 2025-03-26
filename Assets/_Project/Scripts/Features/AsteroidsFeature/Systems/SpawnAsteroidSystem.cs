@@ -9,21 +9,20 @@ namespace Asteroids.Systems
 {
     internal class SpawnAsteroidSystem : IEcsRun
     {
-        [DI] private StaticData _staticData;
-        [DI] private EcsDefaultWorld _world;
-        [DI] private RuntimeData _runtimeData;
-        [DI] private PoolService _poolService;
+        [DI] StaticData _staticData;
+        [DI] EcsDefaultWorld _world;
+        [DI] PoolService _poolService;
 
         private class EventAspect : EcsAspect
         {
-            public readonly EcsPool<SpawnAsteroidEvent> SpawnAsteroidEvents = Inc;
+            public EcsPool<SpawnAsteroidEvent> SpawnAsteroidEvents = Inc;
         }
         class SpawnAspect : EcsAspect
         {
-            public readonly EcsPool<PoolID> PoolIDs = Inc;
-            public readonly EcsPool<Asteroid> Asteroids = Inc;
-            public readonly EcsPool<Velocity> Velocities = Inc;
-            public readonly EcsPool<TransformData> TransformDatas = Inc;
+            public EcsPool<PoolID> PoolIDs = Inc;
+            public EcsPool<Asteroid> Asteroids = Inc;
+            public EcsPool<Velocity> Velocities = Inc;
+            public EcsPool<TransformData> TransformDatas = Inc;
         }
 
         public void Run()

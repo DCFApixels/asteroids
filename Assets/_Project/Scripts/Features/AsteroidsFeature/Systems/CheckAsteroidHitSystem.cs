@@ -9,16 +9,16 @@ namespace Asteroids.Systems
 {
     internal class CheckAsteroidHitSystem : IEcsRun
     {
-        [DI] private RuntimeData _runtimeData;
-        [DI] private EcsDefaultWorld _world;
-        [DI] private PoolService _poolService;
-        [DI] private StaticData _staticData;
+        [DI] RuntimeData _runtimeData;
+        [DI] EcsDefaultWorld _world;
+        [DI] PoolService _poolService;
+        [DI] StaticData _staticData;
 
         private class Aspect : EcsAspect
         {
-            public readonly EcsPool<Asteroid> Asteroids = Inc;
-            public readonly EcsPool<HitEvent> HitEvents = Inc;
-            public readonly EcsPool<TransformData> TransformDatas = Inc;
+            public EcsPool<Asteroid> Asteroids = Inc;
+            public EcsPool<HitEvent> HitEvents = Inc;
+            public EcsPool<TransformData> TransformDatas = Inc;
         }
         public void Run()
         {

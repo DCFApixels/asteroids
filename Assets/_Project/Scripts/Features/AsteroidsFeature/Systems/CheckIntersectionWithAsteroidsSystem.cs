@@ -9,10 +9,10 @@ namespace Asteroids.Systems
 {
     internal class CheckIntersectionWithAsteroidsSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private RuntimeData _runtimeData;
+        [DI] EcsDefaultWorld _world;
+        [DI] RuntimeData _runtimeData;
 
-        private readonly List<AreaHash2D<entlong>.Hit> _hits = new(64);
+        List<AreaHash2D<entlong>.Hit> _hits = new(64);
 
         private class Aspect : EcsAspect
         {
