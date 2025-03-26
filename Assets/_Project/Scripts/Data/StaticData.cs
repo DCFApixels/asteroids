@@ -31,7 +31,8 @@ namespace Asteroids.Data
         public float AdditionalKillOffset = 1.1f;
 
         [Header("Other")]
-        public AsteroidExplosion AsteroidExplosionPrefab;
+        public ExplosionView AsteroidExplosionPrefab;
+        public ExplosionView StarshipExplosionPrefab;
         public float ScreenBorderOffset = 0.5f;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Asteroids.Components
 {
-    internal struct HitEvent : IEcsComponent
+    internal struct HitSignal : IEcsComponent
     {
         public entlong ByObject;
     }

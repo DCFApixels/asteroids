@@ -28,4 +28,5 @@ MonoBehaviour:
   AsteroidDeathLeft: 1
   AdditionalKillOffset: 1.5
   AsteroidExplosionPrefab: {fileID: 161898772272626303, guid: a7cff06f99c379a4fbb10c4094a4a49d, type: 3}
+  StarshipExplosionPrefab: {fileID: 161898772272626303, guid: 658544ca5bff59e4b8749dc3ca184a6e, type: 3}
   ScreenBorderOffset: 0.5

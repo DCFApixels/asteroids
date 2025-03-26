@@ -1,26 +1,34 @@
-﻿using System.Collections.Generic;
-using Asteroids.Components;
+﻿using Asteroids.Components;
 using Asteroids.Data;
+using Asteroids.MovementFeature;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
+using System.Collections.Generic;
 
 namespace Asteroids.Systems
 {
     internal class RespawnStarShipOnHitSystem : IEcsRun, IEcsInit
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private RuntimeData _runtimeData;
-        [DI] private SceneData _sceneData;
+        [DI] EcsDefaultWorld _world;
+        [DI] RuntimeData _runtimeData;
+        [DI] SceneData _sceneData;
 
-        private EcsPool<Starship> _starships;
-        private EcsPool<HitEvent> _hitEvents;
+        private EcsPool<HitSignal> _hitEvents;
         private EcsPool<Asteroid> _asteroids;
-        
+
+
+        class StarshipAspect : EcsAspect
+        {
+            public EcsPool<Starship> Starships = Inc;
+        }
+
         private readonly List<AreaHash2D<entlong>.Hit> _hits = new(32);
 
         public void Run()
         {
-            if (_starships.Count != 0 || _runtimeData.GameState != GameState.Play)
+            var starshipA = _world.GetAspect<StarshipAspect>();
+
+            if (starshipA.Starships.Count != 0 || _runtimeData.GameState != GameState.Play)
             {
                 return;
             }
@@ -37,23 +45,21 @@ namespace Asteroids.Systems
                     _sceneData.SpawnPosition.position.z, _sceneData.KillOnSpawnRadius, _hits);
                 foreach (var hit in _hits)
                 {
-                    var hitId = hit.Id;
-
-                    if (hitId.TryUnpack(out var asteroidEntity, out short _))
+                    if (hit.Id.TryGetID(out var asteroidEntity))
                     {
                         _asteroids.TryAddOrGet(asteroidEntity).DeathsLeft = 0;
                         _hitEvents.TryAddOrGet(asteroidEntity);
                     }
                 }
 
-                _world.GetPool<SpawnStarshipEvent>().Add(_world.NewEntity());
+
+                _world.GetPool<SpawnStarshipEvent>().NewEntity();
             }
         }
 
         public void Init()
         {
-            _starships = _world.GetPool<Starship>();
-            _hitEvents = _world.GetPool<HitEvent>();
+            _hitEvents = _world.GetPool<HitSignal>();
             _asteroids = _world.GetPool<Asteroid>();
         }
     }

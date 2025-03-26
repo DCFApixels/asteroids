@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Asteroids.Views
 {
-    internal class AsteroidExplosion : MonoBehaviour
+    internal class ExplosionView : MonoBehaviour
     {
         public ParticleSystem Explosion;
         public float Time;

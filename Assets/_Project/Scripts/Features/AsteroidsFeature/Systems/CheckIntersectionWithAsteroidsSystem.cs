@@ -22,7 +22,7 @@ namespace Asteroids.Systems
 
         public void Run()
         {
-            EcsPool<HitEvent> hitEvents = _world.GetPool<HitEvent>();
+            EcsPool<HitSignal> hitEvents = _world.GetPool<HitSignal>();
             
             foreach (var e in _world.Where(out Aspect a))
             {

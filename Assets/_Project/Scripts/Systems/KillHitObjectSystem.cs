@@ -5,15 +5,17 @@ using JetBrains.Annotations;
 
 namespace Asteroids.Systems
 {
-    internal class KillHitObjectSystem : IEcsRun
+    internal class KillHitObjectSystem : IEcsRun, IEcsDefaultAddParams
     {
         [DI] private EcsDefaultWorld _world;
         [DI] private PoolService _poolService;
 
+        public AddParams AddParams => EcsConsts.POST_END_LAYER;
+
         private class AspectPool : EcsAspect
         {
             [UsedImplicitly]
-            public readonly EcsPool<HitEvent> HitEvents = Inc;
+            public readonly EcsPool<HitSignal> HitEvents = Inc;
             public readonly EcsPool<PoolID> PoolIds = Inc;
         }
     

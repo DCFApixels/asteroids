@@ -5,6 +5,7 @@ using Asteroids.Data;
 using Asteroids.GameFieldFueature;
 using Asteroids.MovementFeature;
 using Asteroids.StarshipMovmentFeature;
+using Asteroids.StartshipsFeature;
 using Asteroids.Systems;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
@@ -49,6 +50,7 @@ namespace Asteroids
                 .AddModule(new MovementModule())
                 .AddModule(new BulletsModule())
                 .AddModule(new GameFieldModule())
+                .AddModule(new StartshipsModule())
 
                 // Injecting into systems.
                 .Inject(_world)

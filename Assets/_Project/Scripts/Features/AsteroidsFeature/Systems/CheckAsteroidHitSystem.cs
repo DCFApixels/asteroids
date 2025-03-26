@@ -17,7 +17,7 @@ namespace Asteroids.Systems
         private class Aspect : EcsAspect
         {
             public EcsPool<Asteroid> Asteroids = Inc;
-            public EcsPool<HitEvent> HitEvents = Inc;
+            public EcsPool<HitSignal> HitEvents = Inc;
             public EcsPool<TransformData> TransformDatas = Inc;
         }
         public void Run()

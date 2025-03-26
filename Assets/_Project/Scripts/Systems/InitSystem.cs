@@ -20,7 +20,8 @@ namespace Asteroids.Systems
             _poolService.PreWarm(_staticData.BulletViewPrefab, 20);
             _poolService.PreWarm(_staticData.StarshipViewPrefab, 1);
             _poolService.PreWarm(_staticData.AsteroidExplosionPrefab, 20);
-           
+            _poolService.PreWarm(_staticData.StarshipExplosionPrefab, 2);
+
             _sceneData.UI.LoseScreen.InjectWorld(_world);
 
             _world.GetPool<ChangeState>().Add(_world.NewEntity()).NewState = GameState.Play;
