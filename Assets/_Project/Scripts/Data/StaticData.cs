@@ -10,14 +10,9 @@ namespace Asteroids.Data
         [Header("Player")]
         public ScriptableEntityTemplateBase PlayerStarshipTemplate;
         public StarshipView StarshipViewPrefab;
-        public float RotationSpeed = 10;
-        public float StarshipSpeed = 10;
-        public float StarshipAcceleration = 10;
-        public float StarshipMaxSpeed;
         public int Lifes = 3;
         public float StarshipSpawnImmunityTime = 1;
-        [Range(0,1)]
-        public float StarshipFriction = 0.01f;
+
     
         [Header("Bullets")]
         public ScriptableEntityTemplateBase BulletTemplate;
@@ -35,7 +30,8 @@ namespace Asteroids.Data
         [Range(1.1f, 2)]
         public float AdditionalKillOffset = 1.1f;
 
-        public AsteroidExplosion AsteroidExplosion;
-
+        [Header("Other")]
+        public AsteroidExplosion AsteroidExplosionPrefab;
+        public float ScreenBorderOffset = 0.5f;
     }
 }

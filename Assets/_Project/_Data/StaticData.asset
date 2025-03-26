@@ -14,13 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerStarshipTemplate: {fileID: 11400000, guid: a07793aad9fb8d64c8c9b3990441be23, type: 2}
   StarshipViewPrefab: {fileID: 646751663581237465, guid: 863b4d63a5413314197562c04df1f781, type: 3}
-  RotationSpeed: 360
-  StarshipSpeed: 0
-  StarshipAcceleration: 10
-  StarshipMaxSpeed: 10
   Lifes: 3
   StarshipSpawnImmunityTime: 1
-  StarshipFriction: 0.01
   BulletTemplate: {fileID: 11400000, guid: 8957ee73d8334d548949bba0ad54d7f6, type: 2}
   BulletViewPrefab: {fileID: 4782241617648703718, guid: cfda0d7cd365f48488a2261a96329186, type: 3}
   BulletSpeed: 10
@@ -32,4 +27,5 @@ MonoBehaviour:
   AsteroidMinSpeed: 5
   AsteroidDeathLeft: 1
   AdditionalKillOffset: 1.5
-  AsteroidExplosion: {fileID: 161898772272626303, guid: a7cff06f99c379a4fbb10c4094a4a49d, type: 3}
+  AsteroidExplosionPrefab: {fileID: 161898772272626303, guid: a7cff06f99c379a4fbb10c4094a4a49d, type: 3}
+  ScreenBorderOffset: 2.5

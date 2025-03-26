@@ -19,7 +19,7 @@ namespace Asteroids.Systems
             _poolService.PreWarm(_staticData.AsteroidViewPrefab, 20);
             _poolService.PreWarm(_staticData.BulletViewPrefab, 20);
             _poolService.PreWarm(_staticData.StarshipViewPrefab, 1);
-            _poolService.PreWarm(_staticData.AsteroidExplosion, 20);
+            _poolService.PreWarm(_staticData.AsteroidExplosionPrefab, 20);
            
             _sceneData.UI.LoseScreen.InjectWorld(_world);
 

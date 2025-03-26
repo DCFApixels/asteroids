@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: NebulaParticle
-  m_Shader: {fileID: 4800000, guid: 263f91e4c1b3c1e439d87056fe4767c7, type: 3}
+  m_Name: Asteroids_FakeLight
+  m_Shader: {fileID: 4800000, guid: dae447e1647b99140af4002414a00ce8, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -16,24 +16,29 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 10
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 3a2d6edda35b0bd44b5a41cfbf9c19ee, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
+    m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _ColorOffset: 0.2
+    - _Frequency: 1.6
+    - _FrequencyA: 2
     - _Offset: 0
-    - _Power: 0.41
+    - _OffsetA: 15
+    - _OffsetAMultiplier: 0.8
+    - _OffsetB: 10
+    - _OffsetG: 5
+    - _OffsetR: 0
+    - _Power: 0.1
     - _Power1: 1
-    - _Power2: 0.23
+    - _Power2: 1
+    - _Speed: 0.01
     m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 0.62352943}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

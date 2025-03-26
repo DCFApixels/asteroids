@@ -1,3 +1,4 @@
+using Asteroids.CameraSmoothFollowFeature;
 using Asteroids.ControlsFeature;
 using Asteroids.Data;
 using Asteroids.MovementFeature;
@@ -46,6 +47,7 @@ namespace Asteroids
                 .AddModule(new ControlsModule())
                 .AddModule(new StarshipMovmentModule())
                 .AddModule(new MovementModule())
+                .AddModule(new CameraSmoothFollowModule())
 
                 // Injecting into systems.
                 .Inject(_world)

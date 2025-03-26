@@ -27,7 +27,7 @@ namespace Asteroids.Systems
                 ref var asteroid = ref a.Asteroids[e];
                 ref var asteroidTransformData = ref a.TransformDatas[e];
                 
-                var explosion = _poolService.Get(_staticData.AsteroidExplosion, out var instanceID);
+                var explosion = _poolService.Get(_staticData.AsteroidExplosionPrefab, out var instanceID);
                 explosion.transform.position = asteroidTransformData.position;
                 explosion.Play(_poolService, instanceID);
                 

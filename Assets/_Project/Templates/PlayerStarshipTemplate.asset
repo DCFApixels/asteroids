@@ -19,6 +19,7 @@ MonoBehaviour:
   - rid: 1520753779500646423
   - rid: 1520753779500646621
   - rid: 1520753779500646648
+  - rid: 1520753779500646681
   references:
     version: 2
     RefIds:
@@ -50,4 +51,12 @@ MonoBehaviour:
       data:
         component:
           View: {fileID: 0}
+        _offset: 0
+    - rid: 1520753779500646681
+      type: {class: Template_D7729ECC9501F8D9D9868FBACC0F97B5, ns: ComponentTemplates, asm: Assembly-CSharp}
+      data:
+        component:
+          target: {x: 0, y: 0, z: 0}
+          positionsLerp: 0.03
+          moveLerp: 0.01
         _offset: 0
