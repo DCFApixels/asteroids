@@ -40,7 +40,12 @@ namespace Asteroids.StarshipMovmentFeature
                     velocity.lineral += forwardAcceleration;
                 }
 
-                velocity.angular.y = movementData.MaxRotationSpeed * axisControlData.Axis.x;
+                float rotangle = movementData.MaxRotationSpeed;
+
+                if (rotangle > 0 && velocity.angular.y < rotangle || velocity.angular.y > rotangle)
+                {
+                    velocity.angular.y += rotangle * axisControlData.Axis.x * Time.deltaTime;
+                }
             }
         }
     }

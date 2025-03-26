@@ -29,6 +29,7 @@ namespace Asteroids.MovementFeature
                 ref var rigidbody = ref a.rigidbodyDatas.Get(e);
 
                 velocity.lineral = velocity.lineral * Mathf.Clamp01(1f - rigidbody.lineralDrag * Time.deltaTime);
+                velocity.angular = velocity.angular * Mathf.Clamp01(1f - rigidbody.angularDrag * Time.deltaTime);
             }
         }
 

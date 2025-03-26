@@ -20,6 +20,7 @@ MonoBehaviour:
   - rid: 1520753779500646621
   - rid: 1520753779500646648
   - rid: 1520753779500646681
+  - rid: 1520753821003809058
   references:
     version: 2
     RefIds:
@@ -28,7 +29,7 @@ MonoBehaviour:
       data:
         component:
           MaxSpeed: 10
-          MaxRotationSpeed: 270
+          MaxRotationSpeed: 450
           Acceleration: 5
           Power: 0
         _offset: 0
@@ -43,7 +44,7 @@ MonoBehaviour:
       data:
         component:
           lineralDrag: 0.3
-          angularDrag: 0.05
+          angularDrag: 3
           mass: 1
         _offset: 0
     - rid: 1520753779500646648
@@ -58,5 +59,9 @@ MonoBehaviour:
         component:
           target: {x: 0, y: 0, z: 0}
           positionsLerp: 0.03
-          moveLerp: 0.01
+          moveLerp: 0.02
+        _offset: 0
+    - rid: 1520753821003809058
+      type: {class: Template_35CA21CB95018BE256CAA78659C23B59, ns: ComponentTemplates, asm: Assembly-CSharp}
+      data:
         _offset: 0

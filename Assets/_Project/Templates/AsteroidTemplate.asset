@@ -16,8 +16,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c52a3ae0148d0e545b28a3f233f55d08, type: 2}
   _componentTemplates:
   - rid: 1520753779500646430
-  - rid: 1520753779500646644
   - rid: 1520753779500646646
+  - rid: 1520753779500646644
   references:
     version: 2
     RefIds:
