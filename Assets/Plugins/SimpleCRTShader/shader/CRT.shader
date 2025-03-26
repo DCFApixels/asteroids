@@ -5,6 +5,25 @@ Shader "Simple CRT"
         _MainTex ("Texture", 2D) = "white" {}
         _DecalTex ("Decal Texture", 2D) = "white" {}
         _FilmDirtTex ("Dirt Texture", 2D) = "white" {}
+        
+
+        [Toggle] _Scanline("Scanline", Float) = 0
+        _ScanlineIntensity ("Scanline Intensity", Float) = 0.15
+        _ScanlineSpeed ("Scanline Speed", Float) = 1
+        [Toggle] _Monochorome("Monochorome", Float) = 0
+        _MonochoromeIntensity ("Monochorome Intensity", Float) = 0.5
+        [Toggle] _WhiteNoise("White Noise", Float) = 0
+        _WhiteNoiseIntensity("White Noise Intensity", Float) = 1
+        [Toggle] _ScreenJump("Screen Jump", Float) = 0
+        _ScreenJumpLevel("Screen Jump Level", Float) = 1
+        [Toggle] _ChromaticAberration("Chromatic Aberration", Float) = 0
+        _ChromaticAberrationIntensity("Chromatic Aberration Intensity", Float) = 1
+        _ChromaticAberrationStrength("Chromatic Aberration Strength", Float) = 0.003
+        _ChromaticAberrationStrengthMin("Chromatic Aberration Strength Min", Float) = 0
+        _ChromaticAberrationStrengthPolar("Chromatic Aberration Strength Polar", Float) = 0
+        [Toggle] _MultipleGhost("Multiple Ghost", Float) = 0
+        _MultipleGhostStrength("Multiple Ghost Strength", Float) = 0
+        _MultipleGhostIntensity("Multiple Ghost Intensity", Float) = 1
     }
     SubShader
     {
@@ -18,7 +37,14 @@ Shader "Simple CRT"
 
             #pragma vertex vert
             #pragma fragment frag
-
+            #pragma multi_compile_instancing
+            #pragma shader_feature_local _WHITENOISE_ON
+            #pragma shader_feature_local _SCANLINE_ON
+            #pragma shader_feature_local _MONOCHOROME_ON
+            #pragma shader_feature_local _SCREENJUMP_ON
+            #pragma shader_feature_local _CHROMATICABERRATION_ON
+            #pragma shader_feature_local _MULTIPLEGHOST_ON
+            
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -36,15 +62,25 @@ Shader "Simple CRT"
             float4 _MainTex_ST;
             float4 _MainTex_TexelSize;
 
-            int _WhiteNoiseOnOff;
-            int _ScanlineOnOff;
-            int _MonochormeOnOff;
+#if _WHITENOISE_ON
+            float _WhiteNoiseIntensity;
+#endif
+
+#if _SCANLINE_ON
+            float _ScanlineIntensity;
+            float _ScanlineSpeed;
+#endif
+#if _MONOCHOROME_ON
+            float _MonochoromeIntensity;
+#endif
 
             int _LetterBoxOnOff;
             int _LetterBoxEdgeBlur;
             int _LetterBoxType;
-            
+
+#if _SCREENJUMP_ON
             float _ScreenJumpLevel;
+#endif
             
             float _FlickeringStrength;
             float _FlickeringCycle;
@@ -56,11 +92,17 @@ Shader "Simple CRT"
             float _SlippageNoiseOnOff;
             float _SlippageSize;
 
+#if _CHROMATICABERRATION_ON
+            float _ChromaticAberrationIntensity;
             float _ChromaticAberrationStrength;
-            int _ChromaticAberrationOnOff;
+            float _ChromaticAberrationStrengthMin;
+            float _ChromaticAberrationStrengthPolar;
+#endif
 
-            int _MultipleGhostOnOff;
+#if _MULTIPLEGHOST_ON
             float _MultipleGhostStrength;
+            float _MultipleGhostIntensity;
+#endif
 
             sampler2D _DecalTex;
             float4 _DecalTex_ST;
@@ -75,6 +117,14 @@ Shader "Simple CRT"
             float GetRandom(float x);
             float EaseIn(float t0, float t1, float t);
 
+            float2 polarCoordinates(float2 UV, float2 Center, float RadialScale, float LengthScale)
+            {
+                float2 delta = UV - Center;
+                float radius = length(delta) * 2 * RadialScale;
+                float angle = atan2(delta.x, delta.y) * 1.0/6.28 * LengthScale;
+                return float2(radius, angle);
+            }
+
             v2f vert (appdata v)
             {
                 v2f o;
@@ -88,9 +138,9 @@ Shader "Simple CRT"
             {
                 float2 uv = i.uv;
 
-                /////Jump noise
+#if _SCREENJUMP_ON /////Jump noise
                 uv.y = frac(uv.y + _ScreenJumpLevel);
-                /////
+#endif
 
                 /////frickering
                 float flickeringNoise = GetRandom(_Time.y);
@@ -105,18 +155,30 @@ Shader "Simple CRT"
                 uv.x = uv.x + (_SlippageNoiseOnOff * _SlippageStrength * slippageMask * stepMask) * _SlippageOnOff; 
                 /////
 
-                /////Chromatic Aberration
-                float red = tex2D(_MainTex, float2(uv.x - _ChromaticAberrationStrength * _ChromaticAberrationOnOff, uv.y)).r;
-                float green = tex2D(_MainTex, float2(uv.x, uv.y)).g;
-                float blue = tex2D(_MainTex, float2(uv.x + _ChromaticAberrationStrength * _ChromaticAberrationOnOff, uv.y)).b; 
-                float4 color = float4(red, green, blue, 1);
-                /////
 
-                /////Multiple Ghost
-                float4 ghost1st = tex2D(_MainTex, uv - float2(1, 0) * _MultipleGhostStrength * _MultipleGhostOnOff);
-                float4 ghost2nd = tex2D(_MainTex, uv - float2(1, 0) * _MultipleGhostStrength * 2 * _MultipleGhostOnOff);
-                color = color * 0.8 + ghost1st * 0.15 + ghost2nd * 0.05;
-                /////
+                float4 color = tex2D(_MainTex, float2(uv.x, uv.y));
+
+#if _CHROMATICABERRATION_ON /////Chromatic Aberration
+
+                float polar = pow(polarCoordinates(i.uv, float2(0.5, 0.5), 1, 1).r, _ChromaticAberrationStrengthPolar);
+                float polarScale = lerp(_ChromaticAberrationStrengthMin, _ChromaticAberrationStrength, polar);
+
+                float red = tex2D(_MainTex, float2(uv.x - polarScale, uv.y)).r;
+                float green = tex2D(_MainTex, float2(uv.x, uv.y)).g;
+                float blue = tex2D(_MainTex, float2(uv.x + polarScale, uv.y)).b; 
+                color.xyz = lerp(color.xyz, float3(red, green, blue), _ChromaticAberrationIntensity);
+#endif
+
+#if _MULTIPLEGHOST_ON
+                //float4 ghost1st = tex2D(_MainTex, uv - float2(1, 0) * _MultipleGhostStrength * _MultipleGhostOnOff);
+                //float4 ghost2nd = tex2D(_MainTex, uv - float2(1, 0) * _MultipleGhostStrength * 2 * _MultipleGhostOnOff);
+                //color = color * 0.8 + ghost1st * 0.15 + ghost2nd * 0.05;
+
+                float3 ghost1st = tex2D(_MainTex, uv - float2(1, 0) * _MultipleGhostStrength);
+                float3 ghost2nd = tex2D(_MainTex, uv - float2(1, 0) * _MultipleGhostStrength * 2);
+                color.rgb = lerp(color.rgb, (color.rgb * 0.8 + ghost1st * 0.15 + ghost2nd * 0.05), _MultipleGhostIntensity);
+                //color = ;
+#endif
 
                 /////File dirt
                 float2 pp = -1.0 + 2.0 * uv;
@@ -186,38 +248,34 @@ Shader "Simple CRT"
                 }
                 /////
 
-                /////White noise
-                if(_WhiteNoiseOnOff == 1)
-                {
-                    return frac(sin(dot(i.uv, float2(12.9898, 78.233)) + _Time.x) * 43758.5453);
-                }
-                /////
+#if _WHITENOISE_ON
+                float whiteNoise = frac(sin(dot(i.uv, float2(12.9898, 78.233)) + _Time.x) * 43758.5453);
+                color.rgb = lerp(color.rgb, whiteNoise, _WhiteNoiseIntensity);
+#endif
 
                 /////Decal texture
                 float4 decal = tex2D(_DecalTex, (i.decaluv - _DecalTexPos) * _DecalTexScale) * _DecalTexOnOff;
                 color = color * (1 - decal.a) + decal;
                 /////
 
-                /////Scanline
-                float scanline = sin((i.uv.y + _Time.x) * 800.0) * 0.04;
-                color -= scanline * _ScanlineOnOff;
-                /////
+#if _SCANLINE_ON /////Scanline
+                float scanline = sin((i.uv.y + _Time.x * _ScanlineSpeed) * 800.0) * 0.04 * _ScanlineIntensity;
+                color -= scanline;
 
-                //////scanline noise
-                float noiseAlpha = 1;
-                if(pow(sin(uv.y + _Time.y * 2), 200) >= 0.999)
-                {
-                    noiseAlpha = GetRandom(uv.y);
-                    //color *= noiseAlpha;
-                }
-                //////
+                ////////scanline noise
+                //float noiseAlpha = 01;
+                //if(pow(sin(uv.y + _Time.y * 2), 200) >= 0.999)
+                //{
+                //    noiseAlpha *= GetRandom(uv.y);
+                //    color *= noiseAlpha;
+                //}
+#endif
 
-                //////Monochorome
-                if(_MonochormeOnOff == 1)
-                {
-                    color.xyz = 0.299f * color.r + 0.587f * color.g + 0.114f * color.b;
-                }
-                //////
+
+#if _MONOCHOROME_ON //////Monochorome
+                float mc =  0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
+                color.xyz = lerp(color.xyz, mc, _MonochoromeIntensity); 
+#endif
 
                 return color;
             }

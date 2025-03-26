@@ -135,10 +135,13 @@ public class CRTPostEffecter : MonoBehaviour
         material.SetInteger(_MonochormeOnOff, isMonochrome ? 1 : 0);
         material.SetFloat(_FlickeringStrength, flickeringStrength);
         material.SetFloat(_FlickeringCycle, flickeringCycle);
-        material.SetFloat(_ChromaticAberrationStrength, chromaticAberrationStrength);
-        material.SetInteger(_ChromaticAberrationOnOff, isChromaticAberration ? 1 : 0);
+        //material.SetFloat(_ChromaticAberrationStrength, chromaticAberrationStrength);
+        //material.SetInteger(_ChromaticAberrationOnOff, isChromaticAberration ? 1 : 0);
         material.SetInteger(_MultipleGhostOnOff, isMultipleGhost ? 1 : 0);
-        material.SetFloat(_MultipleGhostStrength, multipleGhostStrength); 
+        if (isMultipleGhost)
+        {
+            material.SetFloat(_MultipleGhostStrength, multipleGhostStrength);
+        }
         material.SetInteger(_FilmDirtOnOff, isFilmDirt ? 1 : 0);
         material.SetTexture(_FilmDirtTex, filmDirtTex);
 
@@ -152,18 +155,21 @@ public class CRTPostEffecter : MonoBehaviour
         //////
         
         //////Screen Jump Noise
-        screenJumpTimeLeft -= 0.01f;
-        if (screenJumpTimeLeft <= 0)
+        if(screenJumpFrequency > 0)
         {
-            if (Random.Range(0, 1000) < screenJumpFrequency)
+            screenJumpTimeLeft -= 0.01f;
+            if (screenJumpTimeLeft <= 0)
             {
-                var level = Random.Range(screenJumpMinLevel, screenJumpMaxLevel);
-                material.SetFloat(_ScreenJumpLevel, level);
-                screenJumpTimeLeft = screenJumpLength;
-            }
-            else
-            {
-                material.SetFloat(_ScreenJumpLevel, 0);
+                if (Random.Range(0, 1000) < screenJumpFrequency)
+                {
+                    var level = Random.Range(screenJumpMinLevel, screenJumpMaxLevel);
+                    material.SetFloat(_ScreenJumpLevel, level);
+                    screenJumpTimeLeft = screenJumpLength;
+                }
+                else
+                {
+                    material.SetFloat(_ScreenJumpLevel, 0);
+                }
             }
         }
         //////

@@ -42,7 +42,7 @@ Shader "Asteroids/FakeLight"
             float _Power2;
             float _Offset;
 
-            float2 Unity_PolarCoordinates_float(float2 UV, float2 Center, float RadialScale, float LengthScale)
+            float2 polarCoordinates(float2 UV, float2 Center, float RadialScale, float LengthScale)
             {
                 float2 delta = UV - Center;
                 float radius = length(delta) * 2 * RadialScale;
@@ -62,7 +62,7 @@ Shader "Asteroids/FakeLight"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float r = pow(Unity_PolarCoordinates_float(i.uv, float2(0.5, 0.5), 1, 1).r, _Power1);
+                float r = pow(polarCoordinates(i.uv, float2(0.5, 0.5), 1, 1).r, _Power1);
                 r = clamp(1.0 - r + _Offset, 0, 1);
                 r = pow(r, 2.2); //to lineral
                 r = pow(r, _Power2);
