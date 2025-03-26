@@ -15,7 +15,10 @@ namespace Asteroids.Views
         {
             Gizmos.DrawWireSphere(transform.position, Radius);
         }
-
+        public void BlinkFromValueReset()
+        {
+            LineRenderer.startColor = LineRenderer.endColor = MinColor;
+        }
         public void BlinkFromValue(float value)
         {
             var a = Mathf.Sin(value * BlinkFrequency) / 2f + 0.5f;

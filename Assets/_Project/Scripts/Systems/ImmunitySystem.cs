@@ -24,7 +24,7 @@ namespace Asteroids.Systems
                 if (immunity.TimeLeft <= 0)
                 {
                     a.Immunities.Del(e);
-                    starshipView.BlinkFromValue(0);
+                    starshipView.BlinkFromValueReset();
                 }
                 else
                 {

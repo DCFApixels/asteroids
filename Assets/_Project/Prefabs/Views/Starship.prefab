@@ -47,8 +47,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LineRenderer: {fileID: 6443038446315368265}
-  MinColor: {r: 1, g: 1, b: 1, a: 1}
-  MaxColor: {r: 0, g: 0.38258967, b: 0.582, a: 1}
+  MinColor: {r: 0.2509804, g: 0.39607844, b: 1, a: 1}
+  MaxColor: {r: 0.28627452, g: 0.7137255, b: 1, a: 1}
   BlinkFrequency: 20
   Radius: 1
 --- !u!1 &5352591824047960039
@@ -107,7 +107,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3abea5b2756dcbc449a2562787d89a31, type: 2}
+  - {fileID: 2100000, guid: 10159a6368eb8b4489dc1c3bd8766862, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -154,8 +154,8 @@ LineRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
+      key0: {r: 0.2509804, g: 0.39607844, b: 1, a: 1}
+      key1: {r: 0.2509804, g: 0.39607844, b: 1, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -179,7 +179,7 @@ LineRenderer:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
+      m_ColorSpace: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 3
