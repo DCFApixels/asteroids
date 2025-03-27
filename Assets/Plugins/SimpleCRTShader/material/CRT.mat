@@ -13,11 +13,13 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _CHROMATICABERRATION_ON
+  - _FLICKERING_ON
   - _MONOCHOROME_ON
   - _MULTIPLEGHOST_ON
   - _SCANLINE_ON
   - _WHITENOISE_ON
   m_InvalidKeywords:
+  - _FRICKERING_ON
   - _MONOCHORME_ON
   - _MULTIPLEGHOSTINTENSITY_ON
   - _MULTIPLEGHOSTSTRENGTH_ON
@@ -40,7 +42,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DecalTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: efa2e16292314ee4a9fb3377392451d5, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -92,8 +94,14 @@ Material:
     - _ChromaticAberrationStrengthMin: 0.001
     - _ChromaticAberrationStrengthPolar: 1
     - _Cutoff: 0.5
+    - _DecalTexPos: 0
+    - _DecalTexScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _Flickering: 1
+    - _FlickeringCycle: 111
+    - _FlickeringStrength: 0.001
+    - _Frickering: 1
     - _Gap: 0.003
     - _GlossMapScale: 1
     - _Glossiness: 0.5
@@ -119,6 +127,12 @@ Material:
     - _ScanlineSpeed: 0.5
     - _ScreenJump: 0
     - _ScreenJumpLevel: 0
+    - _Slippage: 0
+    - _SlippageInterval: 1
+    - _SlippageNoiseOnOff: 0.48972875
+    - _SlippageScrollSpeed: 33
+    - _SlippageSize: 11
+    - _SlippageStrength: 0.005
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

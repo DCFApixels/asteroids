@@ -10452,7 +10452,6 @@ MonoBehaviour:
   screenJumpMaxLevel: 0.05
   flickeringStrength: 0.002
   flickeringCycle: 111
-  isSlippage: 0
   isSlippageNoise: 1
   slippageStrength: 0.005
   slippageInterval: 1
@@ -10464,15 +10463,6 @@ MonoBehaviour:
   multipleGhostStrength: 0.005
   isScanline: 1
   isMonochrome: 1
-  isLetterBox: 0
-  isLetterBoxEdgeBlur: 0
-  letterBoxType: 0
-  isFilmDirt: 0
-  filmDirtTex: {fileID: 0}
-  isDecalTex: 0
-  decalTex: {fileID: 0}
-  decalTexPos: {x: 0, y: 0}
-  decalTexScale: {x: 0, y: 0}
   isLowResolution: 0
   resolutions: {x: 0, y: 0}
 --- !u!224 &2033339526 stripped

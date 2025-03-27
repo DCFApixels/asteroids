@@ -589,6 +589,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2026645573903863124}
   - component: {fileID: 8959328714780461160}
+  - component: {fileID: 2473796147053594066}
   m_Layer: 5
   m_Name: GameScreen
   m_TagString: Untagged
@@ -636,6 +637,18 @@ MonoBehaviour:
   Right: {fileID: 9110860022872466881}
   Acceleration: {fileID: 2041574803816173884}
   Shoot: {fileID: 882901280609773313}
+--- !u!225 &2473796147053594066
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5150607987294355378}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5853619426490926302
 GameObject:
   m_ObjectHideFlags: 0
