@@ -91,7 +91,7 @@ Material:
     - _BumpScale: 1
     - _ChromaticAberration: 1
     - _ChromaticAberrationIntensity: 0.4
-    - _ChromaticAberrationStrength: 0.003
+    - _ChromaticAberrationStrength: 0.0025
     - _ChromaticAberrationStrengthMin: 0.001
     - _ChromaticAberrationStrengthPolar: 1
     - _Cutoff: 0.5
