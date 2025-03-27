@@ -20,7 +20,7 @@ Shader "Simple CRT"
         _SlippageStrength ("Slippage Strength", Float) = 0
         _SlippageInterval ("Slippage Interval", Float) = 0
         _SlippageScrollSpeed ("Slippage ScrollSpeed", Float) = 0
-        _SlippageNoiseOnOff ("Slippage Noise OnOff", Float) = 0
+        //_SlippageNoiseOnOff ("Slippage Noise OnOff", Float) = 0
         _SlippageSize ("Slippage Size", Float) = 0
         [Toggle] _ChromaticAberration("Chromatic Aberration", Float) = 0
         _ChromaticAberrationIntensity("Chromatic Aberration Intensity", Float) = 1
@@ -156,7 +156,7 @@ Shader "Simple CRT"
                 float scrollSpeed = _Time.x * _SlippageScrollSpeed;
                 float slippageMask = pow(abs(sin(i.uv.y * _SlippageInterval + scrollSpeed)), _SlippageSize);
                 float stepMask = round(sin(i.uv.y * _SlippageInterval + scrollSpeed - 1));
-                uv.x = uv.x + (_SlippageNoiseOnOff * _SlippageStrength * slippageMask * stepMask) * _SlippageOnOff; 
+                uv.x = uv.x + (_SlippageNoiseOnOff * _SlippageStrength * slippageMask * stepMask); 
 #endif
 
                 float4 color = tex2D(_MainTex, float2(uv.x, uv.y));

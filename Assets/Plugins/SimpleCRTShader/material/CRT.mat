@@ -17,6 +17,7 @@ Material:
   - _MONOCHOROME_ON
   - _MULTIPLEGHOST_ON
   - _SCANLINE_ON
+  - _SLIPPAGE_ON
   - _WHITENOISE_ON
   m_InvalidKeywords:
   - _FRICKERING_ON
@@ -90,7 +91,7 @@ Material:
     - _BumpScale: 1
     - _ChromaticAberration: 1
     - _ChromaticAberrationIntensity: 0.4
-    - _ChromaticAberrationStrength: 0.0044
+    - _ChromaticAberrationStrength: 0.003
     - _ChromaticAberrationStrengthMin: 0.001
     - _ChromaticAberrationStrengthPolar: 1
     - _Cutoff: 0.5
@@ -127,12 +128,12 @@ Material:
     - _ScanlineSpeed: 0.5
     - _ScreenJump: 0
     - _ScreenJumpLevel: 0
-    - _Slippage: 0
+    - _Slippage: 1
     - _SlippageInterval: 1
-    - _SlippageNoiseOnOff: 0.48972875
+    - _SlippageNoiseOnOff: 0.3353179
     - _SlippageScrollSpeed: 33
     - _SlippageSize: 11
-    - _SlippageStrength: 0.005
+    - _SlippageStrength: 0.002
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

@@ -10453,16 +10453,12 @@ MonoBehaviour:
   flickeringStrength: 0.002
   flickeringCycle: 111
   isSlippageNoise: 1
-  slippageStrength: 0.005
+  slippageStrength: 0.002
   slippageInterval: 1
   slippageScrollSpeed: 33
   slippageSize: 11
   chromaticAberrationStrength: 0.0024
-  isChromaticAberration: 0
-  isMultipleGhost: 0
   multipleGhostStrength: 0.005
-  isScanline: 1
-  isMonochrome: 1
   isLowResolution: 0
   resolutions: {x: 0, y: 0}
 --- !u!224 &2033339526 stripped
