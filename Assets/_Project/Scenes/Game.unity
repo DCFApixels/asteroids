@@ -845,7 +845,7 @@ ParticleSystem:
         m_Curve:
         - serializedVersion: 3
           time: 0.00925827
-          value: 0.25
+          value: 0.37682927
           inSlope: 0
           outSlope: 0
           tangentMode: 0
@@ -854,7 +854,7 @@ ParticleSystem:
           outWeight: 0
         - serializedVersion: 3
           time: 0.80857635
-          value: 0.5744903
+          value: 0.6464464
           inSlope: 1.0721639
           outSlope: 1.0721639
           tangentMode: 0
@@ -1228,7 +1228,7 @@ ParticleSystem:
     angle: 25
     length: 5
     boxThickness: {x: 0, y: 0, z: 0}
-    radiusThickness: 0.2
+    radiusThickness: 0.28
     donutRadius: 0.2
     m_Position: {x: 0, y: 0, z: 0}
     m_Rotation: {x: 0, y: 0, z: 0}
@@ -1311,7 +1311,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 14.22
+      value: 16
       mode: 0
       spread: 0
       speed:
@@ -5443,7 +5443,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.5000003, y: -0.49999973, z: -0.49999982, w: 0.50000024}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 20, y: 100, z: 50}
+  m_LocalScale: {x: 20, y: 50, z: 50}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 309011685}

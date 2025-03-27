@@ -18,6 +18,8 @@ Shader "Asteroids/Nebula"
         //_NoiseX ("NoiseX", Float) = 0
         //_FrequencyX ("FrequencyX", Float) = 0
         _ColorContrast ("ColorContrast", Float) = 0
+
+        _Scale ("Scale", Vector) = (1, 1, 0, 0)
     }
     SubShader
     {
@@ -67,6 +69,7 @@ Shader "Asteroids/Nebula"
             //float _NoiseX;
             //float _FrequencyX;
             float _ColorContrast;
+            float2 _Scale;
 
 
             v2f vert (appdata v)
@@ -126,6 +129,7 @@ Shader "Asteroids/Nebula"
             fixed4 frag (v2f i) : SV_Target
             {
                 float time = _Time.y * _Speed + _Seed;
+                i.uv *= _Scale;
 
                 float r = BitangentNoise3D(float3(i.uv * _Frequency, _OffsetR + time))  * _Power + _ColorOffset;
                 float g = BitangentNoise3D(float3(i.uv * _Frequency, _OffsetG + time))  * _Power + _ColorOffset;
