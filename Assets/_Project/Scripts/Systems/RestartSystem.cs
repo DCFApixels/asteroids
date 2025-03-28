@@ -19,7 +19,7 @@ namespace Asteroids.Systems
 
         private class PoolIdAspect : EcsAspect
         {
-            public readonly EcsPool<PoolID> PoolIds = Inc;
+            public readonly EcsPool<PooledUnit> PoolIds = Inc;
         }
         
         public void Run()
@@ -29,7 +29,7 @@ namespace Asteroids.Systems
                 foreach (var poolE in _world.Where(out PoolIdAspect p))
                 {
                     var poolId = p.PoolIds.Get(poolE);
-                    _poolService.Return(poolId.Id, poolId.Component);
+                    _poolService.Return(poolId.ID, poolId.Unit);
                 }
 
                 foreach (var entity in _world.Entities)
@@ -37,7 +37,7 @@ namespace Asteroids.Systems
                     _world.DelEntity(entity);
                 }
 
-                _world.GetPool<ChangeState>().Add(_world.NewEntity()).NewState = GameState.Play;
+                _world.GetPool<ChangeState>().Add(_world.NewEntity()).NextState = GameState.Play;
             }
         }
     }

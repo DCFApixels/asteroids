@@ -61,11 +61,11 @@ namespace Asteroids.Utils
 
     internal static class PoolServiceExtensions
     {
-        public static T Get<T>(this PoolService self, T prefab, out PoolID poolId) where T : Component
+        public static T Get<T>(this PoolService self, T prefab, out PooledUnit pooledUnit) where T : Component
         {
             var result = self.Get<T>(prefab, out int id);
-            poolId.Id = id;
-            poolId.Component = result;
+            pooledUnit.ID = id;
+            pooledUnit.Unit = result;
             return result;
         }
     }

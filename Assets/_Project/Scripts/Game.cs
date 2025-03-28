@@ -1,10 +1,10 @@
 using Asteroids.BulletsFeature;
 using Asteroids.CameraSmoothFollowFeature;
-using Asteroids.ControlsFeature;
 using Asteroids.Data;
 using Asteroids.GameFieldFueature;
+using Asteroids.LocalInputFeature;
 using Asteroids.MovementFeature;
-using Asteroids.StarshipMovmentFeature;
+using Asteroids.StarshipInputControlFeature;
 using Asteroids.StartshipsFeature;
 using Asteroids.Systems;
 using Asteroids.Utils;
@@ -21,11 +21,11 @@ namespace Asteroids
 
         [SerializeField]
         private StaticData StaticData;
-
-        [SerializeField] private SceneData SceneData;
-    
+        [SerializeField] 
+        private SceneData SceneData;
         [SerializeField]
         private RuntimeData RuntimeData;
+
         private void Start()
         {
             _world = new EcsDefaultWorld();
@@ -37,7 +37,9 @@ namespace Asteroids
                 .Add(new InitSystem())
                 .Add(new ChangeStateSystem())
 
-                .AddModule(new StarshipModule())
+                .Add(new SpawnStarshipSystem())
+                .AddModule(new LocalInputModule())
+
                 .AddModule(new AsteroidModule())
 
                 .Add(new KillHitObjectSystem())
@@ -45,8 +47,7 @@ namespace Asteroids
                 .Add(new RestartSystem())
 
                 .AddModule(new CameraSmoothFollowModule())
-                .AddModule(new ControlsModule())
-                .AddModule(new StarshipMovmentModule())
+                .AddModule(new StarshipInputControlModule())
                 .AddModule(new MovementModule())
                 .AddModule(new BulletsModule())
                 .AddModule(new GameFieldModule())
@@ -59,9 +60,9 @@ namespace Asteroids
                 .Inject(RuntimeData)
                 .Inject(new PoolService())
                 .AutoInject()
-               
+
                 .BuildAndInit();
-           
+
         }
 
         private void FixedUpdate()

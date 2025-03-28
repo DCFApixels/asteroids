@@ -24,7 +24,7 @@ namespace Asteroids.Systems
 
             _sceneData.UI.LoseScreen.InjectWorld(_world);
 
-            _world.GetPool<ChangeState>().Add(_world.NewEntity()).NewState = GameState.Play;
+            _world.GetPool<ChangeState>().Add(_world.NewEntity()).NextState = GameState.Play;
         }
     }
 }

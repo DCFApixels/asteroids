@@ -36,8 +36,6 @@ MonoBehaviour:
     - rid: 1520753779500646423
       type: {class: Template_50752EB99501945F2BDC43F6F3BFA134, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
-        component:
-          Axis: {x: 0, y: 0, z: 0}
         _offset: 0
     - rid: 1520753779500646621
       type: {class: Template_E2272BB99501499999DA540D0B04344B, ns: ComponentTemplates, asm: Assembly-CSharp}

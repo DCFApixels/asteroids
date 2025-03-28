@@ -5,6 +5,6 @@ namespace Asteroids.Components
 {
     internal struct ChangeState : IEcsComponent
     {
-        public GameState NewState;
+        public GameState NextState;
     }
 }

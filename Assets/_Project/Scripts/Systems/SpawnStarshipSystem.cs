@@ -2,6 +2,7 @@
 using Asteroids.Data;
 using Asteroids.GameFieldFueature;
 using Asteroids.MovementFeature;
+using Asteroids.StartshipsFeature;
 using Asteroids.Utils;
 using DCFApixels.DragonECS;
 
@@ -20,10 +21,9 @@ namespace Asteroids.Systems
         }
         class SpawnAspect : EcsAspect
         {
-            public readonly EcsPool<PoolID> PoolIDs = Inc;
+            public readonly EcsPool<PooledUnit> PoolIDs = Inc;
             public readonly EcsPool<TransformData> TransformDatas = Inc;
             public readonly EcsPool<Starship> Starships = Inc;
-            public readonly EcsPool<InputData> InputDatas = Inc;
             public readonly EcsPool<Immunity> Immunities = Inc;
             public readonly EcsTagPool<WrapAroundGameFieldMarker> WrapAroundScreenMarkers = Inc;
             public readonly EcsPool<RequestIntersectionEvent> RequestIntersectionEvents = Inc;

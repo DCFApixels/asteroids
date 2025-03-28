@@ -23,9 +23,9 @@ namespace Asteroids.Systems
             foreach (var e in _world.Where(out Aspect a))
             {
                 ref var changeState = ref a.ChangeStates.Get(e);
-                if (_runtimeData.GameState != changeState.NewState)
+                if (_runtimeData.GameState != changeState.NextState)
                 {
-                    switch (changeState.NewState)
+                    switch (changeState.NextState)
                     {
                         case GameState.Play:
                             _world.GetPool<SpawnStarshipEvent>().Add(_world.NewEntity());
@@ -43,7 +43,7 @@ namespace Asteroids.Systems
                             throw new ArgumentOutOfRangeException();
                     }
 
-                    _runtimeData.GameState = changeState.NewState;
+                    _runtimeData.GameState = changeState.NextState;
                 }
 
                 a.ChangeStates.Del(e);

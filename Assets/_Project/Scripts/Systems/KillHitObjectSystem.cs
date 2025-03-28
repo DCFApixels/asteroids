@@ -15,8 +15,8 @@ namespace Asteroids.Systems
         private class AspectPool : EcsAspect
         {
             [UsedImplicitly]
-            public readonly EcsPool<HitSignal> HitEvents = Inc;
-            public readonly EcsPool<PoolID> PoolIds = Inc;
+            public readonly EcsPool<OverlapsEvent> HitEvents = Inc;
+            public readonly EcsPool<PooledUnit> PoolIds = Inc;
         }
     
         public void Run()
@@ -24,7 +24,7 @@ namespace Asteroids.Systems
             foreach (var e in _world.Where(out AspectPool a))
             {
                 var poolId = a.PoolIds.Get(e);
-                _poolService.Return(poolId.Id, poolId.Component);
+                _poolService.Return(poolId.ID, poolId.Unit);
                 _world.DelEntity(e);
             }
         }
