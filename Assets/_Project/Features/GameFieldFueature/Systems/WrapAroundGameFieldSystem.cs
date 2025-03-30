@@ -1,4 +1,4 @@
-﻿using Asteroids.Common;
+﻿using Asteroids.BoundsOverlapsFeature;
 using Asteroids.Data;
 using Asteroids.MovementFeature;
 using DCFApixels.DragonECS;
@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace Asteroids.GameFieldFueature
 {
+    [MetaGroup(GameFieldModule.META_GROUP)]
+    [MetaColor(GameFieldModule.META_COLOR)]
     internal class WrapAroundGameFieldSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;

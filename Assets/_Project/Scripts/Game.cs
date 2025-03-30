@@ -1,3 +1,4 @@
+using Asteroids.BoundsOverlapsFeature;
 using Asteroids.BulletsFeature;
 using Asteroids.CameraSmoothFollowFeature;
 using Asteroids.Data;
@@ -17,7 +18,7 @@ namespace Asteroids
     {
         private EcsPipeline _pipeline;
         private EcsDefaultWorld _world;
-        private EcsEventWorld _eventWorld;
+        private EcsGraphWorld _graphWorld;
 
         [SerializeField]
         private StaticData StaticData;
@@ -29,10 +30,11 @@ namespace Asteroids
         private void Start()
         {
             _world = new EcsDefaultWorld();
-            _eventWorld = new EcsEventWorld();
+            _graphWorld = new EcsGraphWorld();
+            var graph = _world.CreateGraph(_graphWorld);
 
             _pipeline = EcsPipeline.New()
-                .AddUnityDebug(_world, _eventWorld)
+                .AddUnityDebug(_world, _graphWorld)
                 // Adding systems.
                 .Add(new InitSystem())
                 .Add(new ChangeStateSystem())
@@ -46,15 +48,21 @@ namespace Asteroids
                 .Add(new UIUpdateSystem())
                 .Add(new RestartSystem())
 
+
                 .AddModule(new CameraSmoothFollowModule())
                 .AddModule(new StarshipInputControlModule())
                 .AddModule(new MovementModule())
                 .AddModule(new BulletsModule())
+
                 .AddModule(new GameFieldModule())
+                .AddModule(new BoundsOverlapsModule())
+
                 .AddModule(new StartshipsModule())
 
                 // Injecting into systems.
                 .Inject(_world)
+                .Inject(_graphWorld)
+                .Inject(graph)
                 .Inject(StaticData)
                 .Inject(SceneData)
                 .Inject(RuntimeData)
@@ -81,8 +89,8 @@ namespace Asteroids
             _world.Destroy();
             _world = null;
             
-            _eventWorld.Destroy();
-            _eventWorld = null;
+            _graphWorld.Destroy();
+            _graphWorld = null;
         }
     }
 }

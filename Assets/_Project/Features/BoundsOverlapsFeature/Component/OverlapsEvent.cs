@@ -1,18 +1,10 @@
 ﻿using DCFApixels.DragonECS;
 
-namespace Asteroids.Components
+namespace Asteroids.BoundsOverlapsFeature
 {
-    internal struct OverlapsEvent : IEcsComponent
-    {
-        public entlong largestEntity;
-        public entlong smallestEntity;
-        public entlong GetOther(entlong entity)
-        {
-            if (entity.GetIDUnchecked() == largestEntity.GetIDUnchecked())
-            {
-                return smallestEntity;
-            }
-            return largestEntity;
-        }
-    }
+    [MetaGroup(BoundsOverlapsModule.META_GROUP)]
+    [MetaColor(BoundsOverlapsModule.META_COLOR)]
+    [AllowedInWorlds("Graph", "Event")]
+    [System.Serializable]
+    internal struct OverlapsEvent : IEcsComponent { }
 }

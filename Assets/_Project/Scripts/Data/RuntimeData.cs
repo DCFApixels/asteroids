@@ -1,6 +1,6 @@
-﻿using System;
-using Asteroids.Utils;
+﻿using Asteroids.BoundsOverlapsFeature;
 using DCFApixels.DragonECS;
+using System;
 using UnityEngine;
 
 namespace Asteroids.Data
@@ -12,7 +12,7 @@ namespace Asteroids.Data
         public int LifeLeft;
         public int Score;
         public Vector2 FieldSize;
-        public AreaGrid2D<entlong> AreaHash;
+        public AreaGrid2D<entlong> AreaGrid;
         public float LevelStartTime;
     }
 }

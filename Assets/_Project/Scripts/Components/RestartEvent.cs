@@ -2,6 +2,7 @@
 
 namespace Asteroids.Components
 {
+    [System.Serializable]
     internal struct RestartEvent : IEcsTagComponent
     {
     }

@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace Asteroids.LocalInputFeature
 {
+    [MetaGroup(LocalInputModule.META_GROUP)]
+    [MetaColor(LocalInputModule.META_COLOR)]
     internal class LocalInputSystem : IEcsRun, IEcsInit
     {
         [DI] EcsDefaultWorld _world;

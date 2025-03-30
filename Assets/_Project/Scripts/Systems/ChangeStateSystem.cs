@@ -10,7 +10,7 @@ namespace Asteroids.Systems
     {
         [DI] private SceneData _sceneData;
         [DI] private RuntimeData _runtimeData;
-        [DI] private EcsWorld _world;
+        [DI] private EcsDefaultWorld _world;
         [DI] private StaticData _staticData;
 
         private class Aspect : EcsAspect

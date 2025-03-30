@@ -6,7 +6,7 @@ namespace Asteroids.StartshipsFeature
 {
     internal class ImmunitySystem : IEcsRun
     {
-        [DI] private EcsWorld _world;
+        [DI] private EcsDefaultWorld _world;
 
         private class Aspect : EcsAspect
         {

@@ -1,7 +1,9 @@
 ﻿using DCFApixels.DragonECS;
 
-namespace Asteroids.Common
+namespace Asteroids.BoundsOverlapsFeature
 {
+    [MetaGroup(BoundsOverlapsModule.META_GROUP)]
+    [MetaColor(BoundsOverlapsModule.META_COLOR)]
     [System.Serializable]
     public struct BoundsSphere : IEcsComponent
     {

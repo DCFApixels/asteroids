@@ -1,0 +1,26 @@
+{
+    "name": "com.dcfa_pixels.dragonecs-graphs",
+    "author": 
+    {
+        "name": "DCFApixels",
+        "url": "https://github.com/DCFApixels/DragonECS-Graphs"
+    },
+    "displayName": "DragonECS-Graphs",
+    "description": "Entity Graphs for DragonECS",
+    "unity": "2020.3",
+    "version": "0.3.4",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DCFApixels/DragonECS-Graphs.git"
+    },
+    "dependencies": {
+        "com.dcfa_pixels.dragonecs": "https://github.com/DCFApixels/DragonECS.git" 
+    },
+    "keywords":
+    [
+        "ecs",
+        "dragonecs",
+        "extension",
+        "add-on"
+    ]
+}

@@ -6,10 +6,15 @@ using UnityEngine;
 
 namespace Asteroids.CameraSmoothFollowFeature
 {
-    internal class CameraSmoothFollowSystem : IEcsRun
+    [MetaGroup(CameraSmoothFollowModule.META_GROUP)]
+    [MetaColor(CameraSmoothFollowModule.META_COLOR)]
+    internal class CameraSmoothFollowSystem : IEcsRun, IEcsDefaultAddParams
     {
+        public AddParams AddParams => EcsConsts.POST_END_LAYER;
+
         [DI] EcsDefaultWorld _world;
         [DI] SceneData _sceneData;
+
         class Aspect : EcsAspect
         {
             public EcsPool<TransformData> TransformDatas = Inc;

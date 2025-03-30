@@ -1,7 +1,6 @@
-﻿using Asteroids.Components;
+﻿using Asteroids.BoundsOverlapsFeature;
+using Asteroids.Components;
 using Asteroids.Data;
-using Asteroids.MovementFeature;
-using Asteroids.Utils;
 using DCFApixels.DragonECS;
 using System.Collections.Generic;
 
@@ -13,7 +12,7 @@ namespace Asteroids.StartshipsFeature
         [DI] RuntimeData _runtimeData;
         [DI] SceneData _sceneData;
 
-        private EcsPool<OverlapsEvent> _hitEvents;
+        //private EcsPool<OverlapsEvent> _hitEvents;
         private EcsPool<Asteroid> _asteroids;
 
 
@@ -41,14 +40,14 @@ namespace Asteroids.StartshipsFeature
             else
             {
                 //kill all asteroids near spawn point. Fully kill!
-                _runtimeData.AreaHash.FindAllInRadius(_sceneData.SpawnPosition.position.x,
+                _runtimeData.AreaGrid.FindAllInRadius(_sceneData.SpawnPosition.position.x,
                     _sceneData.SpawnPosition.position.z, _sceneData.KillOnSpawnRadius, _hits);
                 foreach (var hit in _hits)
                 {
                     if (hit.Id.TryGetID(out var asteroidEntity))
                     {
-                        _asteroids.TryAddOrGet(asteroidEntity).DeathsLeft = 0;
-                        _hitEvents.TryAddOrGet(asteroidEntity);
+                        //_asteroids.TryAddOrGet(asteroidEntity).DeathsLeft = 0;
+                        //_hitEvents.TryAddOrGet(asteroidEntity);
                     }
                 }
 
@@ -59,7 +58,7 @@ namespace Asteroids.StartshipsFeature
 
         public void Init()
         {
-            _hitEvents = _world.GetPool<OverlapsEvent>();
+            //_hitEvents = _world.GetPool<OverlapsEvent>();
             _asteroids = _world.GetPool<Asteroid>();
         }
     }

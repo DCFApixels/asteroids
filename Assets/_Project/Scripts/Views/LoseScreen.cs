@@ -10,9 +10,9 @@ namespace Asteroids.Views
     {
         [SerializeField] private TMP_Text ScoreText;
         [SerializeField] private Button RestartButton;
-        private EcsWorld _world;
+        private EcsDefaultWorld _world;
 
-        public void InjectWorld(EcsWorld world)
+        public void InjectWorld(EcsDefaultWorld world)
         {
             _world = world;
         }

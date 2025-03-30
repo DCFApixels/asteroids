@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace Asteroids.CameraSmoothFollowFeature
 {
+    [MetaGroup(CameraSmoothFollowModule.META_GROUP)]
+    [MetaColor(CameraSmoothFollowModule.META_COLOR)]
     [System.Serializable]
     public struct CameraSmoothFollowTarget : IEcsComponent
     {

@@ -5,15 +5,17 @@ using DCFApixels.DragonECS;
 
 namespace Asteroids.Systems
 {
-    internal class InitSystem : IEcsInit
+    internal class InitSystem : IEcsInit, IEcsDefaultAddParams
     {
+        public AddParams AddParams => EcsConsts.PRE_BEGIN_LAYER;
+
         [DI] private EcsDefaultWorld _world;
 
         [DI] private StaticData _staticData;
         [DI] private PoolService _poolService;
         [DI] private SceneData _sceneData;
         [DI] private RuntimeData _runtimeData;
-    
+
         public void Init()
         {
             _poolService.PreWarm(_staticData.AsteroidViewPrefab, 20);

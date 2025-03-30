@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Asteroids.Utils
+namespace Asteroids.BoundsOverlapsFeature
 {
     public sealed class AreaGrid2D<T>
     {

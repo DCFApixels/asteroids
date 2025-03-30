@@ -1,5 +1,5 @@
-﻿using DCFApixels.DragonECS;
-using DCFApixels;
+﻿using DCFApixels;
+using DCFApixels.DragonECS;
 using System.Linq;
 using UnityEngine;
 
@@ -7,8 +7,10 @@ namespace Asteroids.MovementFeature
 {
     [MetaGroup(MovementModule.META_GROUP)]
     [MetaColor(MovementModule.META_COLOR)]
-    internal class DebugVelocitySystem : IEcsRun
+    internal class DebugVelocitySystem : IEcsRun, IEcsDefaultAddParams
     {
+        public AddParams AddParams => EcsConsts.POST_END_LAYER;
+
         class VeloctityViewAspect : EcsAspect
         {
             public EcsPool<TransformData> transformDatas = Inc;

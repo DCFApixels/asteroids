@@ -1,58 +1,57 @@
-﻿using Asteroids.Common;
-using Asteroids.Components;
-using Asteroids.Data;
+﻿using Asteroids.Data;
 using Asteroids.MovementFeature;
-using Asteroids.Utils;
 using DCFApixels.DragonECS;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
-namespace Asteroids.Systems
+namespace Asteroids.BoundsOverlapsFeature
 {
+    [MetaGroup(BoundsOverlapsModule.META_GROUP)]
+    [MetaColor(BoundsOverlapsModule.META_COLOR)]
     internal class CheckShpereOverlapsSystem : IEcsInit, IEcsRun
     {
-        [DI] EcsDefaultWorld _world;
+        [DI] EntityGraph _graph;
         [DI] RuntimeData _runtimeData;
 
         List<AreaGrid2D<entlong>.Hit> _hits = new(64);
         Bucket<int>[] _sizeSortEntitiesBuckets = new Bucket<int>[64];
 
+        private const float OFFSET_MULTIPLIER = 4f;
+
         public void Init()
         {
             for (int i = 0; i < _sizeSortEntitiesBuckets.Length; i++)
             {
-                _sizeSortEntitiesBuckets[i] = new Bucket<int>(32, 1 << i);
+                _sizeSortEntitiesBuckets[i] = new Bucket<int>(32, (1 << i) / OFFSET_MULTIPLIER * 2f);
             }
         }
-
 
         class BoundsAspect : EcsAspect
         {
             public EcsPool<BoundsSphere> BoundsSpheres = Inc;
             public EcsPool<TransformData> TransformDatas = Inc;
         }
-        class EventAspect : EcsAspect
+        class RelAspect : EcsAspect
         {
             public EcsPool<OverlapsEvent> OverlapsEvents = Inc;
         }
         public void Run()
         {
-            var eventA = _world.GetAspect<EventAspect>();
-            eventA.OverlapsEvents.ClearAll();
+            var relA = _graph.GraphWorld.GetAspect<RelAspect>();
+            relA.OverlapsEvents.ClearAll();
             for (int i = 0; i < _sizeSortEntitiesBuckets.Length; i++)
             {
                 _sizeSortEntitiesBuckets[i].Clear();
             }
 
-            var es = _world.WhereToGroup(out BoundsAspect a);
-
+            var es = _graph.World.WhereToGroup(out BoundsAspect a);
             foreach (var e in es)
             {
                 ref var boundsSphere = ref a.BoundsSpheres[e];
-                var index = NextPowerOfTwoExponent(boundsSphere.radius);
+                var index = NextPowerOfTwoExponent(boundsSphere.radius * OFFSET_MULTIPLIER);
                 _sizeSortEntitiesBuckets[index].Add() = e;
             }
-
 
             for (int i = _sizeSortEntitiesBuckets.Length - 1; i >= 0; i--)
             {
@@ -61,12 +60,11 @@ namespace Asteroids.Systems
                 {
                     ref var boundsSphere = ref a.BoundsSpheres[e];
                     var position = a.TransformDatas[e].position;
-                    _runtimeData.AreaHash.FindAllInRadius(position.x, position.z, sizeSortEntitiesBucket.CheckedRadius, _hits);
+                    _runtimeData.AreaGrid.FindAllInRadius(position.x, position.z, sizeSortEntitiesBucket.CheckedRadius, _hits);
 
                     foreach (var hit in _hits)
                     {
-                        var otherEntity = hit.Id;
-                        if (otherEntity.TryGetID(out var otherE) == false)
+                        if (hit.Id.TryGetID(out var otherE) == false)
                         {
                             continue;
                         }
@@ -75,14 +73,14 @@ namespace Asteroids.Systems
                         {
                             ref var otherBoundsSphere = ref a.BoundsSpheres[otherE];
                             var overlapRadius = otherBoundsSphere.radius + boundsSphere.radius;
-                            if (boundsSphere.radius > otherBoundsSphere.radius) //отсеиваем дублирование
+                            if (boundsSphere.radius >= otherBoundsSphere.radius) //отсеиваем дублирование
                             {
                                 if (hit.SqrDistance <= overlapRadius * overlapRadius && e != otherE)
                                 {
-                                    var eventE = _world.NewEntity(eventA);
-                                    ref var overlapsEvent = ref eventA.OverlapsEvents[eventE];
-                                    overlapsEvent.largestEntity = (_world, e);
-                                    overlapsEvent.smallestEntity = otherEntity;
+                                    var relE = _graph.GetOrNewRelation(otherE, e);
+                                    relA.OverlapsEvents.TryAddOrGet(relE);
+                                    var relEInverse = _graph.GetOrNewInverseRelation(relE);
+                                    relA.OverlapsEvents.TryAddOrGet(relEInverse);
                                 }
                             }
                         }
@@ -95,24 +93,23 @@ namespace Asteroids.Systems
 
         public static unsafe int NextPowerOfTwoExponent(float v)
         {
-            if (v < 1.0f) { return 0; }      // Все значения < 1 → степень 0
+            if (v < 1.0f) { return 0; } 
 
             uint bits;
-            bits = *(uint*)&v; // unsafe-преобразование float в uint
+            bits = *(uint*)&v;
 
             // Извлекаем экспоненту (8 бит) и преобразуем в смещенное значение
             int exponent = ((int)(bits >> 23) & 0xFF) - 127;
-
             // Извлекаем мантиссу (23 бита)
             uint mantissa = bits & 0x007FFFFF;
-
             // Если мантисса не нулевая, увеличиваем степень
             int result = exponent + (mantissa != 0 ? 1 : 0);
-            // Ограничиваем диапазон 0-63
+
             return result > 63 ? 63 : (result < 0 ? 0 : result);
         }
 
         #region Bucket
+        [DebuggerDisplay("Count: {Count}")]
         private class Bucket<T>
         {
             public readonly float CheckedRadius;
@@ -122,14 +119,7 @@ namespace Asteroids.Systems
             public Bucket(int minSize, float checkedRadius)
             {
                 CheckedRadius = checkedRadius;
-                if (minSize < 4)
-                {
-                    minSize = 4;
-                }
-                else
-                {
-                    minSize = NextPow2(minSize);
-                }
+                minSize = minSize < 4 ? 4 : NextPow2(minSize);
                 _items = new T[minSize];
                 _count = 0;
             }
@@ -146,7 +136,7 @@ namespace Asteroids.Systems
             {
                 if(_items.Length <= _count)
                 {
-                    var newSize = NextPow2(_count);
+                    var newSize = NextPow2(_count + 1);
                     Array.Resize(ref _items, newSize);
                 }
                 return ref _items[_count++];

@@ -1,10 +1,13 @@
 ﻿using Asteroids.Data;
+using Asteroids.GameFieldFueature;
 using DCFApixels;
 using DCFApixels.DragonECS;
 using UnityEngine;
 
 namespace Asteroids.Systems
 {
+    [MetaGroup(GameFieldModule.META_GROUP)]
+    [MetaColor(GameFieldModule.META_COLOR)]
     internal class UpdateFieldSizeSystem : IEcsRun, IEcsDefaultAddParams
     {
         public AddParams AddParams => EcsConsts.PRE_BEGIN_LAYER;
@@ -44,7 +47,7 @@ namespace Asteroids.Systems
             DebugX.Draw().WireQuad(Vector3.zero, Quaternion.LookRotation(Vector3.up), size);
             _runtimeData.FieldSize = size + Vector2.one * _staticData.ScreenBorderOffset;
             DebugX.Draw().WireQuad(Vector3.zero, Quaternion.LookRotation(Vector3.up), _runtimeData.FieldSize);
-            _runtimeData.AreaHash = new(size.x / 4, -size.x / 2f, -size.y / 2f, size.x / 2f, size.y / 2f);
+            _runtimeData.AreaGrid = new(size.x / 4, -size.x / 2f, -size.y / 2f, size.x / 2f, size.y / 2f);
         }
     }
 }

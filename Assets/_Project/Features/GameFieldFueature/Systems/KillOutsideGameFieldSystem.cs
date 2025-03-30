@@ -6,6 +6,8 @@ using DCFApixels.DragonECS;
 
 namespace Asteroids.GameFieldFueature
 {
+    [MetaGroup(GameFieldModule.META_GROUP)]
+    [MetaColor(GameFieldModule.META_COLOR)]
     internal class KillOutsideGameFieldSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;

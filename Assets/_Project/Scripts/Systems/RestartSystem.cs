@@ -8,7 +8,7 @@ namespace Asteroids.Systems
 {
     internal class RestartSystem : IEcsRun
     {
-        [DI] private EcsWorld _world;
+        [DI] private EcsDefaultWorld _world;
         [DI] private PoolService _poolService;
 
         private class Aspect : EcsAspect
