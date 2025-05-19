@@ -13,9 +13,9 @@ namespace Asteroids.Systems
         [DI] EcsDefaultWorld _world;
         [DI] PoolService _poolService;
 
-        private class EventAspect : EcsAspect
+        class EventAspect : EcsAspect
         {
-            public EcsPool<SpawnAsteroidEvent> SpawnAsteroidEvents = Inc;
+            public EcsPool<SpawnAsteroidSignal> SpawnAsteroidSignals = Inc;
         }
         class SpawnAspect : EcsAspect
         {
@@ -28,11 +28,11 @@ namespace Asteroids.Systems
         public void Run()
         {
             var spawnA = _world.GetAspect<SpawnAspect>();
-            foreach (var eventE in _world.Where(out EventAspect eventA))
+            foreach (var newE in _world.Where(out EventAspect eventA))
             {
-                var spawnAsteroidEvent = eventA.SpawnAsteroidEvents.Get(eventE);
+                var spawnAsteroidEvent = eventA.SpawnAsteroidSignals.Get(newE);
 
-                var newE = _world.NewEntity(_staticData.AsteroidTemplate);
+                _staticData.AsteroidTemplate.Apply(_world, newE);
                 var newViewInstance = _poolService.Get(_staticData.AsteroidViewPrefab, out spawnA.PoolIDs.TryAddOrGet(newE));
                 newViewInstance.Connect((_world, newE), false);
                 spawnA.Apply(_world, newE);
@@ -51,7 +51,7 @@ namespace Asteroids.Systems
                 ref var newVelocity = ref spawnA.Velocities.TryAddOrGet(newE);
                 newVelocity.lineral = newTransformData.CalcLocalVector(Vector3.forward) * Random.Range(_staticData.AsteroidMinSpeed, _staticData.AsteroidMaxSpeed);
             
-                eventA.SpawnAsteroidEvents.Del(eventE);
+                eventA.SpawnAsteroidSignals.Del(newE);
             }
         }
 

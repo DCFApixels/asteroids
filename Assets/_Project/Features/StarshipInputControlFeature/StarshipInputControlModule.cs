@@ -6,12 +6,13 @@ namespace Asteroids.StarshipInputControlFeature
     [MetaColor(META_COLOR)]
     public class StarshipInputControlModule : IEcsModule, IEcsDefaultAddParams
     {
-        public const string META_GROUP = nameof(Asteroids) + "." + nameof(StarshipInputControlFeature);
+        public const string META_GROUP = nameof(Asteroids) + "/" + nameof(StarshipInputControlFeature);
         public const uint META_COLOR = MetaColor.SkyBlue;
         public AddParams AddParams => META_GROUP;
         public void Import(EcsPipeline.Builder b)
         {
-            b.Layers.InsertAfter(EcsConsts.BASIC_LAYER, META_GROUP);
+            b.Layers.Add(META_GROUP).After(EcsConsts.BASIC_LAYER);
+            //b.Layers.InsertAfter(EcsConsts.BASIC_LAYER, META_GROUP);
             b.Add(new StarshipMovmentSystem());
         }
     }

@@ -24,7 +24,7 @@ namespace Asteroids.MovementFeature
                 ref var velocity = ref a.velocities.Get(e);
                 ref var transform = ref a.transformDatas.Get(e);
 
-                DebugX.Draw(Color.cyan).RayArrow(transform.position, velocity.lineral / 2f);
+                DebugX.Draw(new Color(1,1,1,0.3f) * Color.cyan).RayArrow(transform.position, velocity.lineral / 2f);
             }
         }
     }

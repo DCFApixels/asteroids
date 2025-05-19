@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Asteroids.Components
 {
-    internal struct SpawnAsteroidEvent : IEcsComponent
+    internal struct SpawnAsteroidSignal : IEcsComponent
     {
         public int DeathsLeft;
         public float StartRadius;

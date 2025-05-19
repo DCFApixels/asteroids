@@ -6,13 +6,15 @@ namespace Asteroids.BoundsOverlapsFeature
     [MetaColor(META_COLOR)]
     class BoundsOverlapsModule : IEcsModule, IEcsDefaultAddParams
     {
-        public const string META_GROUP = nameof(Asteroids) + "." + nameof(BoundsOverlapsFeature);
+        public const string META_GROUP = nameof(Asteroids) + "/" + nameof(BoundsOverlapsFeature);
         public const uint META_COLOR = MetaColor.Lime;
         public AddParams AddParams => META_GROUP;
         public void Import(EcsPipeline.Builder b)
         {
-            b.Layers.InsertAfter(EcsConsts.BEGIN_LAYER, META_GROUP);
+            b.Layers.Add(META_GROUP).After(EcsConsts.BASIC_LAYER);
+            //b.Layers.InsertAfter(EcsConsts.BEGIN_LAYER, META_GROUP);
             b.Add(new CheckShpereOverlapsSystem());
+            b.Add(new DebugCheckShpereOverlapsSystem());
             b.Add(new RecalculateSpaceHashSystem());
         }
     }

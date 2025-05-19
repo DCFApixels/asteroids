@@ -21,7 +21,7 @@ namespace Asteroids.Systems
             {
                 _previousSpawnTime = gameTime;
 
-                var spawnAsteroidEvents = _world.GetPool<SpawnAsteroidEvent>();
+                var spawnAsteroidEvents = _world.GetPool<SpawnAsteroidSignal>();
                 
                 for (var var = 0; var < _staticData.SpawnAmount; var++)
                 {

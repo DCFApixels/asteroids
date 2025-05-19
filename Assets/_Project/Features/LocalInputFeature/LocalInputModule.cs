@@ -6,12 +6,13 @@ namespace Asteroids.LocalInputFeature
     [MetaColor(META_COLOR)]
     internal class LocalInputModule : IEcsModule, IEcsDefaultAddParams
     {
-        public const string META_GROUP = nameof(Asteroids) + "." + nameof(LocalInputFeature);
+        public const string META_GROUP = nameof(Asteroids) + "/" + nameof(LocalInputFeature);
         public const uint META_COLOR = MetaColor.Cyan;
         public AddParams AddParams => META_GROUP;
         public void Import(EcsPipeline.Builder b)
         {
-            b.Layers.InsertAfter(EcsConsts.PRE_BEGIN_LAYER, META_GROUP);
+            b.Layers.Add(META_GROUP).After(EcsConsts.PRE_BEGIN_LAYER);
+            //b.Layers.InsertAfter(EcsConsts.PRE_BEGIN_LAYER, META_GROUP);
             b.Add(new LocalInputSystem());
         }
     }

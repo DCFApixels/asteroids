@@ -7,6 +7,9 @@ namespace Asteroids.BulletsFeature
         public void Import(EcsPipeline.Builder b)
         {
             b.Add(new BulletLifeTimeSystem());
+            b.Add(new TouchToHitRequestSystem());
+
+            b.Add(new BulletHitAnswerSystem());
         }
     }
 }

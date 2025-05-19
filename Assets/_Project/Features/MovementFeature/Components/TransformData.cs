@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Asteroids.MovementFeature
 {
-    [System.Serializable]
     [MetaGroup(MovementModule.META_GROUP)]
     [MetaColor(MovementModule.META_COLOR)]
     [MetaID("E9522BB9950115AD62A48B42DEA0B5ED")]
+    [System.Serializable]
     public struct TransformData : IEcsComponent
     {
         public static readonly TransformData Default = new TransformData()

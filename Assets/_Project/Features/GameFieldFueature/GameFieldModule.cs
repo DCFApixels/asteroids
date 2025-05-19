@@ -7,12 +7,13 @@ namespace Asteroids.GameFieldFueature
     [MetaColor(META_COLOR)]
     internal class GameFieldModule : IEcsModule, IEcsDefaultAddParams
     {
-        public const string META_GROUP = nameof(Asteroids) + "." + nameof(GameFieldFueature);
+        public const string META_GROUP = nameof(Asteroids) + "/" + nameof(GameFieldFueature);
         public const uint META_COLOR = MetaColor.BlueViolet;
         public AddParams AddParams => META_GROUP;
         public void Import(EcsPipeline.Builder b)
         {
-            b.Layers.Insert(EcsConsts.END_LAYER, META_GROUP);
+            b.Layers.Add(META_GROUP).Before(EcsConsts.END_LAYER);
+            //b.Layers.Insert(EcsConsts.END_LAYER, META_GROUP);
             b.Add(new UpdateFieldSizeSystem());
             b.Add(new CheckAroundGameFieldSystem());
             b.Add(new WrapAroundGameFieldSystem());

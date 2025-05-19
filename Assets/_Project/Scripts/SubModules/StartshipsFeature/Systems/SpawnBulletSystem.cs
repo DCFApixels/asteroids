@@ -27,7 +27,6 @@ namespace Asteroids.StartshipsFeature
             public readonly EcsPool<PooledUnit> PoolIDs = Inc;
             public readonly EcsPool<Velocity> Velocities = Inc;
             public readonly EcsPool<TransformData> TransformDatas = Inc;
-            public readonly EcsPool<RequestIntersectionEvent> RequestIntersectionEvents = Inc;
         }
 
         public void Run()
@@ -48,10 +47,6 @@ namespace Asteroids.StartshipsFeature
 
                 ref var newVelocity = ref spawnA.Velocities[newE];
                 newVelocity.lineral = newTransformData.CalcLocalVector(Vector3.forward) * (_staticData.BulletSpeed + Math.Abs(stashipA.Velocities[stashipE].lineral.magnitude));
-
-                ref var newRequestIntersectionEvent = ref spawnA.RequestIntersectionEvents[newE];
-                newRequestIntersectionEvent.CheckRadius = _staticData.AsteroidViewPrefab.Radius + newViewInstance.Radius;
-                newRequestIntersectionEvent.ObjectRadius = newViewInstance.Radius;
 
                 stashipA.FireInputBeginSignals.Del(stashipE);
             }

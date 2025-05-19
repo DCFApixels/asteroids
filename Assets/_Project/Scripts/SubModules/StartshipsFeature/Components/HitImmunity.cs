@@ -2,7 +2,8 @@
 
 namespace Asteroids.StartshipsFeature
 {
-    internal struct Immunity : IEcsComponent
+    [System.Serializable]
+    public struct HitImmunity : IEcsComponent
     {
         public float TimeLeft;
     }

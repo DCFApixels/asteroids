@@ -21,7 +21,9 @@ namespace ComponentTemplates
     [MetaID("Template_D7729ECC9501F8D9D9868FBACC0F97B5")] class Template_D7729ECC9501F8D9D9868FBACC0F97B5 : ComponentTemplate<CameraSmoothFollowTarget> { }
     [MetaID("Template_CB79ECCA950122BC3E7CE6C8397659EB")] class Template_CB79ECCA950122BC3E7CE6C8397659EB : ComponentTemplate<Bullet> { }
     [MetaID("Template_395668D195011D0C128ED015E17731C5")] class Template_395668D195011D0C128ED015E17731C5 : ComponentTemplate<BoundsSphere> { }
-
+    [MetaID("Template_60B433E69501E56AA53E7EED0A72BA83")] class Template_60B433E69501E56AA53E7EED0A72BA83 : ComponentTemplate<HitImmunity> { }
+    
+    [MetaID("Tempalte_B4F66F791607DD802EC7793F70E6D6D9")] class Tempalte_B4F66F791607DD802EC7793F70E6D6D9 : TagComponentTemplate<TouchToHitEmmiter> { }
     [MetaID("Template_35CA21CB95018BE256CAA78659C23B59")] class Template_35CA21CB95018BE256CAA78659C23B59 : TagComponentTemplate<WrapAroundGameFieldMarker> { }
     [MetaID("Template_4A1123CB9501B7933D75AA7248F28132")] class Template_4A1123CB9501B7933D75AA7248F28132 : TagComponentTemplate<KillOutsideGameFieldMarker> { }
 }

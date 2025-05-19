@@ -28,8 +28,8 @@ namespace Asteroids.BulletsFeature
                         a.KillOutsideGameFieldMarkers.Add(e);
                     }
                 }
-
             }
+
         }
     }
 }

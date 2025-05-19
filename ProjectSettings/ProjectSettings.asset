@@ -841,6 +841,7 @@ PlayerSettings:
   webWasm2023: 1
   scriptingDefineSymbols:
     Standalone: DRAGONECS_DEEP_DEBUG;DRAGONECS_ENABLE_UNITY_CONSOLE_SHORTCUT_LINKS;DEBUGX_DISABLE_INBUILD
+    WebGL: DRAGONECS_DEEP_DEBUG
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

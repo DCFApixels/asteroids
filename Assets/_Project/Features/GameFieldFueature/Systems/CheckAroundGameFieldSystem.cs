@@ -17,13 +17,13 @@ namespace Asteroids.GameFieldFueature
         {
             public EcsPool<TransformData> TransformDatas = Inc;
             public EcsPool<BoundsSphere> BoundsSpheres = Inc;
-            public EcsPool<InOutsideGameFieldSignal> InAroundGameFieldSignals = Exc;
+            public EcsPool<InOutsideGameFieldSignal> InOutsideGameFieldSignals = Exc;
         }
 
         public void Run()
         {
             var a = _world.GetAspect<Aspect>();
-            a.InAroundGameFieldSignals.ClearAll();
+            a.InOutsideGameFieldSignals.ClearAll();
 
             foreach (var e in _world.Where(a))
             {
@@ -35,17 +35,17 @@ namespace Asteroids.GameFieldFueature
 
                 Vector3 gameFieldCenter = Vector3.zero;
                 Vector3 gameFieldSizeHalf = new Vector3(fieldSize.x, 0, fieldSize.y) / 2f + Vector3.one * 2f * boundsSphere.radius;
-                Vector3 arounds = position - gameFieldCenter;
+                Vector3 outside = position - gameFieldCenter;
 
-                float CalcAxisAround(float axis_, float sizeHalf_) { return Mathf.Max(0, axis_ - sizeHalf_); }
-                arounds.x = Mathf.Sign(arounds.x) * CalcAxisAround(Mathf.Abs(arounds.x), gameFieldSizeHalf.x);
-                arounds.y = Mathf.Sign(arounds.y) * CalcAxisAround(Mathf.Abs(arounds.y), gameFieldSizeHalf.y);
-                arounds.z = Mathf.Sign(arounds.z) * CalcAxisAround(Mathf.Abs(arounds.z), gameFieldSizeHalf.z);
+                float CalcAxisOutside(float axis_, float sizeHalf_) { return Mathf.Max(0, axis_ - sizeHalf_); }
+                outside.x = Mathf.Sign(outside.x) * CalcAxisOutside(Mathf.Abs(outside.x), gameFieldSizeHalf.x);
+                outside.y = Mathf.Sign(outside.y) * CalcAxisOutside(Mathf.Abs(outside.y), gameFieldSizeHalf.y);
+                outside.z = Mathf.Sign(outside.z) * CalcAxisOutside(Mathf.Abs(outside.z), gameFieldSizeHalf.z);
 
-                if (arounds != Vector3.zero)
+                if (outside != Vector3.zero)
                 {
-                    ref var inAroundGameFieldSignal = ref a.InAroundGameFieldSignals.Add(e);
-                    inAroundGameFieldSignal.Arounds = arounds;
+                    ref var inOutsideGameFieldSignal = ref a.InOutsideGameFieldSignals.Add(e);
+                    inOutsideGameFieldSignal.Value = outside;
                 }
 
                 transformData.position = position;

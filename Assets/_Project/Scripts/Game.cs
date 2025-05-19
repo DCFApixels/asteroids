@@ -69,6 +69,8 @@ namespace Asteroids
                 .Inject(new PoolService())
                 .AutoInject()
 
+                .Add(new DebugEntitiesSystem())
+
                 .BuildAndInit();
 
         }

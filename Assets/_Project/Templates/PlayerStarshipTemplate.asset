@@ -21,6 +21,7 @@ MonoBehaviour:
   - rid: 1520753779500646648
   - rid: 1520753779500646681
   - rid: 1520753821003809058
+  - rid: 1520753913477464545
   references:
     version: 2
     RefIds:
@@ -62,4 +63,10 @@ MonoBehaviour:
     - rid: 1520753821003809058
       type: {class: Template_35CA21CB95018BE256CAA78659C23B59, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
+        _offset: 0
+    - rid: 1520753913477464545
+      type: {class: Template_395668D195011D0C128ED015E17731C5, ns: ComponentTemplates, asm: Assembly-CSharp}
+      data:
+        component:
+          radius: 0.8
         _offset: 0

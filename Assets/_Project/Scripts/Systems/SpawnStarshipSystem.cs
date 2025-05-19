@@ -24,9 +24,8 @@ namespace Asteroids.Systems
             public readonly EcsPool<PooledUnit> PoolIDs = Inc;
             public readonly EcsPool<TransformData> TransformDatas = Inc;
             public readonly EcsPool<Starship> Starships = Inc;
-            public readonly EcsPool<Immunity> Immunities = Inc;
+            public readonly EcsPool<HitImmunity> Immunities = Inc;
             public readonly EcsTagPool<WrapAroundGameFieldMarker> WrapAroundScreenMarkers = Inc;
-            public readonly EcsPool<RequestIntersectionEvent> RequestIntersectionEvents = Inc;
         }
 
         public void Run()
@@ -46,10 +45,6 @@ namespace Asteroids.Systems
                 newTransformData.position = _sceneData.SpawnPosition.position;
                 newTransformData.rotation = _sceneData.SpawnPosition.rotation;
 
-                ref var newWantIntersectionWithAsteroid = ref spawnA.RequestIntersectionEvents[newE];
-                newWantIntersectionWithAsteroid.CheckRadius = _staticData.AsteroidViewPrefab.Radius + newViewInstance.Radius;
-                newWantIntersectionWithAsteroid.ObjectRadius = newViewInstance.Radius;
-            
                 eventA.SpawnStarships.Del(eventE);
             }
         }

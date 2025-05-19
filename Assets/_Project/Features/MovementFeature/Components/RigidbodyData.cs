@@ -2,10 +2,10 @@
 
 namespace Asteroids.MovementFeature
 {
-    [System.Serializable]
     [MetaGroup(MovementModule.META_GROUP)]
     [MetaColor(MovementModule.META_COLOR)]
     [MetaID("E2272BB99501499999DA540D0B04344B")]
+    [System.Serializable]
     public struct RigidbodyData : IEcsComponent
     {
         public static readonly RigidbodyData Default = new RigidbodyData

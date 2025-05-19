@@ -46,6 +46,9 @@ namespace Asteroids.BoundsOverlapsFeature
             }
 
             var es = _graph.World.WhereToGroup(out BoundsAspect a);
+
+            ////TODO тут неяно что нужно очищать буфер иначе ломается логика графа, он начинает выдвать релейшены помеченные на удаление
+            //_graph.GraphWorld.ReleaseDelEntityBufferAll(); 
             foreach (var e in es)
             {
                 ref var boundsSphere = ref a.BoundsSpheres[e];
@@ -64,26 +67,24 @@ namespace Asteroids.BoundsOverlapsFeature
 
                     foreach (var hit in _hits)
                     {
-                        if (hit.Id.TryGetID(out var otherE) == false)
+                        if (hit.Id.TryGetID(out var otherE) == false || es.Has(otherE) == false || e == otherE)
                         {
                             continue;
                         }
 
-                        if (es.Has(otherE))
+                        ref var otherBoundsSphere = ref a.BoundsSpheres[otherE];
+                        var overlapRadius = otherBoundsSphere.radius + boundsSphere.radius;
+                        if (boundsSphere.radius >= otherBoundsSphere.radius) //отсеиваем дублирование
                         {
-                            ref var otherBoundsSphere = ref a.BoundsSpheres[otherE];
-                            var overlapRadius = otherBoundsSphere.radius + boundsSphere.radius;
-                            if (boundsSphere.radius >= otherBoundsSphere.radius) //отсеиваем дублирование
+                            if (hit.SqrDistance <= overlapRadius * overlapRadius)
                             {
-                                if (hit.SqrDistance <= overlapRadius * overlapRadius && e != otherE)
-                                {
-                                    var relE = _graph.GetOrNewRelation(otherE, e);
-                                    relA.OverlapsEvents.TryAddOrGet(relE);
-                                    var relEInverse = _graph.GetOrNewInverseRelation(relE);
-                                    relA.OverlapsEvents.TryAddOrGet(relEInverse);
-                                }
+                                var relE = _graph.GetOrNewRelation(otherE, e);
+                                relA.OverlapsEvents.TryAddOrGet(relE);
+                                var relEInverse = _graph.GetOrNewRelation(e, otherE);
+                                relA.OverlapsEvents.TryAddOrGet(relEInverse);
                             }
                         }
+
                     }
                 }
             }

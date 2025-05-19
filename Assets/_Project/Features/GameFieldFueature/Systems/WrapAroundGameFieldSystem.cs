@@ -36,13 +36,13 @@ namespace Asteroids.GameFieldFueature
                 Vector3 gameFieldSize = new Vector3(fieldSize.x, 0, fieldSize.y) + Vector3.one * 2f * boundsSphere.radius;
 
 
-                if(inAroundGameFieldSignal.Arounds.x != 0)
+                if(inAroundGameFieldSignal.Value.x != 0)
                 {
-                    position.x += -Mathf.Sign(inAroundGameFieldSignal.Arounds.x) * gameFieldSize.x;
+                    position.x += -Mathf.Sign(inAroundGameFieldSignal.Value.x) * gameFieldSize.x;
                 }
-                if(inAroundGameFieldSignal.Arounds.z != 0)
+                if(inAroundGameFieldSignal.Value.z != 0)
                 {
-                    position.z += -Mathf.Sign(inAroundGameFieldSignal.Arounds.z) * gameFieldSize.z;
+                    position.z += -Mathf.Sign(inAroundGameFieldSignal.Value.z) * gameFieldSize.z;
                 }
 
 

@@ -68,5 +68,7 @@ namespace Asteroids.Utils
             pooledUnit.Unit = result;
             return result;
         }
+
+        public static int prefabID = Shader.PropertyToID("123456"); 
     }
 }

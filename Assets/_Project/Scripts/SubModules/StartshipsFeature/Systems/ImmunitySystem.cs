@@ -1,5 +1,4 @@
-﻿using Asteroids.Components;
-using DCFApixels.DragonECS;
+﻿using DCFApixels.DragonECS;
 using UnityEngine;
 
 namespace Asteroids.StartshipsFeature
@@ -7,28 +6,48 @@ namespace Asteroids.StartshipsFeature
     internal class ImmunitySystem : IEcsRun
     {
         [DI] private EcsDefaultWorld _world;
+        [DI] private EcsGraphWorld _graphWorld;
 
         private class Aspect : EcsAspect
         {
-            public readonly EcsPool<Starship> Starships = Inc;
-            public readonly EcsPool<Immunity> Immunities = Inc;
+            public readonly EcsPool<HitImmunity> Immunities = Inc;
+            public readonly EcsPool<Starship> Starships = Opt;
         }
         public void Run()
         {
-            foreach (var e in _world.Where(out Aspect a))
+            foreach (var e in _graphWorld.Where(out Aspect a))
             {
-                ref var immunity = ref a.Immunities.Get(e);
+                ref var immunity = ref a.Immunities[e];
                 immunity.TimeLeft -= Time.deltaTime;
-                var starshipView = a.Starships.Get(e).View;
-                
                 if (immunity.TimeLeft <= 0)
                 {
                     a.Immunities.Del(e);
-                    starshipView.BlinkFromValueReset();
                 }
-                else
+            }
+            foreach (var e in _world.Where(out Aspect a))
+            {
+                ref var immunity = ref a.Immunities[e];
+                immunity.TimeLeft -= Time.deltaTime;
+
+
+                if (a.Starships.Has(e))
                 {
-                    starshipView.BlinkFromValue(immunity.TimeLeft);
+                    var starshipView = a.Starships[e].View;
+
+                    if (immunity.TimeLeft <= 0)
+                    {
+                        starshipView.BlinkFromValueReset();
+                    }
+                    else
+                    {
+                        starshipView.BlinkFromValue(immunity.TimeLeft);
+                    }
+                }
+
+
+                if (immunity.TimeLeft <= 0)
+                {
+                    a.Immunities.Del(e);
                 }
             }
         }

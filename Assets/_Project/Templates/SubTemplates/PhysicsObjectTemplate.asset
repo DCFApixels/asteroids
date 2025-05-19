@@ -18,6 +18,7 @@ MonoBehaviour:
   - rid: 1520753779500646427
   - rid: 1520753779500646428
   - rid: 1520753799220166827
+  - rid: 1520753917188113407
   references:
     version: 2
     RefIds:
@@ -50,4 +51,8 @@ MonoBehaviour:
       data:
         component:
           radius: 0.5
+        _offset: 0
+    - rid: 1520753917188113407
+      type: {class: Tempalte_B4F66F791607DD802EC7793F70E6D6D9, ns: ComponentTemplates, asm: Assembly-CSharp}
+      data:
         _offset: 0
