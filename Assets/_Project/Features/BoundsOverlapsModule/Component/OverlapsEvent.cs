@@ -6,5 +6,5 @@ namespace Modules.BoundsOverlaps
     [MetaColor(BoundsOverlapsModule.META_COLOR)]
     [AllowedInWorlds("Graph", "Event")]
     [System.Serializable]
-    internal struct OverlapsEvent : IEcsComponent { }
+    public struct OverlapsEvent : IEcsComponent { }
 }

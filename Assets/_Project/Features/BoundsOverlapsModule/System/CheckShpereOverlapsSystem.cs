@@ -1,5 +1,4 @@
-﻿using Asteroids;
-using Asteroids.MovementFeature;
+﻿using Asteroids.MovementFeature;
 using DCFApixels.DragonECS;
 using System;
 using System.Collections.Generic;
@@ -47,8 +46,6 @@ namespace Modules.BoundsOverlaps
 
             var es = _graph.World.WhereToGroup(out BoundsAspect a);
 
-            ////TODO тут неяно что нужно очищать буфер иначе ломается логика графа, он начинает выдвать релейшены помеченные на удаление
-            //_graph.GraphWorld.ReleaseDelEntityBufferAll(); 
             foreach (var e in es)
             {
                 ref var boundsSphere = ref a.BoundsSpheres[e];

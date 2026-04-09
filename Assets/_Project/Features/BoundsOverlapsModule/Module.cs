@@ -4,7 +4,7 @@ namespace Modules.BoundsOverlaps
 {
     [MetaGroup(META_GROUP, EcsConsts.MODULES_GROUP)]
     [MetaColor(META_COLOR)]
-    internal class BoundsOverlapsModule : IEcsModule, IEcsDefaultAddParams
+    public class BoundsOverlapsModule : IEcsModule, IEcsDefaultAddParams
     {
         public const string META_GROUP = nameof(Modules) + "/" + nameof(BoundsOverlaps);
         public const uint META_COLOR = MetaColor.Lime;
@@ -18,7 +18,7 @@ namespace Modules.BoundsOverlaps
         }
     }
     [System.Serializable]
-    internal class BoundsOverlapsRuntime
+    public class BoundsOverlapsRuntime
     {
         public AreaGrid2D<entlong> AreaGrid;
     }

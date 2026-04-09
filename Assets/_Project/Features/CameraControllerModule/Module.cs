@@ -4,7 +4,7 @@ namespace Modules.CameraController
 {
     [MetaGroup(META_GROUP, EcsConsts.MODULES_GROUP)]
     [MetaColor(META_COLOR)]
-    internal class CameraControllerModule : IEcsModule, IEcsDefaultAddParams
+    public class CameraControllerModule : IEcsModule, IEcsDefaultAddParams
     {
         public const string META_GROUP = nameof(Modules) + "/" + nameof(CameraController);
         public const uint META_COLOR = MetaColor.BlueViolet;
