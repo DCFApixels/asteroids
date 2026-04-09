@@ -1,5 +1,4 @@
-﻿using Asteroids.Data;
-using DCFApixels.DragonECS;
+﻿using DCFApixels.DragonECS;
 using UnityEngine;
 
 namespace Asteroids.LocalInputFeature
@@ -9,13 +8,13 @@ namespace Asteroids.LocalInputFeature
     internal class LocalInputSystem : IEcsRun, IEcsInit
     {
         [DI] EcsDefaultWorld _world;
-        [DI] SceneData _sceneData;
+        [DI] SceneData s;
 
         class InputAspect : EcsAspect
         {
             public EcsPool<LocalInputReceiver> LocalInputReceivers = Inc;
-            public EcsPool<MoveAxisInputSignal> MoveAxisInputSignals = Opt;
-            public EcsPool<FireInputBeginSignal> FireInputBeginSignals = Opt;
+            public EcsPool<MoveAxisInputEvent> MoveAxisInputEvents = Opt;
+            public EcsPool<FireInputBeginEvent> FireInputBeginEvents = Opt;
         }
         public void Run()
         {
@@ -23,46 +22,48 @@ namespace Asteroids.LocalInputFeature
             var vertical = Input.GetAxis("Vertical");
             if (Input.touchSupported && horizontal == 0 && vertical == 0)
             {
-                var gameScreen = _sceneData.UI.GameScreen;
+                var gameScreen = s.UI.GameScreen;
                 horizontal = gameScreen.Left.IsDown ? -1f : gameScreen.Right.IsDown ? 1f : 0f;
                 vertical = gameScreen.Acceleration.IsDown ? 1f : 0f;
             }
             bool isSpaceDown = Input.GetKeyDown(KeyCode.Space);
             if (Input.touchSupported && isSpaceDown == false)
             {
-                var gameScreen = _sceneData.UI.GameScreen;
+                var gameScreen = s.UI.GameScreen;
                 isSpaceDown = gameScreen.Shoot.IsDown;
             }
 
+            _world.GetAspects(out InputAspect a);
+            a.FireInputBeginEvents.ClearAll();
 
             bool hasMoveInput = horizontal != 0 || vertical != 0;
-            foreach (var e in _world.Where(out InputAspect a))
+            foreach (var e in _world.Where(a))
             {
                 if (isSpaceDown)
                 {
-                    a.FireInputBeginSignals.TryAddOrGet(e);
+                    a.FireInputBeginEvents.TryAddOrGet(e);
                 }
                 else 
                 { 
-                    a.FireInputBeginSignals.TryDel(e);
+                    a.FireInputBeginEvents.TryDel(e);
                 }
 
                 if (hasMoveInput)
                 {
-                    ref var inputData = ref a.MoveAxisInputSignals.TryAddOrGet(e);
-                    inputData.Horizontal = horizontal;
-                    inputData.Vertical = vertical;
+                    ref var moveEvent = ref a.MoveAxisInputEvents.TryAddOrGet(e);
+                    moveEvent.Horizontal = horizontal;
+                    moveEvent.Vertical = vertical;
                 }
-                else if (a.MoveAxisInputSignals.Has(e))
+                else if (a.MoveAxisInputEvents.Has(e))
                 {
-                    ref var inputData = ref a.MoveAxisInputSignals[e];
-                    if (inputData.Axis != Vector2.zero)
+                    ref var moveEvent = ref a.MoveAxisInputEvents[e];
+                    if (moveEvent.Axis != Vector2.zero)
                     {
-                        inputData.Axis = Vector2.zero;
+                        moveEvent.Axis = Vector2.zero;
                     }
                     else
                     {
-                        a.MoveAxisInputSignals.Del(e);
+                        a.MoveAxisInputEvents.Del(e);
                     }
                 }
             }
@@ -71,7 +72,7 @@ namespace Asteroids.LocalInputFeature
         public void Init()
         {
             Input.simulateMouseWithTouches = false;
-            _sceneData.UI.GameScreen.MobileControlRoot.SetActive(Input.touchSupported);
+            s.UI.GameScreen.MobileControlRoot.SetActive(Input.touchSupported);
         }
     }
 }

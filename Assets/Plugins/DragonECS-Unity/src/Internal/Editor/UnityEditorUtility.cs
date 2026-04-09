@@ -142,7 +142,8 @@ namespace DCFApixels.DragonECS.Unity.Editors
                             entityEditorBlockDrawers.Add(drawer);
                         }
 
-                        if (type.IsUnityObject() == false && type.GetConstructor(Type.EmptyTypes) != null)
+                        if (type.IsUnityObject() == false && 
+                            (type.IsValueType || type.GetConstructor(Type.EmptyTypes) != null))
                         {
                             serializableTypes.Add(type);
                             if (hasMetaID)
@@ -235,6 +236,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
         //private static Type[] _noHiddenSerializableTypes;
         private static GUIContent _singletonIconContent = null;
         private static GUIContent _singletonContent = null;
+        private static GUIContent _singleton2Content = null;
         private static GUIStyle _inputFieldCenterAnhor = null;
         private static Dictionary<Type, MonoScript> _scriptsAssets = new Dictionary<Type, MonoScript>(256);
 
@@ -312,8 +314,8 @@ namespace DCFApixels.DragonECS.Unity.Editors
                     break;
                 case SerializedPropertyType.Gradient:
 #if UNITY_2022_1_OR_NEWER
-                    property.gradientValue = new Gradient();;
-           
+                    property.gradientValue = new Gradient(); ;
+
 #else
                     Debug.LogWarning($"Unsupported SerializedPropertyType: {property.propertyType}");
 #endif
@@ -402,6 +404,22 @@ namespace DCFApixels.DragonECS.Unity.Editors
             _singletonContent.image = null;
             return _singletonContent;
         }
+        public static GUIContent GetLabelOrNull(string name, string tooltip = null)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return null;
+            }
+            return GetLabel(name, tooltip);
+        }
+        public static GUIContent GetLabelOrNull(Texture value, string tooltip = null)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            return GetLabel(value, tooltip);
+        }
         public static GUIContent GetLabel(string name, string tooltip = null)
         {
             if (_singletonContent == null)
@@ -423,6 +441,17 @@ namespace DCFApixels.DragonECS.Unity.Editors
             _singletonIconContent.image = image;
             _singletonIconContent.tooltip = tooltip;
             return _singletonIconContent;
+        }
+        public static GUIContent GetLabel2(string name, string tooltip = null)
+        {
+            if (_singleton2Content == null)
+            {
+                _singleton2Content = new GUIContent();
+            }
+            _singleton2Content.text = name;
+            _singleton2Content.image = null;
+            _singleton2Content.tooltip = tooltip;
+            return _singleton2Content;
         }
         #endregion
 

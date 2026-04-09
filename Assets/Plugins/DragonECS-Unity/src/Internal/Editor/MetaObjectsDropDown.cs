@@ -35,7 +35,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
                     }
                 }
                 return result;
-            }).Select(o => (o, (ITypeMeta)o.ToMeta()));
+            }).Select(o => (o, (ITypeMeta)o.GetMeta()));
             Setup(itemMetaPairs);
         }
 
@@ -86,31 +86,37 @@ namespace DCFApixels.DragonECS.Unity.Editors
             }
         }
     }
-    internal class ComponentTemplatesDropDown : MetaObjectsDropDown<IComponentTemplate>
+    internal class ComponentTemplatesDropDown : MetaObjectsDropDown<ComponentTemplateTypeCache>
     {
-        public ComponentTemplatesDropDown()
-        {
-            IEnumerable<(IComponentTemplate template, ITypeMeta meta)> itemMetaPairs = ComponentTemplateTypeCache.Dummies.ToArray().Select(dummy =>
-            {
-                ITypeMeta meta;
-                if (dummy is ITypeMeta withMetaOverride)
-                {
-                    meta = withMetaOverride;
-                }
-                else
-                {
-                    meta = dummy.Type.GetMeta();
-                }
-                return (dummy, meta);
-            });
-            //TODO оптимизировать или вырезать
-            itemMetaPairs = itemMetaPairs.OrderBy(o => o.meta.Group.Name);
-            Setup(itemMetaPairs);
-        }
+        private ComponentTemplatesDropDown() { }
 
         private bool _isCheckUnique;
         private SerializedProperty _arrayProperty;
         private SerializedProperty _fieldProperty;
+
+        public static Dictionary<PredicateTypesKey, ComponentTemplatesDropDown> _dropDownsCache = new Dictionary<PredicateTypesKey, ComponentTemplatesDropDown>(32);
+        public static ComponentTemplatesDropDown Get(PredicateTypesKey key)
+        {
+            if(_dropDownsCache.TryGetValue(key, out var result) == false)
+            {
+                result = new ComponentTemplatesDropDown();
+                IEnumerable<(ComponentTemplateTypeCache template, ITypeMeta meta)> itemMetaPairs = ComponentTemplateTypeCache.All.ToArray()
+                    .Where(o =>
+                    {
+                        return key.Check(o.Type);
+                    })
+                    .Select(o =>
+                    {
+                        return (o, o.Meta);
+                    });
+
+                //TODO оптимизировать или вырезать
+                itemMetaPairs = itemMetaPairs.OrderBy(o => o.meta.Group.Name);
+                result.Setup(itemMetaPairs);
+                _dropDownsCache[key] = result;
+            }
+            return result;
+        }
 
         public void OpenForArray(Rect position, SerializedProperty arrayProperty, bool isCheckUnique)
         {
@@ -139,14 +145,14 @@ namespace DCFApixels.DragonECS.Unity.Editors
             }
 
             Type componentType = item.Obj.GetType();
-            IComponentTemplate cmptmp = item.Obj;
+            var data = item.Obj;
 
-            if (_arrayProperty != null && cmptmp != null)
+            if (_arrayProperty != null && data != null)
             {
                 int index = _arrayProperty.arraySize;
                 if (_isCheckUnique)
                 {
-                    if (cmptmp.IsUnique)
+                    if (data.IsUnique)
                     {
                         for (int i = 0, iMax = _arrayProperty.arraySize; i < iMax; i++)
                         {
@@ -163,7 +169,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
 
             if (_fieldProperty != null)
             {
-                _fieldProperty.managedReferenceValue = cmptmp.Clone();
+                _fieldProperty.managedReferenceValue = data.CreateInstance();
                 _fieldProperty.serializedObject.ApplyModifiedProperties();
             }
         }
@@ -174,7 +180,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
         {
             IEnumerable<(IEcsPool pool, ITypeMeta meta)> itemMetaPairs = pools.Select(pool =>
             {
-                return (pool, (ITypeMeta)pool.ComponentType.ToMeta());
+                return (pool, (ITypeMeta)pool.ComponentType.GetMeta());
             });
             Setup(itemMetaPairs);
         }
@@ -208,7 +214,8 @@ namespace DCFApixels.DragonECS.Unity.Editors
     {
         private string _name;
         private bool _isContainsNull;
-        private IEnumerable<(T, ITypeMeta)> _itemMetaPairs;
+        public IEnumerable<(T, ITypeMeta)> _itemMetaPairs;
+
         public MetaObjectsDropDown() : base(new AdvancedDropdownState())
         {
             minimumSize = new Vector2(220f, EditorGUIUtility.singleLineHeight * 20);
@@ -333,7 +340,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
                     var x = Group.Splited.GetEnumerator();
                     x.MoveNext();
                     return x.Current.GetHashCode() ^ state;
-                };
+                }
             }
         }
         #endregion

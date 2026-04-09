@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9332747f7cd8d84c9f75106abbd6d8b, type: 3}
+  m_Name: ConfigData
+  m_EditorClassIdentifier: 
+  PlayerStarshipTemplate: {fileID: 11400000, guid: b5b84482a6e5e3b4c9111d81c84dfca5, type: 2}
+  Lifes: 3
+  StarshipSpawnImmunityTime: 1
+  ProjectileDescription: {fileID: 11400000, guid: a0b25c6bd1970d14ab89f4a8fe850a7f, type: 2}
+  BulletSpeed: 10
+  AsteroidDescription: {fileID: 11400000, guid: 3632d911de607c54b8db15e757360eb3, type: 2}
+  SpawnFrequency: 3
+  SpawnAmount: 10
+  AsteroidMaxSpeed: 1
+  AsteroidMinSpeed: 5
+  AsteroidDeathLeft: 2
+  AdditionalKillOffset: 1.1
+  ScreenBorderOffset: 0.5

@@ -44,7 +44,12 @@ namespace DCFApixels.DragonECS.Unity.Editors
             get { return UserSettingsPrefs.instance.IsShowHidden; }
             set { UserSettingsPrefs.instance.IsShowHidden = value; }
         }
-        private static ComponentColorMode ComponentColorMode
+        protected bool IsShowRuntimeComponents
+        {
+            get { return UserSettingsPrefs.instance.IsShowRuntimeComponents; }
+            set { UserSettingsPrefs.instance.IsShowRuntimeComponents = value; }
+        }
+        protected static ComponentColorMode ComponentColorMode
         {
             get { return UserSettingsPrefs.instance.ComponentColorMode; }
             set { UserSettingsPrefs.instance.ComponentColorMode = value; }
@@ -190,7 +195,12 @@ namespace DCFApixels.DragonECS.Unity.Editors
             get { return UserSettingsPrefs.instance.IsShowHidden; }
             set { UserSettingsPrefs.instance.IsShowHidden = value; }
         }
-        private static ComponentColorMode ComponentColorMode
+        protected bool IsShowRuntimeComponents
+        {
+            get { return UserSettingsPrefs.instance.IsShowRuntimeComponents; }
+            set { UserSettingsPrefs.instance.IsShowRuntimeComponents = value; }
+        }
+        protected static ComponentColorMode ComponentColorMode
         {
             get { return UserSettingsPrefs.instance.ComponentColorMode; }
             set { UserSettingsPrefs.instance.ComponentColorMode = value; }
@@ -212,20 +222,14 @@ namespace DCFApixels.DragonECS.Unity.Editors
         protected virtual void OnStaticInit() { }
         protected virtual void OnInit() { }
 
-        //private Stopwatch _stopwatch = new Stopwatch();
-
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            //_stopwatch.Restart();
             using (EcsGUI.CheckChanged(property.serializedObject))
             {
                 StaticInit();
                 Init();
                 DrawCustom(position, property, label);
             }
-            //_stopwatch.Stop();
-            //var result = _stopwatch.Elapsed;
-            //UnityEngine.Debug.Log($"{result.Minutes}:{result.Seconds}:{result.Milliseconds}");
         }
         protected abstract void DrawCustom(Rect position, SerializedProperty property, GUIContent label);
     }

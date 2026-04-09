@@ -6,7 +6,7 @@ namespace Asteroids.LocalInputFeature
     [MetaGroup(LocalInputModule.META_GROUP)]
     [MetaColor(LocalInputModule.META_COLOR)]
     [System.Serializable]
-    public struct MoveAxisInputSignal : IEcsComponent
+    public struct MoveAxisInputEvent : IEcsComponent
     {
         public float Horizontal
         {
@@ -21,5 +21,5 @@ namespace Asteroids.LocalInputFeature
         public Vector2 Axis;
     }
     [System.Serializable]
-    public struct FireInputBeginSignal : IEcsComponent { }
+    public struct FireInputBeginEvent : IEcsComponent { }
 }

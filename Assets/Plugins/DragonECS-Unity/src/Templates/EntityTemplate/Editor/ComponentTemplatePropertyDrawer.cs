@@ -9,7 +9,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
     [CustomPropertyDrawer(typeof(ComponentTemplateProperty), true)]
     internal class ComponentTemplatePropertyDrawer : ExtendedPropertyDrawer
     {
-        private ComponentTemplateReferenceDrawer _drawer = new ComponentTemplateReferenceDrawer();
+        private ComponentTemplateReferenceDrawer _drawer = new ComponentTemplateReferenceDrawer(new PredicateTypesKey(new Type[] { typeof(ITemplateNode) }));
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             property.Next(true);
@@ -26,22 +26,52 @@ namespace DCFApixels.DragonECS.Unity.Editors
             _drawer.Draw(position, root, property, label);
         }
     }
-    [CustomPropertyDrawer(typeof(ComponentTemplateReferenceAttribute), true)]
-    internal class ComponentTemplateReferenceDrawer : ExtendedPropertyDrawer<ComponentTemplateReferenceAttribute>
+    [CustomPropertyDrawer(typeof(ComponentTemplateFieldAttribute), true)]
+    internal class ComponentTemplateReferenceDrawer : ExtendedPropertyDrawer<ComponentTemplateFieldAttribute>
     {
         private const float DamagedComponentHeight = 18f * 2f;
-        private static ComponentTemplatesDropDown _componentDropDown;
+        private ComponentTemplatesDropDown _componentDropDown;
+        private PredicateTypesKey? _predicateOverride;
+
 
         #region Properties
-        private float SingleLineWithPadding => OneLineHeight + Padding * 4f;
         private float Padding => Spacing;
-        protected override bool IsStaticInit => _componentDropDown != null;
+        protected override bool IsInit => _componentDropDown != null;
         #endregion
 
-        #region Init
-        protected override void OnStaticInit()
+        public ComponentTemplateReferenceDrawer() { }
+        public ComponentTemplateReferenceDrawer(PredicateTypesKey key)
         {
-            _componentDropDown = new ComponentTemplatesDropDown();
+            _predicateOverride = key;
+        }
+
+        #region Init
+        protected override void OnInit()
+        {
+            PredicateTypesKey key;
+            if(_predicateOverride == null)
+            {
+                Type[] withOutTypes = Type.EmptyTypes;
+                if (fieldInfo != null)
+                {
+                    withOutTypes = fieldInfo.TryGetAttribute(out ReferenceButtonWithOutAttribute a) ? a.PredicateTypes : Array.Empty<Type>();
+                }
+                if (Attribute != null)
+                {
+                    var types = Attribute.PredicateTypes;
+                    if(types == null || types.Length == 0)
+                    {
+                        types = new Type[] { typeof(ITemplateNode) };
+                    }
+                    key = new PredicateTypesKey(types, withOutTypes);
+                }
+                else
+                {
+                    key = new PredicateTypesKey(new Type[] { typeof(object) }, withOutTypes);
+                }
+                _predicateOverride = key;
+            }
+            _componentDropDown = ComponentTemplatesDropDown.Get(_predicateOverride.Value);
             _componentDropDown.OnSelected += SelectComponent;
         }
 
@@ -50,46 +80,49 @@ namespace DCFApixels.DragonECS.Unity.Editors
         private static void SelectComponent(ComponentTemplatesDropDown.Item item)
         {
             //EcsGUI.Changed = true;
-            currentProperty.managedReferenceValue = item.Obj.Clone();
+            object inst = item.Obj.CreateInstance();
+            currentProperty.managedReferenceValue = inst;
             currentProperty.isExpanded = false;
             currentProperty.serializedObject.ApplyModifiedProperties();
         }
-
         #endregion
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            #region No SerializeReference
-            if (property.propertyType != SerializedPropertyType.ManagedReference)
-            {
-                return EditorGUI.GetPropertyHeight(property, label);
-            }
-            #endregion
+            bool isSerializeReference = property.propertyType == SerializedPropertyType.ManagedReference;
+            //#region No SerializeReference
+            //if (property.propertyType != SerializedPropertyType.ManagedReference)
+            //{
+            //    return EditorGUI.GetPropertyHeight(property, label);
+            //}
+            //#endregion
 
-            var instance = property.managedReferenceValue;
-            IComponentTemplate template = instance as IComponentTemplate;
-
-            if (template == null || instance == null)
+            if (isSerializeReference)
             {
-                return EditorGUIUtility.singleLineHeight + Padding * 2f;
-            }
-
-            try
-            {
-                if (instance is ComponentTemplateBase customTemplate)
+                var instance = property.managedReferenceValue;
+                IComponentTemplate template = instance as IComponentTemplate;
+                if (instance == null)
                 {
-                    property = property.FindPropertyRelative("component");
+                    return EditorGUIUtility.singleLineHeight + Padding * 2f;
+                }
+
+                try
+                {
+                    if (instance is ComponentTemplateBase customTemplate)
+                    {
+                        property = property.FindPropertyRelative("component");
+                    }
+                }
+                catch
+                {
+                    property = null;
+                }
+                if (property == null)
+                {
+                    return DamagedComponentHeight;
                 }
             }
-            catch
-            {
-                property = null;
-            }
-            if (property == null)
-            {
-                return DamagedComponentHeight;
-            }
-
+            
             int propCount = EcsGUI.GetChildPropertiesCount(property);
 
             return (propCount <= 0 ? EditorGUIUtility.singleLineHeight : EditorGUI.GetPropertyHeight(property, label)) + Padding * 4f;
@@ -99,39 +132,58 @@ namespace DCFApixels.DragonECS.Unity.Editors
         {
             Draw(position, property, property, label);
         }
-        public void Draw(Rect position, SerializedProperty rootProperty, SerializedProperty property, GUIContent label)
+        public void Draw(Rect rect, SerializedProperty rootProperty, SerializedProperty property, GUIContent label)
         {
-            #region No SerializeReference
-            if (property.propertyType != SerializedPropertyType.ManagedReference)
-            {
-                EditorGUI.PropertyField(position, property, label, true);
-                return;
-            }
-            #endregion
+            bool isSerializeReference = property.propertyType == SerializedPropertyType.ManagedReference;
+            //#region No SerializeReference
+            //if (isSerializeReference == false)
+            //{
+            //    EditorGUI.PropertyField(position, property, label, true);
+            //    return;
+            //}
+            //#endregion
 
-            var instance = property.managedReferenceValue;
-            IComponentTemplate template = instance as IComponentTemplate;
-
-            if (template == null || instance == null)
-            {
-                DrawSelectionPopup(position, property, label);
-                return;
-            }
-
+            ITypeMeta meta = null;
             SerializedProperty componentProp = property;
-            if (componentProp.managedReferenceValue is ComponentTemplateBase customTemplate)
+            if (isSerializeReference)
             {
-                componentProp = property.FindPropertyRelative("component");
+                var template = property.managedReferenceValue;
+                if (template == null)
+                {
+                    DrawSelectionPopup(rect, property, label);
+                    return;
+                }
+
+                IComponentTemplate componentTemplate = template as IComponentTemplate;
+                if (componentProp.managedReferenceValue is ComponentTemplateBase customTemplate)
+                {
+                    componentProp = property.FindPropertyRelative("component");
+                }
+                if (componentProp == null)
+                {
+                    DrawDamagedComponent(rect, "Damaged component template.");
+                    return;
+                }
+
+                meta = template as ITypeMeta;
+                if (meta == null)
+                {
+                    if (componentTemplate != null)
+                    {
+                        meta = componentTemplate.Type.GetMeta();
+                    }
+                    else
+                    {
+                        meta = template.GetMeta();
+                    }
+                }
             }
-            if (componentProp == null)
+            else
             {
-                DrawDamagedComponent(position, "Damaged component template.");
-                return;
+                meta = fieldInfo.FieldType.GetMeta();
             }
 
-            ITypeMeta meta = template is ITypeMeta metaOverride ? metaOverride : template.Type.ToMeta();
 
-            Rect rect = position;
             if (EcsGUI.DrawTypeMetaBlock(ref rect, rootProperty, meta))
             {
                 return;

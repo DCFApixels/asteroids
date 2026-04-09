@@ -1,5 +1,4 @@
-﻿using Asteroids.Data;
-using Asteroids.MovementFeature;
+﻿using Asteroids.MovementFeature;
 using DCFApixels.DragonECS;
 using System.Linq;
 using UnityEngine;
@@ -13,11 +12,11 @@ namespace Asteroids.CameraSmoothFollowFeature
         public AddParams AddParams => EcsConsts.POST_END_LAYER;
 
         [DI] EcsDefaultWorld _world;
-        [DI] SceneData _sceneData;
+        [DI] SceneData s;
 
         class Aspect : EcsAspect
         {
-            public EcsPool<TransformData> TransformDatas = Inc;
+            public EcsPool<RigidTransform> TransformDatas = Inc;
             public EcsPool<CameraSmoothFollowTarget> cameraSmoothFollowTargets = Inc;
         }
         public void Run()
@@ -27,11 +26,11 @@ namespace Asteroids.CameraSmoothFollowFeature
                 ref var transformData = ref a.TransformDatas[e];
                 ref var cameraSmoothFollowTarget = ref a.cameraSmoothFollowTargets[e];
 
-                Vector3 campos = Vector3.Lerp(To2D(cameraSmoothFollowTarget.target), To2D(transformData.position), cameraSmoothFollowTarget.positionsLerp);
-                campos.y = _sceneData.Camera.transform.position.y;
+                Vector3 campos = Vector3.Lerp(To2D(cameraSmoothFollowTarget.target), To2D(transformData.Position), cameraSmoothFollowTarget.positionsLerp);
+                campos.y = s.Camera.transform.position.y;
 
-                campos = Vector3.Lerp(_sceneData.Camera.transform.position, campos, cameraSmoothFollowTarget.moveLerp);
-                _sceneData.Camera.transform.position = campos;
+                campos = Vector3.Lerp(s.Camera.transform.position, campos, cameraSmoothFollowTarget.moveLerp);
+                s.Camera.transform.position = campos;
             }
         }
         private static Vector3 To2D(Vector3 v)

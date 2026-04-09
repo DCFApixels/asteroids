@@ -3,7 +3,8 @@
 #endif
 #pragma warning disable IDE1006
 #pragma warning disable CS8981
-using DCFApixels.DragonECS.Internal;
+using DCFApixels.DragonECS.Core.Internal;
+using DCFApixels.DragonECS.Core.Unchecked;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -47,12 +48,20 @@ namespace DCFApixels.DragonECS
         public bool IsAlive
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return EcsWorld.GetWorld(_world).IsAlive(_id, _gen); }
+            get
+            {
+                return EcsWorld.TryGetWorld(_world, out EcsWorld world) && world.IsAlive(_id, _gen);
+            }
         }
         public bool IsNull
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _full == 0L; }
+        }
+        public bool IsDeadOrNull
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return IsAlive == false; }
         }
         public int ID
         {
@@ -108,6 +117,48 @@ namespace DCFApixels.DragonECS
 
         #region Constructors
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public entlong(EcsWorld world, int id) : this()
+        {
+            if (world == null)
+            {
+                _id = 0;
+                _gen = 0;
+                _world = 0;
+            }
+            else
+            {
+                _id = id;
+                _gen = world.GetGen(id);
+                _world = world.ID;
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public entlong(int id, EcsWorld world) : this(world, id) { }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public entlong(EcsWorld world, entlong entity) : this()
+        {
+#if DEBUG
+            if (world.ID != entity.WorldID) { Throw.ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (world.ID != entity.WorldID) { world = null; }
+#endif
+            if (world == null)
+            {
+                _id = 0;
+                _gen = 0;
+                _world = 0;
+            }
+            else
+            {
+                _id = entity._id;
+                _gen = entity._gen;
+                _world = entity._world;
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public entlong(entlong entity, EcsWorld world) : this(world, entity) { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public entlong(int id, short gen, short world) : this()
         {
             _id = id;
@@ -119,15 +170,9 @@ namespace DCFApixels.DragonECS
         {
             _full = full;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe entlong NewUnsafe(long id, long gen, long world)
-        {
-            long x = id << 48 | gen << 32 | id;
-            return *(entlong*)&x;
-        }
         #endregion
 
-        #region Unpacking
+        #region Unpacking Try
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetID(out int id)
         {
@@ -146,7 +191,105 @@ namespace DCFApixels.DragonECS
             worldID = _world;
             return IsAlive;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGetGen(out short gen)
+        {
+            gen = _gen;
+            return IsAlive;
+        }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(out int id)
+        {
+            id = _id;
+            return IsAlive;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(out int id, out EcsWorld world)
+        {
+            world = GetWorld_Internal();
+            id = _id;
+            return IsAlive;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(out int id, out short gen, out EcsWorld world)
+        {
+            world = GetWorld_Internal();
+            gen = _gen;
+            id = _id;
+            return IsAlive;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(out int id, out short worldID)
+        {
+            worldID = _world;
+            id = _id;
+            return IsAlive;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(out int id, out short gen, out short worldID)
+        {
+            worldID = _world;
+            gen = _gen;
+            id = _id;
+            return IsAlive;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(EcsWorld world)
+        {
+            if (world.ID != _world) { return false; }
+            return world.IsAlive(_id, _gen);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(EcsWorld world, out int id)
+        {
+            if (world.ID != _world) { id = EcsConsts.NULL_ENTITY_ID; return false; }
+            id = _id;
+            return world.IsAlive(_id, _gen);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(EcsWorld world, out int id, out short gen)
+        {
+            if (world.ID != _world) { gen = 0; id = EcsConsts.NULL_ENTITY_ID; return false; }
+            gen = _gen;
+            id = _id;
+            return world.IsAlive(_id, _gen);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(EcsMask mask, out int id)
+        {
+            if (mask.WorldID != _world) { id = EcsConsts.NULL_ENTITY_ID; return false; }
+            id = _id;
+            return mask.World.IsAlive(_id, _gen) && mask.World.IsMatchesMask(mask, _id);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(EcsMask mask, out int id, out short gen)
+        {
+            if (mask.WorldID != _world) { gen = 0; id = EcsConsts.NULL_ENTITY_ID; return false; }
+            gen = _gen;
+            id = _id;
+            return mask.World.IsAlive(_id, _gen) && mask.World.IsMatchesMask(mask, _id);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(EcsAspect aspect, out int id)
+        {
+            if (aspect.World.ID != _world) { id = EcsConsts.NULL_ENTITY_ID; return false; }
+            id = _id;
+            return aspect.World.IsAlive(_id, _gen) && aspect.IsMatches(_id);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryUnpack(EcsAspect aspect, out int id, out short gen)
+        {
+            if (aspect.World.ID != _world) { gen = 0; id = EcsConsts.NULL_ENTITY_ID; return false; }
+            gen = _gen;
+            id = _id;
+            return aspect.World.IsAlive(_id, _gen) && aspect.IsMatches(_id);
+        }
+        #endregion
+
+        #region Unpacking/Deconstruct
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Unpack(out int id)
         {
@@ -229,46 +372,43 @@ namespace DCFApixels.DragonECS
             gen = _gen;
             id = _id;
         }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryUnpack(out int id)
+        public void Deconstruct(out int id, out short gen, out short worldID)
         {
-            id = _id;
-            return IsAlive;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryUnpack(out int id, out EcsWorld world)
-        {
-            world = GetWorld_Internal();
-            id = _id;
-            return IsAlive;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryUnpack(out int id, out short gen, out EcsWorld world)
-        {
-            world = GetWorld_Internal();
-            gen = _gen;
-            id = _id;
-            return IsAlive;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryUnpack(out int id, out short worldID)
-        {
-            worldID = _world;
-            id = _id;
-            return IsAlive;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryUnpack(out int id, out short gen, out short worldID)
-        {
+#if DEBUG
+            if (IsAlive == false) { Throw.Ent_ThrowIsNotAlive(this); }
+#elif DRAGONECS_STABILITY_MODE
+            if (IsAlive == false)
+            {
+                worldID = EcsConsts.NULL_WORLD_ID;
+                gen = default;
+                id = EcsConsts.NULL_ENTITY_ID;
+                return;
+            }
+#endif
             worldID = _world;
             gen = _gen;
             id = _id;
-            return IsAlive;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Deconstruct(out int id, out EcsWorld world)
+        {
+#if DEBUG
+            if (IsAlive == false) { Throw.Ent_ThrowIsNotAlive(this); }
+#elif DRAGONECS_STABILITY_MODE
+            if (IsAlive == false)
+            {
+                world = EcsWorld.GetWorld(EcsConsts.NULL_WORLD_ID);
+                id = EcsConsts.NULL_ENTITY_ID;
+                return;
+            }
+#endif
+            world = EcsWorld.GetWorld(_world);
+            id = _id;
         }
         #endregion
 
-        #region Unpacking
+        #region Unpacking Unchecked
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetIDUnchecked()
         {
@@ -324,16 +464,10 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator entlong((EcsWorld world, int entityID) a) { return Combine_Internal(a.entityID, a.world); }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public static implicit operator entlong((entlong entity, EcsWorld world) a) { return Combine_Internal(a.entity._id, a.world); }
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public static implicit operator entlong((EcsWorld world, entlong entity) a) { return Combine_Internal(a.entity._id, a.world); }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static entlong Combine_Internal(int entityID, EcsWorld world)
-        {
-            return world == null ? new entlong(entityID, 0, 0) : world.GetEntityLong(entityID);
-        }
+        public static implicit operator entlong((entlong entity, EcsWorld world) a) { return Combine_Internal(a.entity, a.world); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator entlong((EcsWorld world, entlong entity) a) { return Combine_Internal(a.entity, a.world); }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator long(entlong a) { return a._full; }
@@ -343,14 +477,22 @@ namespace DCFApixels.DragonECS
         public static explicit operator int(entlong a) { return a.ID; }
         #endregion
 
-        #region Deconstruct
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deconstruct(out int id, out short gen, out short worldID) { Unpack(out id, out gen, out worldID); }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deconstruct(out int id, out EcsWorld world) { Unpack(out id, out world); }
-        #endregion
-
         #region Other
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static entlong Combine_Internal(int entityID, EcsWorld world)
+        {
+            return world == null ? new entlong(entityID, 0, 0) : world.GetEntityLong(entityID);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static entlong Combine_Internal(entlong entity, EcsWorld world)
+        {
+#if DEBUG
+            if (world.ID != entity.WorldID) { Throw.ArgumentDifferentWorldsException(); }
+#elif DRAGONECS_STABILITY_MODE
+            if (world.ID != entity.WorldID) { return default; }
+#endif
+            return entity;
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private EcsWorld GetWorld_Internal()
         {
@@ -359,6 +501,7 @@ namespace DCFApixels.DragonECS
 #endif
             return EcsWorld.GetWorld(_world);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode() { return unchecked((int)_full) ^ (int)(_full >> 32); }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -370,152 +513,27 @@ namespace DCFApixels.DragonECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(long other) { return _full == other; }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int CompareTo(entlong other)
+        public int CompareTo(entlong other) { return Compare(_id, other._id); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Compare(entlong left, entlong right) { return left.CompareTo(right); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Compare(int left, int right)
         {
             // NOTE: Because _id cannot be less than 0,
             // the case “_id - other._id > MaxValue” is impossible.
-            return _id - other._id;
+            return left - right;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Compare(entlong left, entlong right) { return left.CompareTo(right); }
 
-
-        internal class DebuggerProxy
+        internal class DebuggerProxy : EntityDebuggerProxy
         {
-            private List<object> _componentsList = new List<object>();
-            private entlong _value;
-            public long full { get { return _value._full; } }
-            public int id { get { return _value._id; } }
-            public short gen { get { return _value._gen; } }
-            public short world { get { return _value._world; } }
-            public EntState State { get { return _value.IsNull ? EntState.Null : _value.IsAlive ? EntState.Alive : EntState.Dead; } }
-            public EcsWorld EcsWorld { get { return EcsWorld.GetWorld(world); } }
-            public IEnumerable<object> components
-            {
-                get
-                {
-                    _value.World.GetComponentsFor(_value.ID, _componentsList);
-                    return _componentsList;
-                }
-            }
-            public DebuggerProxy(entlong value)
-            {
-                _value = value;
-            }
-            public DebuggerProxy(EntitySlotInfo value)
-            {
-                _value = new entlong(value.id, value.gen, value.world);
-            }
-            public enum EntState { Null, Dead, Alive, }
-        }
-        #endregion
-    }
-}
-
-namespace DCFApixels.DragonECS
-{
-    [DebuggerTypeProxy(typeof(DebuggerProxy))]
-    public readonly struct EntitySlotInfo : IEquatable<EntitySlotInfo>
-    {
-        private readonly long _full;
-        public readonly int id;
-        public readonly short gen;
-        public readonly short world;
-
-        #region Properties
-        private EcsWorld World { get { return EcsWorld.GetWorld(world); } }
-        private EntState State { get { return _full == 0 ? EntState.Null : World.IsAlive(id, gen) ? EntState.Alive : EntState.Dead; } }
-
-        #endregion
-
-        #region Constructors
-        public EntitySlotInfo(long full)
-        {
-            unchecked
-            {
-                ulong ufull = (ulong)full;
-                id = (int)((ufull >> 0) & 0x0000_0000_FFFF_FFFF);
-                gen = (short)((ufull >> 32) & 0x0000_0000_0000_FFFF);
-                world = (short)((ufull >> 48) & 0x0000_0000_0000_FFFF);
-                _full = full;
-            }
-        }
-        public EntitySlotInfo(int id, short gen, short world)
-        {
-            this.id = id;
-            this.gen = gen;
-            this.world = world;
-            _full = ((long)world << 48 | (long)gen << 32 | (long)id);
-        }
-        #endregion
-
-        #region Operators
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(EntitySlotInfo a, EntitySlotInfo b)
-        {
-            return a.id == b.id &&
-                a.gen == b.gen &&
-                a.world == b.world;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(EntitySlotInfo a, EntitySlotInfo b)
-        {
-            return a.id != b.id ||
-                a.gen != b.gen ||
-                a.world != b.world;
-        }
-        #endregion
-
-        #region Other
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode() { return unchecked(id ^ gen ^ (world * EcsConsts.MAGIC_PRIME)); }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString() { return $"slot(id:{id} g:{gen} w:{world} {(State == EntState.Null ? "null" : State == EntState.Alive ? "alive" : "not alive")})"; }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj) { return obj is EntitySlotInfo other && this == other; }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(EntitySlotInfo other) { return this == other; }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deconstruct(out int id, out int gen, out int world)
-        {
-            id = this.id;
-            gen = this.gen;
-            world = this.world;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deconstruct(out int id, out int world)
-        {
-            id = this.id;
-            world = this.world;
-        }
-        public enum EntState { Null, Dead, Alive, }
-        internal class DebuggerProxy
-        {
-            private List<object> _componentsList = new List<object>();
-            private EntitySlotInfo _source;
-            public long full { get { return _source._full; } }
-            public int id { get { return _source.id; } }
-            public short gen { get { return _source.gen; } }
-            public short world { get { return _source.world; } }
-            public EntState State { get { return _source.State; } }
-            public EcsWorld World { get { return _source.World; } }
-            public IEnumerable<object> Components
-            {
-                get
-                {
-                    if (State == EntState.Alive)
-                    {
-                        World.GetComponentsFor(id, _componentsList);
-                        return _componentsList;
-                    }
-                    return Array.Empty<object>();
-                }
-            }
-            public DebuggerProxy(EntitySlotInfo value)
-            {
-                _source = value;
-            }
+            public override long full => base.full;
+            public override int id => base.id;
+            public override short gen => base.gen;
+            public override short worldID => base.worldID;
+            public override EntitySlotInfo.StateFlag State => base.State;
+            public override EcsWorld World => base.World;
+            public override IEnumerable<object> Components { get => base.Components; set => base.Components = value; }
+            public DebuggerProxy(entlong entity) : base(entity) { }
         }
         #endregion
     }

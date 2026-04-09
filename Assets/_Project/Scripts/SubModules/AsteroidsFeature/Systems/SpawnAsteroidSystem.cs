@@ -1,58 +1,54 @@
 ﻿using Asteroids.Components;
-using Asteroids.Data;
 using Asteroids.MovementFeature;
-using Asteroids.Utils;
 using DCFApixels.DragonECS;
+using Modules.BoundsOverlaps;
 using UnityEngine;
 
 namespace Asteroids.Systems
 {
     internal class SpawnAsteroidSystem : IEcsRun
     {
-        [DI] StaticData _staticData;
+        [DI] ConfigData c;
         [DI] EcsDefaultWorld _world;
-        [DI] PoolService _poolService;
 
         class EventAspect : EcsAspect
         {
-            public EcsPool<SpawnAsteroidSignal> SpawnAsteroidSignals = Inc;
+            public EcsPool<SpawnAsteroidRequest> Requests = Inc;
         }
         class SpawnAspect : EcsAspect
         {
-            public EcsPool<PooledUnit> PoolIDs = Inc;
             public EcsPool<Asteroid> Asteroids = Inc;
+            public EcsPool<BoundsSphere> BoundsSpheres = Inc;
             public EcsPool<Velocity> Velocities = Inc;
-            public EcsPool<TransformData> TransformDatas = Inc;
+            public EcsPool<RigidTransform> RigidTransforms = Inc;
         }
 
         public void Run()
         {
-            var spawnA = _world.GetAspect<SpawnAspect>();
-            foreach (var newE in _world.Where(out EventAspect eventA))
+            _world.GetAspects(out SpawnAspect spawnA, out EventAspect eventA);
+            foreach (var newE in _world.Where(eventA))
             {
-                var spawnAsteroidEvent = eventA.SpawnAsteroidSignals.Get(newE);
+                var req = eventA.Requests.Get(newE);
 
-                _staticData.AsteroidTemplate.Apply(_world, newE);
-                var newViewInstance = _poolService.Get(_staticData.AsteroidViewPrefab, out spawnA.PoolIDs.TryAddOrGet(newE));
-                newViewInstance.Connect((_world, newE), false);
+                req.Description.Apply(_world, newE);
                 spawnA.Apply(_world, newE);
 
-                newViewInstance.SetRadius(spawnAsteroidEvent.StartRadius);
-
                 ref var newAsteroid = ref spawnA.Asteroids.TryAddOrGet(newE);
-                newAsteroid.DeathsLeft = spawnAsteroidEvent.DeathsLeft;
-                newAsteroid.Radius = spawnAsteroidEvent.StartRadius;
+                newAsteroid.Description = req.Description;
+                newAsteroid.DeathsLeft = req.OverrideDeathsCount;
 
-            
-                ref var newTransformData = ref spawnA.TransformDatas.TryAddOrGet(newE);
-                newTransformData.position = spawnAsteroidEvent.Position;
-                newTransformData.rotation = spawnAsteroidEvent.Rotation;
+                ref var newBounds = ref spawnA.BoundsSpheres[newE];
+                newBounds.Radius = req.OverrideRadius;
+                newAsteroid.View.SetRadius(newBounds.Radius); 
+
+                ref var newTransformData = ref spawnA.RigidTransforms.TryAddOrGet(newE);
+                newTransformData.Position = req.Position;
+                newTransformData.Rotation = req.Rotation;
 
                 ref var newVelocity = ref spawnA.Velocities.TryAddOrGet(newE);
-                newVelocity.lineral = newTransformData.CalcLocalVector(Vector3.forward) * Random.Range(_staticData.AsteroidMinSpeed, _staticData.AsteroidMaxSpeed);
-            
-                eventA.SpawnAsteroidSignals.Del(newE);
+                newVelocity.Lineral = newTransformData.ToLocalVector(Vector3.forward) * Random.Range(c.AsteroidMinSpeed, c.AsteroidMaxSpeed);
             }
+            eventA.Requests.ClearAll();
         }
 
     }

@@ -11,20 +11,21 @@ namespace Asteroids.MovementFeature
     {
         public AddParams AddParams => EcsConsts.POST_END_LAYER;
 
+        [DI] EcsDefaultWorld _world;
+
         class VeloctityViewAspect : EcsAspect
         {
-            public EcsPool<TransformData> transformDatas = Inc;
-            public EcsPool<Velocity> velocities = Inc;
+            public EcsPool<RigidTransform> RigidTransform = Inc;
+            public EcsPool<Velocity> Velocities = Inc;
         }
-        [DI] EcsDefaultWorld _world;
         public void Run()
         {
             foreach (var e in _world.Where(out VeloctityViewAspect a))
             {
-                ref var velocity = ref a.velocities.Get(e);
-                ref var transform = ref a.transformDatas.Get(e);
+                ref var velocity = ref a.Velocities[e];
+                ref var transform = ref a.RigidTransform[e];
 
-                DebugX.Draw(new Color(1,1,1,0.3f) * Color.cyan).RayArrow(transform.position, velocity.lineral / 2f);
+                DebugX.Draw(new Color(1, 1, 1, 0.3f) * Color.cyan).RayArrow(transform.Position, velocity.Lineral / 2f);
             }
         }
     }

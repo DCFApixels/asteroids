@@ -2,15 +2,15 @@
 #undef DEBUG
 #endif
 using DCFApixels.DragonECS.Unity;
-using DCFApixels.DragonECS.Unity.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DCFApixels.DragonECS
 {
-    public abstract class MonoEntityTemplateBase : MonoBehaviour, IEntityTemplate
+    public abstract class MonoEntityTemplateBase : MonoBehaviour, ITemplateNode
     {
         public abstract void Apply(short worldID, int entityID);
     }
@@ -21,21 +21,15 @@ namespace DCFApixels.DragonECS
     [MetaGroup(EcsUnityConsts.PACK_GROUP, EcsUnityConsts.ENTITY_BUILDING_GROUP)]
     [MetaDescription(EcsConsts.AUTHOR, nameof(MonoBehaviour) + " implementation of an entity template. Templates are a set of components that are applied to entities.")]
     [MetaID("DragonECS_C734BA8092014833C14F21E05D7B1551")]
-    public class MonoEntityTemplate : MonoEntityTemplateBase, IEntityTemplateInternal
+    public class MonoEntityTemplate : MonoEntityTemplateBase, ITemplateNode
     {
         [SerializeReference]
-        [ReferenceButton(true, typeof(IComponentTemplate))]
-        private IComponentTemplate[] _componentTemplates;
-
-        #region Properties
-        string IEntityTemplateInternal.ComponentsPropertyName
-        {
-            get { return nameof(_componentTemplates); }
-        }
-        #endregion
+        [ReferenceButton(true, typeof(ITemplateNode))]
+        [FormerlySerializedAs("_components")]
+        private ITemplateNode[] _componentTemplates;
 
         #region Methods
-        public ReadOnlySpan<IComponentTemplate> GetComponentTemplates()
+        public ReadOnlySpan<ITemplateNode> GetComponentTemplates()
         {
             return _componentTemplates;
         }
@@ -62,7 +56,7 @@ namespace DCFApixels.DragonECS
             if (_componentTemplates == null) { return; }
             foreach (var item in _componentTemplates)
             {
-                item?.OnValidate(gameObject);
+                if(item is IComponentTemplate ct) { ct.OnValidate(gameObject); }
             }
         }
         private void OnDrawGizmos()
@@ -70,7 +64,7 @@ namespace DCFApixels.DragonECS
             if (_componentTemplates == null) { return; }
             foreach (var item in _componentTemplates)
             {
-                item?.OnGizmos(transform, IComponentTemplate.GizmosMode.Always);
+                if(item is IComponentTemplate ct) { ct.OnGizmos(transform, IComponentTemplate.GizmosMode.Always); }
             }
         }
         private void OnDrawGizmosSelected()
@@ -78,7 +72,7 @@ namespace DCFApixels.DragonECS
             if (_componentTemplates == null) { return; }
             foreach (var item in _componentTemplates)
             {
-                item?.OnGizmos(transform, IComponentTemplate.GizmosMode.Selected);
+                if(item is IComponentTemplate ct) { ct.OnGizmos(transform, IComponentTemplate.GizmosMode.Selected); }
             }
         }
         #endregion

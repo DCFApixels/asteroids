@@ -193,6 +193,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ebe272dab3d4c41b27c544dd960e41d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _preWarmCount: 8
+  DeathVFX: {fileID: 11400000, guid: 6a5cd183517f4da4a8548cc15344caf3, type: 2}
   LineRenderer: {fileID: 6506862308472665275}
   Radius: 1
 --- !u!1 &6628177050925095984

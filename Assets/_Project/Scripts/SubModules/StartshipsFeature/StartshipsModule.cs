@@ -7,9 +7,6 @@ namespace Asteroids.StartshipsFeature
     {
         public void Import(EcsPipeline.Builder b)
         {
-            b.Add(new StartshipDeathSystem());
-
-
             b.Add(new ImmunitySystem());
             b.Add(new SpawnBulletSystem());
             b.Add(new RespawnStarShipOnHitSystem());

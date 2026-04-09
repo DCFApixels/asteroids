@@ -19,7 +19,7 @@ namespace DCFApixels.DragonECS.Core
 
         private readonly IDependencyGraph<string> _graph;
         private readonly EcsPipeline.Builder _pipelineBuilder;
-        private readonly string _preBeginLayer;
+        //private readonly string _preBeginLayer;
 
         #region Properties
         public EcsPipeline.Builder Back
@@ -209,21 +209,21 @@ namespace DCFApixels.DragonECS.Core
         {
             var enumerator = other.GetEnumerator();
             string prev = null;
-            if (_preBeginLayer != null)
-            {
-                while (enumerator.MoveNext())
-                {
-                    var layer = enumerator.Current;
-                    if (layer == _preBeginLayer) { break; }
-
-                    Add(layer);
-                    if (prev != null)
-                    {
-                        Move(prev).Before(layer);
-                    }
-                    prev = layer;
-                }
-            }
+            //if (_preBeginLayer != null)
+            //{
+            //    while (enumerator.MoveNext())
+            //    {
+            //        var layer = enumerator.Current;
+            //        if (layer == _preBeginLayer) { break; }
+            //
+            //        Add(layer);
+            //        if (prev != null)
+            //        {
+            //            Move(prev).Before(layer);
+            //        }
+            //        prev = layer;
+            //    }
+            //}
             while (enumerator.MoveNext())
             {
                 var layer = enumerator.Current;
@@ -250,75 +250,6 @@ namespace DCFApixels.DragonECS.Core
         public string[] Build()
         {
             return _graph.Sort();
-        }
-        #endregion
-
-        #region Obsolete
-        [Obsolete("Use " + nameof(LayersMap) + ".Add(layer).Before(targetLayer).Back;")]
-        public EcsPipeline.Builder Insert(string targetLayer, string newLayer)
-        {
-            Add(newLayer).Before(targetLayer);
-            return _pipelineBuilder;
-        }
-        [Obsolete("Use " + nameof(LayersMap) + ".Add(layer).After(targetLayer).Back;")]
-        public EcsPipeline.Builder InsertAfter(string targetLayer, string newLayer)
-        {
-            Add(newLayer).After(targetLayer);
-            return _pipelineBuilder;
-        }
-        [Obsolete("Use " + nameof(LayersMap) + ".Move(layer).Before(targetLayer).Back;")]
-        public EcsPipeline.Builder Move(string targetLayer, string newLayer)
-        {
-            Move(newLayer).Before(targetLayer);
-            return _pipelineBuilder;
-        }
-        [Obsolete("Use " + nameof(LayersMap) + ".Move(layer).After(targetLayer).Back;")]
-        public EcsPipeline.Builder MoveAfter(string targetLayer, string newLayer)
-        {
-            Move(newLayer).After(targetLayer);
-            return _pipelineBuilder;
-        }
-        [Obsolete("Use " + nameof(LayersMap) + ".Add(layers).Before(targetLayer).Back;")]
-        public EcsPipeline.Builder Insert(string targetLayer, params string[] newLayers)
-        {
-            Add(newLayers).Before(targetLayer);
-            return _pipelineBuilder;
-        }
-        [Obsolete("Use " + nameof(LayersMap) + ".Add(layers).After(targetLayer).Back;")]
-        public EcsPipeline.Builder InsertAfter(string targetLayer, params string[] newLayers)
-        {
-            Add(newLayers).After(targetLayer);
-            return _pipelineBuilder;
-        }
-        [Obsolete("Use " + nameof(LayersMap) + ".Move(layers).Before(targetLayer).Back;")]
-        public EcsPipeline.Builder Move(string targetLayer, params string[] movingLayers)
-        {
-            Move(movingLayers).Before(targetLayer);
-            return _pipelineBuilder;
-        }
-        [Obsolete("Use " + nameof(LayersMap) + ".Move(layers).After(targetLayer).Back;")]
-        public EcsPipeline.Builder MoveAfter(string targetLayer, params string[] movingLayers)
-        {
-            Move(movingLayers).After(targetLayer);
-            return _pipelineBuilder;
-        }
-
-        [Obsolete]
-        public object this[int index]
-        {
-            get
-            {
-                int i = 0;
-                foreach (var item in this)
-                {
-                    if (i == index)
-                    {
-                        return item;
-                    }
-                    i++;
-                }
-                return null;
-            }
         }
         #endregion
     }

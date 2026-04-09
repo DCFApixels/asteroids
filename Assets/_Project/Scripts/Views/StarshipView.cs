@@ -3,7 +3,7 @@ using Color = UnityEngine.Color;
 
 namespace Asteroids.Views
 {
-    public class StarshipView : MonoBehaviour
+    public class StarshipView : ViewBase
     {
         public LineRenderer LineRenderer;
         public Color MinColor;

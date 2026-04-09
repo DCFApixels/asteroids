@@ -1,4 +1,5 @@
 ﻿using DCFApixels.DragonECS;
+using UnityEngine;
 
 namespace Asteroids.MovementFeature
 {
@@ -7,23 +8,23 @@ namespace Asteroids.MovementFeature
     public partial class ApplyTransformSystem : IEcsRun, IEcsDefaultAddParams
     {
         public AddParams AddParams => EcsConsts.POST_END_LAYER;
-        class Aspect : EcsAspect
-        {
-            public EcsPool<TransformData> transforms = Inc;
-            public EcsPool<GameObjectConnect> gocs = Inc;
-        }
 
         [DI] EcsDefaultWorld _world;
 
+        class Aspect : EcsAspect
+        {
+            public EcsPool<RigidTransform> RigidTransforms = Inc;
+            public EcsRefPool<Transform> Transforms = Inc;
+        }
         public void Run()
         {
             foreach (var e in _world.Where(out Aspect a))
             {
-                ref var transform = ref a.transforms.TryAddOrGet(e);
-                var goc = a.gocs.Get(e).Connect.transform;
-                 
-                goc.position = transform.position;
-                goc.rotation = transform.rotation;
+                ref var transform = ref a.RigidTransforms.TryAddOrGet(e);
+                var goc = a.Transforms[e].transform;
+
+                goc.position = transform.Position;
+                goc.rotation = transform.Rotation;
             }
         }
     }

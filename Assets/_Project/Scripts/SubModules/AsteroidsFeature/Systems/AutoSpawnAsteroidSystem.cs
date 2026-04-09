@@ -1,5 +1,4 @@
 ﻿using Asteroids.Components;
-using Asteroids.Data;
 using DCFApixels.DragonECS;
 using UnityEngine;
 
@@ -7,28 +6,28 @@ namespace Asteroids.Systems
 {
     public class AutoSpawnAsteroidSystem : IEcsRun
     {
-        [DI] StaticData _staticData;
         [DI] EcsDefaultWorld _world;
-        [DI] RuntimeData _runtimeData;
+        [DI] ConfigData c;
+        [DI] RuntimeData r;
 
         int _previousSpawnTime;
         
         public void Run()
         {
-            var gameTime = (int)(Time.time - _runtimeData.LevelStartTime);
-            if (gameTime != _previousSpawnTime && gameTime >= _staticData.SpawnFrequency &&
-                gameTime % _staticData.SpawnFrequency == 0)
+            var gameTime = (int)(Time.time - r.LevelStartTime);
+            if (gameTime != _previousSpawnTime && gameTime >= c.SpawnFrequency &&
+                gameTime % c.SpawnFrequency == 0)
             {
                 _previousSpawnTime = gameTime;
 
-                var spawnAsteroidEvents = _world.GetPool<SpawnAsteroidSignal>();
+                var spawnRequests = _world.GetPool<SpawnAsteroidRequest>();
                 
-                for (var var = 0; var < _staticData.SpawnAmount; var++)
+                for (var i = 0; i < c.SpawnAmount; i++)
                 {
-                    var size = _runtimeData.FieldSize;
+                    var size = r.FieldSize;
 
-                    var startAsteroidRadius = _staticData.AsteroidViewPrefab.Radius;
-               
+                    var startAsteroidRadius = c.AsteroidDescription.BoundsRadius;
+
                     var spawnPosition = new Vector3(
                         Random.value > 0.5f
                             ? Random.Range(size.x / 2f + startAsteroidRadius / 2f, size.x / 2f + startAsteroidRadius/2f)
@@ -37,11 +36,12 @@ namespace Asteroids.Systems
                         Random.Range(-size.y / 2f - startAsteroidRadius/2f, size.y / 2f + startAsteroidRadius/2f));
 
                     var startRotation = Quaternion.LookRotation(-spawnPosition);
-                    ref var spawnAsteroid = ref spawnAsteroidEvents.Add(_world.NewEntity());
-                    spawnAsteroid.Position = spawnPosition;
-                    spawnAsteroid.Rotation = startRotation;
-                    spawnAsteroid.DeathsLeft = _staticData.AsteroidDeathLeft;
-                    spawnAsteroid.StartRadius = startAsteroidRadius;
+                    ref var spawnRequest = ref spawnRequests.Add(_world.NewEntity());
+                    spawnRequest.Description = c.AsteroidDescription;
+                    spawnRequest.Position = spawnPosition;
+                    spawnRequest.Rotation = startRotation;
+                    spawnRequest.OverrideDeathsCount = c.AsteroidDescription.DeathsCount;
+                    spawnRequest.OverrideRadius = startAsteroidRadius;
                 }
             }
         }

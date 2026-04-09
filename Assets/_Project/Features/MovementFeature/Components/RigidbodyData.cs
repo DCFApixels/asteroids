@@ -10,13 +10,13 @@ namespace Asteroids.MovementFeature
     {
         public static readonly RigidbodyData Default = new RigidbodyData
         {
-            mass = 1,
-            lineralDrag = 0.05f,
-            angularDrag = 0.05f,
+            Mass = 1,
+            LineralDrag = 0.05f,
+            AngularDrag = 0.05f,
         };
-        public float lineralDrag;
-        public float angularDrag;
+        public float LineralDrag;
+        public float AngularDrag;
 
-        public float mass;
+        public float Mass;
     }
 }

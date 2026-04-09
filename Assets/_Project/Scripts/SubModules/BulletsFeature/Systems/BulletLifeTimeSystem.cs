@@ -1,6 +1,4 @@
-﻿using Asteroids.GameFieldFueature;
-using DCFApixels.DragonECS;
-using System.Linq;
+﻿using DCFApixels.DragonECS;
 using UnityEngine;
 
 namespace Asteroids.BulletsFeature
@@ -10,26 +8,19 @@ namespace Asteroids.BulletsFeature
         [DI] EcsDefaultWorld _world;
         class Aspect : EcsAspect
         {
-            public EcsPool<Bullet> Bullets = Inc;
-            public EcsTagPool<WrapAroundGameFieldMarker> WrapAroundGameFieldMarkers = Inc;
-            public EcsTagPool<KillOutsideGameFieldMarker> KillOutsideGameFieldMarkers = Exc;
+            public EcsPool<Projectile> Bullets = Inc;
+            public EcsPool<ProjectileLifetime> BulletLifetimes = Inc;
+
+            public EcsPool<OutOfGameFieldBehavior> OutOfGameFieldBehaviors = Opt;
         }
         public void Run()
         {
-            foreach (var e in _world.Where(out Aspect a))
+            _world.GetAspects(out Aspect a);
+            foreach (var e in a.BulletLifetimes.UpdateTime(Time.deltaTime))
             {
-                ref var bullet = ref a.Bullets[e];
-                if (bullet.lifeTime > 0)
-                {
-                    bullet.lifeTime -= Time.deltaTime;
-                    if (bullet.lifeTime < 0)
-                    {
-                        a.WrapAroundGameFieldMarkers.Del(e);
-                        a.KillOutsideGameFieldMarkers.Add(e);
-                    }
-                }
+                a.BulletLifetimes.Del(e);
+                a.OutOfGameFieldBehaviors.TryAddOrGet(e).Mode = OutOfGameFieldBehaviorMode.KillImmediate;
             }
-
         }
     }
 }

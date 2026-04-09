@@ -1,52 +1,48 @@
 ﻿using Asteroids.Components;
-using Asteroids.Data;
-using Asteroids.GameFieldFueature;
 using Asteroids.MovementFeature;
 using Asteroids.StartshipsFeature;
-using Asteroids.Utils;
+using DCFApixels;
 using DCFApixels.DragonECS;
 
 namespace Asteroids.Systems
 {
     internal class SpawnStarshipSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private StaticData _staticData;
-        [DI] private SceneData _sceneData;
-        [DI] private PoolService _poolService;
+        [DI] EcsDefaultWorld _world;
+        [DI] ConfigData c;
+        [DI] SceneData s;
 
-        class EventAspect : EcsAspect
+        class RequestAspect : EcsAspect
         {
-            public readonly EcsTagPool<SpawnStarshipEvent> SpawnStarships = Inc;
+            public readonly EcsPool<SpawnStarshipRequest> Requests = Inc;
         }
         class SpawnAspect : EcsAspect
         {
-            public readonly EcsPool<PooledUnit> PoolIDs = Inc;
-            public readonly EcsPool<TransformData> TransformDatas = Inc;
+            public readonly EcsPool<RigidTransform> TransformDatas = Inc;
             public readonly EcsPool<Starship> Starships = Inc;
             public readonly EcsPool<HitImmunity> Immunities = Inc;
-            public readonly EcsTagPool<WrapAroundGameFieldMarker> WrapAroundScreenMarkers = Inc;
+            public readonly EcsPool<OutOfGameFieldBehavior> OutOfGameFieldBehaviors = Inc;
         }
 
         public void Run()
         {
-            var spawnA = _world.GetAspect<SpawnAspect>();
-            foreach (var eventE in _world.Where(out EventAspect eventA))
+            _world.GetAspects(out SpawnAspect spawnA, out RequestAspect eventA);
+            foreach (var eventE in _world.Where(eventA))
             {
-                var newE = _world.NewEntity(_staticData.PlayerStarshipTemplate);
-                var newViewInstance = _poolService.Get(_staticData.StarshipViewPrefab, out spawnA.PoolIDs.TryAddOrGet(newE));
-                newViewInstance.Connect((_world, newE), false);
+                ref var req = ref eventA.Requests[eventE];
+
+                var newE = _world.NewEntity(c.PlayerStarshipTemplate);
                 spawnA.Apply(_world, newE);
 
-                spawnA.Starships[newE].View = newViewInstance;
-                spawnA.Immunities[newE].TimeLeft = _staticData.StarshipSpawnImmunityTime;
+                spawnA.Immunities[newE].TimeLeft = c.StarshipSpawnImmunityTime;
 
                 ref var newTransformData = ref spawnA.TransformDatas[newE];
-                newTransformData.position = _sceneData.SpawnPosition.position;
-                newTransformData.rotation = _sceneData.SpawnPosition.rotation;
+                newTransformData.Position = req.Position;
+                newTransformData.Rotation = req.Rotation;
 
-                eventA.SpawnStarships.Del(eventE);
             }
+
+            eventA.Requests.ClearAll();
         }
     }
 }

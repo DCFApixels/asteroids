@@ -1,15 +1,13 @@
-using Asteroids.BoundsOverlapsFeature;
 using Asteroids.BulletsFeature;
 using Asteroids.CameraSmoothFollowFeature;
-using Asteroids.Data;
 using Asteroids.GameFieldFueature;
 using Asteroids.LocalInputFeature;
 using Asteroids.MovementFeature;
 using Asteroids.StarshipInputControlFeature;
 using Asteroids.StartshipsFeature;
 using Asteroids.Systems;
-using Asteroids.Utils;
 using DCFApixels.DragonECS;
+using Modules.BoundsOverlaps;
 using UnityEngine;
 
 namespace Asteroids
@@ -21,7 +19,7 @@ namespace Asteroids
         private EcsGraphWorld _graphWorld;
 
         [SerializeField]
-        private StaticData StaticData;
+        private ConfigData StaticData;
         [SerializeField] 
         private SceneData SceneData;
         [SerializeField]
@@ -44,10 +42,10 @@ namespace Asteroids
 
                 .AddModule(new AsteroidModule())
 
-                .Add(new KillHitObjectSystem())
+                .Add(new OutOfGameFieldBehaviorSystem())
+                .Add(new PlayDeathVFXSystem())
                 .Add(new UIUpdateSystem())
                 .Add(new RestartSystem())
-
 
                 .AddModule(new CameraSmoothFollowModule())
                 .AddModule(new StarshipInputControlModule())
@@ -58,6 +56,7 @@ namespace Asteroids
                 .AddModule(new BoundsOverlapsModule())
 
                 .AddModule(new StartshipsModule())
+                .Add(new DeleteKilledEntitesSystem())
 
                 // Injecting into systems.
                 .Inject(_world)
@@ -66,7 +65,6 @@ namespace Asteroids
                 .Inject(StaticData)
                 .Inject(SceneData)
                 .Inject(RuntimeData)
-                .Inject(new PoolService())
                 .AutoInject()
 
                 .Add(new DebugEntitiesSystem())

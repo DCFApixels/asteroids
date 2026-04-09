@@ -2,15 +2,15 @@
 #undef DEBUG
 #endif
 using DCFApixels.DragonECS.Unity;
-using DCFApixels.DragonECS.Unity.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DCFApixels.DragonECS
 {
-    public abstract class ScriptableEntityTemplateBase : ScriptableObject, IEntityTemplate
+    public abstract class ScriptableEntityTemplateBase : ScriptableObject, ITemplateNode
     {
         public abstract void Apply(short worldID, int entityID);
     }
@@ -20,20 +20,14 @@ namespace DCFApixels.DragonECS
     [MetaDescription(EcsConsts.AUTHOR, nameof(ScriptableObject) + " implementation of an entity template. Templates are a set of components that are applied to entities.")]
     [CreateAssetMenu(fileName = nameof(ScriptableEntityTemplate), menuName = EcsConsts.FRAMEWORK_NAME + "/" + nameof(ScriptableEntityTemplate), order = 1)]
     [MetaID("DragonECS_7C4DBA809201D959401A5BDFB6363EC0")]
-    public class ScriptableEntityTemplate : ScriptableEntityTemplateBase, IEntityTemplateInternal
+    public class ScriptableEntityTemplate : ScriptableEntityTemplateBase, ITemplateNode
     {
         [SerializeField]
         private ScriptableEntityTemplateBase[] _templates;
         [SerializeReference]
-        [ReferenceButton(true, typeof(IComponentTemplate))]
-        private IComponentTemplate[] _componentTemplates;
-
-        #region Properties
-        string IEntityTemplateInternal.ComponentsPropertyName
-        {
-            get { return nameof(_componentTemplates); }
-        }
-        #endregion
+        [ReferenceButton(true, typeof(ITemplateNode))]
+        [FormerlySerializedAs("_components")]
+        private ITemplateNode[] _componentTemplates;
 
         #region Methods
         public ReadOnlySpan<ScriptableEntityTemplateBase> GetTemplates()
@@ -44,7 +38,7 @@ namespace DCFApixels.DragonECS
         {
             _templates = templates.ToArray();
         }
-        public ReadOnlySpan<IComponentTemplate> GetComponentTemplates()
+        public ReadOnlySpan<ITemplateNode> GetComponentTemplates()
         {
             return _componentTemplates;
         }
@@ -75,7 +69,7 @@ namespace DCFApixels.DragonECS
             if (_componentTemplates == null) { return; }
             foreach (var item in _componentTemplates)
             {
-                item?.OnValidate(this);
+                if (item is IComponentTemplate ct) { ct.OnValidate(this); }
             }
         }
         #endregion

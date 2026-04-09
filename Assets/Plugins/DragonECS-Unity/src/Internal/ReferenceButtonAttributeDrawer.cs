@@ -10,6 +10,26 @@ namespace DCFApixels.DragonECS.Unity.Editors
 }
 
 #if UNITY_EDITOR
+namespace DCFApixels.DragonECS.Unity.Internal
+{
+    using DCFApixels.DragonECS.Unity.Editors;
+    using UnityEditor;
+    internal partial class UnityReflectionCache
+    {
+        public bool IsReferenceButtonCacheInit_Editor;
+        public bool InitReferenceButtonCache_Editor(SerializedProperty sp)
+        {
+            if (IsReferenceButtonCacheInit_Editor) { return false; }
+
+            HasSerializableData_Editor = sp.HasSerializableData();
+
+            IsReferenceButtonCacheInit_Editor = true;
+            return true;
+        }
+        public bool HasSerializableData_Editor;
+    }
+}
+
 namespace DCFApixels.DragonECS.Unity.Editors
 {
     using DCFApixels.DragonECS.Unity.Internal;
@@ -17,7 +37,6 @@ namespace DCFApixels.DragonECS.Unity.Editors
     using UnityEditor;
     using UnityEngine;
 
-    [CustomPropertyDrawer(typeof(ComponentTemplateReferenceAttribute), true)]
     [CustomPropertyDrawer(typeof(ReferenceButtonAttribute), true)]
     internal sealed class ReferenceButtonAttributeDrawer : ExtendedPropertyDrawer<IReferenceButtonAttribute>
     {
@@ -26,19 +45,31 @@ namespace DCFApixels.DragonECS.Unity.Editors
         {
             Type fieldType = fieldInfo.FieldType;
             _withOutTypes = fieldType.TryGetAttribute(out ReferenceButtonWithOutAttribute a) ? a.PredicateTypes : Array.Empty<Type>();
-            if (fieldType.IsGenericType)
+            //if (fieldType.IsGenericType)
+            //{
+            //    if (fieldType.IsGenericTypeDefinition == false)
+            //    {
+            //        fieldType = fieldType.GetGenericTypeDefinition();
+            //    }
+            //}
+        }
+
+        private UnityReflectionCache _reflectionCache;
+        private UnityReflectionCache Cahce(SerializedProperty sp)
+        {
+            if (UnityReflectionCache.InitLocal(sp.managedReferenceValue.GetType(), ref _reflectionCache))
             {
-                if (fieldType.IsGenericTypeDefinition == false)
-                {
-                    fieldType = fieldType.GetGenericTypeDefinition();
-                }
+                _reflectionCache.InitReferenceButtonCache_Editor(sp);
             }
+            return _reflectionCache;
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             Init();
-            if (property.managedReferenceValue != null)
+            if (property.propertyType == SerializedPropertyType.ManagedReference &&
+                property.managedReferenceValue != null &&
+                Cahce(property).HasSerializableData_Editor)
             {
                 return EditorGUI.GetPropertyHeight(property, label, true);
             }
@@ -50,6 +81,11 @@ namespace DCFApixels.DragonECS.Unity.Editors
 
         protected override void DrawCustom(Rect position, SerializedProperty property, GUIContent label)
         {
+            if(property.propertyType != SerializedPropertyType.ManagedReference)
+            {
+                GUI.Label(position, label);
+                return;
+            }
             if (IsArrayElement)
             {
                 label = UnityEditorUtility.GetLabelTemp();
@@ -58,7 +94,8 @@ namespace DCFApixels.DragonECS.Unity.Editors
             selButtnoRect.height = OneLineHeight;
             DrawSelectionPopupButton(selButtnoRect, property);
 
-            if (property.managedReferenceValue != null)
+            if (property.managedReferenceValue != null &&
+                Cahce(property).HasSerializableData_Editor)
             {
                 EditorGUI.PropertyField(position, property, label, true);
             }

@@ -1,4 +1,6 @@
 ﻿#if UNITY_EDITOR
+using DCFApixels.DragonECS.Core;
+using DCFApixels.DragonECS.Core.Unchecked;
 using DCFApixels.DragonECS.Unity.Internal;
 using System;
 using System.Collections.Generic;
@@ -141,10 +143,10 @@ namespace DCFApixels.DragonECS.Unity.Editors
             private readonly int _value;
             public IndentLevelScope(int value)
             {
-                _value = EditorGUI.indentLevel;
-                EditorGUI.indentLevel = value;
+                _value = IndentLevel;
+                IndentLevel = value;
             }
-            public void Dispose() { EditorGUI.indentLevel = _value; }
+            public void Dispose() { IndentLevel = _value; }
         }
         public struct AlignmentScope : IDisposable
         {
@@ -259,7 +261,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
         public static AlignmentScope SetAlignment(TextAnchor value) => new AlignmentScope(GUI.skin.label, value);
         public static AlignmentScope SetAlignment(GUIStyle target) => new AlignmentScope(target);
         public static IndentLevelScope SetIndentLevel(int level) => new IndentLevelScope(level);
-        public static IndentLevelScope UpIndentLevel() => new IndentLevelScope(EditorGUI.indentLevel + 1);
+        public static IndentLevelScope UpIndentLevel() => new IndentLevelScope(IndentLevel + 1);
         public static ContentColorScope SetContentColor(Color value) => new ContentColorScope(value);
         public static ContentColorScope SetContentColor(Color value, float a) => new ContentColorScope(value.r, value.g, value.b, a);
         public static ContentColorScope SetContentColor(float r, float g, float b, float a = 1f) => new ContentColorScope(r, g, b, a);
@@ -276,20 +278,36 @@ namespace DCFApixels.DragonECS.Unity.Editors
         public static LabelWidthScope SetLabelWidth(float value) => new LabelWidthScope(value);
         #endregion
 
-        private static readonly BindingFlags fieldFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        //private static readonly BindingFlags fieldFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
         internal readonly static Color GrayColor = new Color32(100, 100, 100, 255);
         internal readonly static Color GreenColor = new Color32(75, 255, 0, 255);
         internal readonly static Color RedColor = new Color32(255, 0, 75, 255);
 
-        private static readonly Rect HeadIconsRect = new Rect(0f, 0f, 19f, 19f);
-
-        public static float EntityBarHeight => EditorGUIUtility.singleLineHeight + 3f;
-
-        private static float indent => (float)EditorGUI.indentLevel * 15f;
-        private static float indentLevel => EditorGUI.indentLevel;
+        internal static readonly Rect HeadIconsRect = new Rect(0f, 0f, 19f, 19f);
 
         #region Properties
+        public static float EntityBarHeight
+        {
+            get => EditorGUIUtility.singleLineHeight + 3f;
+        }
+        public static float Indent
+        {
+            get => EditorGUI.indentLevel * 15f;
+        }
+        public static int IndentLevel
+        {
+            get => EditorGUI.indentLevel;
+            set => EditorGUI.indentLevel = value;
+        }
+        public static float OneLineHeight
+        {
+            get => EditorGUIUtility.singleLineHeight;
+        }
+        public static float Spacing
+        {
+            get => EditorGUIUtility.standardVerticalSpacing;
+        }
         private static ComponentColorMode AutoColorMode
         {
             get { return UserSettingsPrefs.instance.ComponentColorMode; }
@@ -310,14 +328,6 @@ namespace DCFApixels.DragonECS.Unity.Editors
         //    get { return UserSettingsPrefs.instance.IsFastModeRuntimeComponents; }
         //    set { UserSettingsPrefs.instance.IsFastModeRuntimeComponents = value; }
         //}
-        private static float OneLineHeight
-        {
-            get => EditorGUIUtility.singleLineHeight;
-        }
-        private static float Spacing
-        {
-            get => EditorGUIUtility.standardVerticalSpacing;
-        }
         #endregion
 
         #region enums
@@ -327,12 +337,11 @@ namespace DCFApixels.DragonECS.Unity.Editors
             Add = 1,
             Clear = 2,
         }
-        [Flags]
         public enum EntityStatus : byte
         {
             NotAlive = 0,
-            Alive = 1 << 0,
-            Undefined = 1 << 1,
+            Alive = 1,
+            Undefined = 2,
         }
         #endregion
 
@@ -366,7 +375,37 @@ namespace DCFApixels.DragonECS.Unity.Editors
         #endregion
 
         #region small elems
-        public static void DrawIcon(Rect position, Texture icon, float iconPadding, string description)
+        public static void DrawTextureSoftColor(Rect position, Texture texture)
+        {
+            if (Event.current.type == EventType.Repaint)
+            {
+                Graphics.DrawTexture(position, texture, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, GUI.color * 0.5f, null);
+            }
+        }
+        public static void DrawTexture(Rect position, Texture texture)
+        {
+            if (Event.current.type == EventType.Repaint)
+            {
+                Graphics.DrawTexture(position, texture, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, GUI.color, null);
+            }
+        }
+        public static void DrawRectSoftColor(Rect position, Color color)
+        {
+            if (Event.current.type == EventType.Repaint)
+            {
+                Texture texture = UnityEditorUtility.GetWhiteTexture();
+                Graphics.DrawTexture(position, texture, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, GUI.color * color * 0.5f, null);
+            }
+        }
+        public static void DrawRect(Rect position, Color color)
+        {
+            if (Event.current.type == EventType.Repaint)
+            {
+                Texture texture = UnityEditorUtility.GetWhiteTexture();
+                Graphics.DrawTexture(position, texture, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, GUI.color * color, null);
+            }
+        }
+        public static void DrawIcon(Rect position, Texture icon, float iconPadding, string tooltip)
         {
             if (position.width != position.height)
             {
@@ -378,8 +417,8 @@ namespace DCFApixels.DragonECS.Unity.Editors
             }
             using (SetColor(GUI.enabled ? GUI.color : GUI.color * new Color(1f, 1f, 1f, 0.4f)))
             {
-                GUI.Label(position, UnityEditorUtility.GetLabel(string.Empty, description));
-                GUI.DrawTexture(RectUtility.AddPadding(position, iconPadding), icon);
+                GUI.Label(position, UnityEditorUtility.GetLabel(string.Empty, tooltip));
+                DrawTextureSoftColor(RectUtility.AddPadding(position, iconPadding), icon);
             }
         }
         public static (bool, bool) IconButtonGeneric(Rect position)
@@ -413,7 +452,25 @@ namespace DCFApixels.DragonECS.Unity.Editors
             }
         }
 
+        public static void EntityHyperlinkButton(Rect position, EcsWorld world, int entityID)
+        {
+            var current = Event.current;
+            var hover = IconHoverScan(position, current);
 
+            var click = IconButton(position, Icons.Instance.HyperlinkIcon, 2f, string.Empty);
+            if (GUI.enabled)
+            {
+                if (click)
+                {
+                    var obj = world.Get<EntityLinksComponent>().GetLink(entityID);
+                    if (obj != null)
+                    {
+                        EditorGUIUtility.PingObject(obj);
+                        Selection.activeObject = obj;
+                    }
+                }
+            }
+        }
         public static void ScriptAssetButton(Rect position, MonoScript script)
         {
             var current = Event.current;
@@ -489,20 +546,99 @@ namespace DCFApixels.DragonECS.Unity.Editors
         #endregion
 
         #region entity bar
-        public static void EntityBarForAlive(Rect position, EntityStatus status, int id, short gen, short world)
+        internal readonly struct EntityLinksComponent : IEcsWorldComponent<EntityLinksComponent>
         {
-            EntityBar(position, status != EntityStatus.Alive, status, id, gen, world);
+            private readonly Storage _storage;
+            private EntityLinksComponent(Storage storage) { _storage = storage; }
+            public void SetConnectLink(int entityID, EcsEntityConnect link) { _storage.links[entityID].connect = link; }
+            public void SetMonitorLink(int entityID, EntityMonitor link) { _storage.links[entityID].monitor = link; }
+            public EcsEntityConnect GetConnectLink(int entityID) { return _storage.links[entityID].connect; }
+            public EntityMonitor GetMonitorLink(int entityID) { return _storage.links[entityID].monitor; }
+            public UnityEngine.Object GetLink(int entityID)
+            {
+                ref var links = ref _storage.links[entityID];
+                if (links.connect != null)
+                {
+                    return links.connect;
+                }
+                return links.monitor;
+            }
+            void IEcsWorldComponent<EntityLinksComponent>.Init(ref EntityLinksComponent component, EcsWorld world)
+            {
+                component = new EntityLinksComponent(new Storage(world));
+            }
+            void IEcsWorldComponent<EntityLinksComponent>.OnDestroy(ref EntityLinksComponent component, EcsWorld world)
+            {
+                component = default;
+            }
+            private class Storage : IEcsWorldEventListener
+            {
+                private readonly EcsWorld _world;
+                public (EcsEntityConnect connect, EntityMonitor monitor)[] links;
+                public Storage(EcsWorld world)
+                {
+                    _world = world;
+                    _world.AddListener(this);
+                    links = new (EcsEntityConnect, EntityMonitor)[_world.Capacity];
+                }
+                public void OnWorldResize(int newSize) { Array.Resize(ref links, newSize); }
+                public void OnReleaseDelEntityBuffer(ReadOnlySpan<int> buffer) { }
+                public void OnWorldDestroy() { }
+            }
         }
-        public static void EntityBar(Rect position, int id, short gen, short world)
+        public static void EntityField(Rect position, entlong entity)
         {
-            EntityBar_Internal(position, false, id, gen, world);
+            EntityField(position, DragonGUIContent.Empty, entity);
         }
-        public static void EntityBar(Rect position)
+        public static unsafe void EntityField(Rect position, DragonGUIContent label, entlong entity)
         {
-            EntityBar_Internal(position, true);
+            EntityField(position, label, (EntitySlotInfo)entity);
         }
-        public static void EntityBar(Rect position, bool isPlaceholder, EntityStatus status, int id = 0, short gen = 0, short world = 0)
+        public static void EntityField(Rect position, EntitySlotInfo entity)
         {
+            EntityField(position, DragonGUIContent.Empty, entity);
+        }
+        public static void EntityField(Rect position, DragonGUIContent label, EntitySlotInfo entity)
+        {
+            bool isAlive = false;
+            if (EcsWorld.TryGetWorld(entity.worldID, out EcsWorld world))
+            {
+                isAlive = world.IsAlive(entity.id, entity.gen);
+            }
+            EntityField_Internal(position, label, entity.id == 0, isAlive ? EntityStatus.Alive : EntityStatus.NotAlive, entity.id, entity.gen, entity.worldID);
+        }
+        public static void EntityField(Rect position, SerializedProperty property)
+        {
+            EntityField(position, property, DragonGUIContent.Empty);
+        }
+        public static void EntityField(Rect position, SerializedProperty property, DragonGUIContent label)
+        {
+            EntitySlotInfo entity = new EntitySlotInfo(property.FindPropertyRelative("_full").longValue);
+
+            if (property.hasMultipleDifferentValues)
+            {
+                EntityField_Internal(position, label, true, EntityStatus.Undefined, 0, 0, 0);
+            }
+            else
+            {
+                bool isAlive = false;
+                if (EcsWorld.TryGetWorld(entity.worldID, out EcsWorld world))
+                {
+                    isAlive = world.IsAlive(entity.id, entity.gen);
+                }
+                EntityField_Internal(position, label, entity.id == 0, isAlive ? EntityStatus.Alive : EntityStatus.NotAlive, entity.id, entity.gen, entity.worldID);
+            }
+        }
+
+        internal static void EntityField_Internal(Rect position, GUIContent label, bool isPlaceholder, EntityStatus status, int id, short gen, short world)
+        {
+            if (label != null)
+            {
+                Rect labelRect;
+                (labelRect, position) = position.HorizontalSliceLeft(EditorGUIUtility.labelWidth * 0.65f);
+                EditorGUI.LabelField(labelRect, label);
+            }
+
             using (SetLabelWidth(0f))
             {
                 var (entityInfoRect, statusRect) = RectUtility.VerticalSliceBottom(position, 3f);
@@ -511,10 +647,10 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 switch (status)
                 {
                     case EntityStatus.NotAlive:
-                        statusColor = EcsGUI.RedColor;
+                        statusColor = RedColor;
                         break;
                     case EntityStatus.Alive:
-                        statusColor = EcsGUI.GreenColor;
+                        statusColor = GreenColor;
                         break;
                     default:
                         statusColor = new Color32(200, 200, 200, 255);
@@ -524,18 +660,18 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 statusColor.a = 0.6f;
                 EditorGUI.DrawRect(statusRect, statusColor);
 
-                EntityBar_Internal(entityInfoRect, isPlaceholder, id, gen, world);
+                EntityFieldContent_Internal(entityInfoRect, isPlaceholder, id, gen, world);
             }
         }
-        private static void EntityBar_Internal(Rect position, bool isPlaceHolder, int id = 0, short gen = 0, short world = 0)
+        private static void EntityFieldContent_Internal(Rect position, bool isPlaceHolder, int id, short gen, short world)
         {
-            using (SetLabelWidth(0f))
+            using (SetLabelWidth(0f)) using (SetIndentLevel(0))
             {
                 Color w = Color.gray;
                 w.a = 0.6f;
                 Color b = Color.black;
                 b.a = 0.55f;
-                EditorGUI.DrawRect(position, w);
+                DrawRectSoftColor(position, w);
 
                 var (idRect, genWorldRect) = RectUtility.HorizontalSliceLerp(position, 0.4f);
                 var (genRect, worldRect) = RectUtility.HorizontalSliceLerp(genWorldRect, 0.5f);
@@ -543,22 +679,19 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 idRect = RectUtility.AddPadding(idRect, 2, 1, 0, 0);
                 genRect = RectUtility.AddPadding(genRect, 1, 1, 0, 0);
                 worldRect = RectUtility.AddPadding(worldRect, 1, 2, 0, 0);
-                EditorGUI.DrawRect(idRect, b);
-                EditorGUI.DrawRect(genRect, b);
-                EditorGUI.DrawRect(worldRect, b);
+                DrawRectSoftColor(idRect, b);
+                DrawRectSoftColor(genRect, b);
+                DrawRectSoftColor(worldRect, b);
 
                 GUIStyle style = UnityEditorUtility.GetInputFieldCenterAnhor();
 
                 if (isPlaceHolder)
                 {
-                    using (new EditorGUI.DisabledScope(true))
+                    using (SetAlpha(0.85f)) using (Disable)
                     {
                         GUI.Label(idRect, "Entity ID", style);
-                        using (SetAlpha(0.85f))
-                        {
-                            GUI.Label(genRect, "Generation", style);
-                            GUI.Label(worldRect, "World ID", style);
-                        }
+                        GUI.Label(genRect, "Generation", style);
+                        GUI.Label(worldRect, "World ID", style);
                     }
                 }
                 else
@@ -581,48 +714,48 @@ namespace DCFApixels.DragonECS.Unity.Editors
         {
             return DrawTypeMetaBlockPadding * 2 + contentHeight;
         }
-        public static bool DrawTypeMetaElementBlock(ref Rect position, SerializedProperty arrayProperty, int elementIndex, SerializedProperty elementRootProperty, ITypeMeta meta)
+
+        public static bool DrawTypeMetaElementBlock(ref Rect rect, SerializedProperty arrayProperty, int elementIndex, SerializedProperty elementRootProperty, ITypeMeta meta)
         {
-            var result = DrawTypeMetaBlock_Internal(ref position, elementRootProperty, meta, elementIndex, arrayProperty.arraySize);
-            if (result.HasFlag(DrawTypeMetaBlockResult.CloseButtonClicked))
+            var result = DrawTypeMetaBlock_Internal(ref rect, elementRootProperty, meta, elementIndex, arrayProperty.arraySize);
+            if (result.HasFlag(DrawTypeMetaBlockResultFlags.CloseButtonClicked))
             {
                 arrayProperty.DeleteArrayElementAtIndex(elementIndex);
             }
-            return result != DrawTypeMetaBlockResult.None;
+            return result != DrawTypeMetaBlockResultFlags.None;
         }
-        public static bool DrawTypeMetaBlock(ref Rect position, SerializedProperty rootProperty, ITypeMeta meta, int index = -1, int total = -1)
+        public static bool DrawTypeMetaBlock(ref Rect rect, SerializedProperty rootProperty, ITypeMeta meta, int index = -1, int total = -1)
         {
-            var result = DrawTypeMetaBlock_Internal(ref position, rootProperty, meta, index, total);
-            if (result.HasFlag(DrawTypeMetaBlockResult.CloseButtonClicked))
+            var result = DrawTypeMetaBlock_Internal(ref rect, rootProperty, meta, index, total);
+            if (result.HasFlag(DrawTypeMetaBlockResultFlags.CloseButtonClicked))
             {
                 rootProperty.ResetValues();
             }
-            return result.HasFlag(DrawTypeMetaBlockResult.Drop);
+            return result.HasFlag(DrawTypeMetaBlockResultFlags.DropExpanded);
         }
 
-        private enum DrawTypeMetaBlockResult
+        [Flags]
+        private enum DrawTypeMetaBlockResultFlags
         {
             None = 0,
-            Drop = 1 << 0,
+            DropExpanded = 1 << 0,
             CloseButtonClicked = 1 << 1,
         }
-        private static DrawTypeMetaBlockResult DrawTypeMetaBlock_Internal(ref Rect position, SerializedProperty rootProperty, ITypeMeta meta, int index = -1, int total = -1)
+       
+
+        private static DrawTypeMetaBlockResultFlags DrawTypeMetaBlock_Internal(ref Rect rect, SerializedProperty rootProperty, ITypeMeta meta, int index = -1, int total = -1)
         {
-            Color alphaPanelColor;
             if (meta == null)
             {
-                alphaPanelColor = Color.black;
-                alphaPanelColor.a = EscEditorConsts.COMPONENT_DRAWER_ALPHA;
-                EditorGUI.DrawRect(position, alphaPanelColor);
-                position = position.AddPadding(DrawTypeMetaBlockPadding * 2f);
-                return DrawTypeMetaBlockResult.None;
+                EditorGUI.DrawRect(rect, Color.black.SetAlpha(EscEditorConsts.COMPONENT_DRAWER_ALPHA));
+                return DrawTypeMetaBlockResultFlags.None;
             }
 
-            string name = meta.Name;
+            //string name = meta.Name;
             string description = meta.Description.Text;
 
-            int positionIndex;
-            if (index < 0)
+            int positionIndex = index;
+            if (positionIndex < 0)
             {
                 positionIndex = int.MaxValue;
                 var counter = rootProperty.Copy();
@@ -632,53 +765,51 @@ namespace DCFApixels.DragonECS.Unity.Editors
                     positionIndex--;
                 }
             }
-            else
-            {
-                positionIndex = index;
-            }
 
-            alphaPanelColor = SelectPanelColor(meta, positionIndex, total).Desaturate(EscEditorConsts.COMPONENT_DRAWER_DESATURATE).SetAlpha(EscEditorConsts.COMPONENT_DRAWER_ALPHA);
+            Color panelColor = SelectPanelColor(meta, positionIndex, total)
+                .Desaturate(EscEditorConsts.COMPONENT_DRAWER_DESATURATE)
+                .SetAlpha(EscEditorConsts.COMPONENT_DRAWER_ALPHA);
 
-            DrawTypeMetaBlockResult result = DrawTypeMetaBlockResult.None;
+            EditorGUI.DrawRect(rect, panelColor);
+
+            Rect optionRect = rect;
+            rect = rect.AddPadding(DrawTypeMetaBlockPadding * 2f);
+
+            optionRect.center -= new Vector2(0, optionRect.height);
+            optionRect.yMin = optionRect.yMax;
+            optionRect.yMax += HeadIconsRect.height;
+            optionRect.xMin = optionRect.xMax - 64;
+            optionRect.center += Vector2.up * DrawTypeMetaBlockPadding;
+
+            DrawTypeMetaBlockResultFlags result = DrawTypeMetaBlockResultFlags.None;
             using (CheckChanged())
             {
-                EditorGUI.DrawRect(position, alphaPanelColor);
-
-                Rect optionButton = position;
-                position = position.AddPadding(DrawTypeMetaBlockPadding * 2f);
-
-                optionButton.center -= new Vector2(0, optionButton.height);
-                optionButton.yMin = optionButton.yMax;
-                optionButton.yMax += HeadIconsRect.height;
-                optionButton.xMin = optionButton.xMax - 64;
-                optionButton.center += Vector2.up * DrawTypeMetaBlockPadding;
-
                 //Canceling isExpanded
                 bool oldIsExpanded = rootProperty.isExpanded;
-                if (ClickTest(optionButton))
+                if (ClickTest(optionRect))
                 {
                     rootProperty.isExpanded = oldIsExpanded;
-                    result |= DrawTypeMetaBlockResult.Drop;
+                    result |= DrawTypeMetaBlockResultFlags.DropExpanded;
                 }
 
                 //Close button
-                optionButton.xMin = optionButton.xMax - HeadIconsRect.width;
-                if (CloseButton(optionButton))
+                optionRect.xMin = optionRect.xMax - HeadIconsRect.width;
+                if (CloseButton(optionRect))
                 {
-                    result |= DrawTypeMetaBlockResult.CloseButtonClicked;
+                    result |= DrawTypeMetaBlockResultFlags.CloseButtonClicked;
                     return result;
                 }
                 //Edit script button
                 if (ScriptsCache.TryGetScriptAsset(meta.FindRootTypeMeta(), out MonoScript script))
                 {
-                    optionButton = HeadIconsRect.MoveTo(optionButton.center - (Vector2.right * optionButton.width));
-                    ScriptAssetButton(optionButton, script);
+                    optionRect = HeadIconsRect.MoveTo(optionRect.center - (Vector2.right * optionRect.width));
+                    ScriptAssetButton(optionRect, script);
                 }
                 //Description icon
                 if (string.IsNullOrEmpty(description) == false)
                 {
-                    optionButton = HeadIconsRect.MoveTo(optionButton.center - (Vector2.right * optionButton.width));
-                    DescriptionIcon(optionButton, description);
+                    optionRect = HeadIconsRect.MoveTo(optionRect.center - (Vector2.right * optionRect.width));
+                    DescriptionIcon(optionRect, description);
                 }
             }
             return result;
@@ -722,12 +853,27 @@ namespace DCFApixels.DragonECS.Unity.Editors
             }
             return result;
         }
+        internal static bool HasSerializableData(this SerializedProperty property)
+        {
+            var propsCounter = property.Copy();
+            int lastDepth = propsCounter.depth;
+            bool next = propsCounter.Next(true) && lastDepth < propsCounter.depth;
+            while (next)
+            {
+                if(propsCounter.propertyType != SerializedPropertyType.Generic)
+                {
+                    return true;
+                }
+                next = propsCounter.Next(true) && lastDepth < propsCounter.depth;
+            }
+            return false;
+        }
         #endregion
 
         #region SelectPanelColor
         public static Color SelectPanelColor(ITypeMeta meta, int index, int total)
         {
-            var trueMeta = meta.Type.ToMeta();
+            var trueMeta = meta.Type.GetMeta();
             bool isCustomColor = trueMeta.IsCustomColor || meta.Color != trueMeta.Color;
             return SelectPanelColor(meta.Color, isCustomColor, index, total);
         }
@@ -742,19 +888,21 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 switch (AutoColorMode)
                 {
                     case ComponentColorMode.Auto:
-                        return color.ToUnityColor().Desaturate(0.48f) / 1.18f; //.Desaturate(0.48f) / 1.18f;
+                        {
+                            return color.ToUnityColor().Desaturate(0.48f) / 1.18f; //.Desaturate(0.48f) / 1.18f;
+                        }
                     case ComponentColorMode.Rainbow:
-                        int localTotal = Mathf.Max(total, EscEditorConsts.AUTO_COLOR_RAINBOW_MIN_RANGE);
-                        Color hsv = Color.HSVToRGB(1f / localTotal * (index % localTotal), 1, 1);
-                        return hsv.Desaturate(0.48f) / 1.18f;
+                        {
+                            int localTotal = Mathf.Max(total, EscEditorConsts.AUTO_COLOR_RAINBOW_MIN_RANGE);
+                            Color hsv = Color.HSVToRGB(1f / localTotal * (index % localTotal), 1, 1);
+                            return hsv.Desaturate(0.48f) / 1.18f;
+                        }
                     default:
-                        return GetGenericPanelColor(index);
+                        {
+                            return index % 2 == 0 ? new Color(0.40f, 0.40f, 0.40f) : new Color(0.54f, 0.54f, 0.54f);
+                        }
                 }
             }
-        }
-        public static Color GetGenericPanelColor(int index)
-        {
-            return index % 2 == 0 ? new Color(0.40f, 0.40f, 0.40f) : new Color(0.54f, 0.54f, 0.54f);
         }
         #endregion
 
@@ -857,48 +1005,6 @@ namespace DCFApixels.DragonECS.Unity.Editors
         }
         #endregion
 
-        #region PredicateTypesKey
-        private readonly struct PredicateTypesKey : IEquatable<PredicateTypesKey>
-        {
-            public readonly Type[] types;
-            public readonly Type[] withoutTypes;
-            public PredicateTypesKey(Type[] types, Type[] withoutTypes)
-            {
-                this.types = types;
-                this.withoutTypes = withoutTypes;
-            }
-            public bool Equals(PredicateTypesKey other)
-            {
-                if (types.Length != other.types.Length) { return false; }
-                if (withoutTypes.Length != other.withoutTypes.Length) { return false; }
-                for (int i = 0; i < types.Length; i++)
-                {
-                    if (types[i] != other.types[i])
-                    {
-                        return false;
-                    }
-                }
-                for (int i = 0; i < withoutTypes.Length; i++)
-                {
-                    if (withoutTypes[i] != other.withoutTypes[i])
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            public override bool Equals(object obj)
-            {
-                return obj is PredicateTypesKey key && Equals(key);
-            }
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(types);
-            }
-            public static implicit operator PredicateTypesKey((Type[], Type[]) types) { return new PredicateTypesKey(types.Item1, types.Item2); }
-        }
-        #endregion
-
         #region ReferenceDropDown
         private class ReferenceDropDown : AdvancedDropdown
         {
@@ -939,7 +1045,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
                     }
                     if (isAssignable)
                     {
-                        ITypeMeta meta = type.ToMeta();
+                        ITypeMeta meta = type.GetMeta();
                         string description = meta.Description.Text;
                         MetaGroup group = meta.Group;
                         var splitedGroup = group.Splited;
@@ -1031,7 +1137,8 @@ namespace DCFApixels.DragonECS.Unity.Editors
                         var x = Group.Splited.GetEnumerator();
                         x.MoveNext();
                         return x.Current.GetHashCode() ^ state;
-                    };
+                    }
+                    ;
                 }
             }
             #endregion

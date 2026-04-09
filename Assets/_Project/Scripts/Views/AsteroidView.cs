@@ -4,7 +4,7 @@ using Random = UnityEngine.Random;
 
 namespace Asteroids.Views
 {
-    internal class AsteroidView : MonoBehaviour
+    public class AsteroidView : ViewBase
     {
         public LineRenderer LineRenderer;
         public float Radius = 2;

@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60ca5433f62743caa27175aa28abdd06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _preWarmCount: 1
+  DeathVFX: {fileID: 11400000, guid: 9674ba7956a1cce4bbe0e3c7abd461e4, type: 2}
   LineRenderer: {fileID: 6443038446315368265}
   MinColor: {r: 0.2509804, g: 0.39607844, b: 1, a: 1}
   MaxColor: {r: 0.28627452, g: 0.7137255, b: 1, a: 1}

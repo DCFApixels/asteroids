@@ -1,6 +1,4 @@
-﻿using Asteroids.Data;
-using DCFApixels.DragonECS;
-using System.Security;
+﻿using DCFApixels.DragonECS;
 
 namespace Asteroids.Components
 {

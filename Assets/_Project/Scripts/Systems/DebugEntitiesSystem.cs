@@ -13,9 +13,9 @@ namespace Asteroids.Systems
 
         public void Run()
         {
-            foreach (var e in _world.Where(out SingleAspect<TransformData> a))
+            foreach (var e in _world.Where(out SingleAspect<RigidTransform> a))
             {
-                DebugX.Draw().Text(a.pool[e].position, e.ToString());
+                DebugX.Draw().Text(a.pool[e].Position, e.ToString());
             }
         }
     }

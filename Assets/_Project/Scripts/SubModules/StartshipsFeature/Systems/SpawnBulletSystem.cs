@@ -1,8 +1,6 @@
-﻿using Asteroids.Components;
-using Asteroids.Data;
-using Asteroids.LocalInputFeature;
+﻿using Asteroids.LocalInputFeature;
 using Asteroids.MovementFeature;
-using Asteroids.Utils;
+using DCFApixels;
 using DCFApixels.DragonECS;
 using System;
 using UnityEngine;
@@ -11,22 +9,20 @@ namespace Asteroids.StartshipsFeature
 {
     internal class SpawnBulletSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private StaticData _staticData;
-        [DI] private PoolService _poolService;
+        [DI] EcsDefaultWorld _world;
+        [DI] ConfigData c;
 
         class StashipAspect : EcsAspect
         {
-            public readonly EcsPool<Starship> Starships = Inc;
-            public readonly EcsPool<FireInputBeginSignal> FireInputBeginSignals = Inc;
-            public readonly EcsPool<TransformData> TransformDatas = Inc;
-            public readonly EcsPool<Velocity> Velocities = Inc;
+            public EcsPool<Starship> Starships = Inc;
+            public EcsPool<FireInputBeginEvent> FireInputBeginSignals = Inc;
+            public EcsPool<RigidTransform> TransformDatas = Inc;
+            public EcsPool<Velocity> Velocities = Inc;
         }
         class SpawnAspect : EcsAspect
         {
-            public readonly EcsPool<PooledUnit> PoolIDs = Inc;
-            public readonly EcsPool<Velocity> Velocities = Inc;
-            public readonly EcsPool<TransformData> TransformDatas = Inc;
+            public EcsPool<Velocity> Velocities = Inc;
+            public EcsPool<RigidTransform> TransformDatas = Inc;
         }
 
         public void Run()
@@ -36,19 +32,15 @@ namespace Asteroids.StartshipsFeature
             {
                 var stashipTransformData = stashipA.TransformDatas.Get(stashipE);
 
-                var newE = _world.NewEntity(_staticData.BulletTemplate); 
-                var newViewInstance = _poolService.Get(_staticData.BulletViewPrefab, out spawnA.PoolIDs.TryAddOrGet(newE));
-                newViewInstance.Connect((_world, newE), false);
+                var newE = _world.NewEntity(c.ProjectileDescription);
                 spawnA.Apply(_world, newE);
 
                 ref var newTransformData = ref spawnA.TransformDatas[newE];
-                newTransformData.position = stashipTransformData.position;
-                newTransformData.rotation = stashipTransformData.rotation;
+                newTransformData.Position = stashipTransformData.Position;
+                newTransformData.Rotation = stashipTransformData.Rotation;
 
                 ref var newVelocity = ref spawnA.Velocities[newE];
-                newVelocity.lineral = newTransformData.CalcLocalVector(Vector3.forward) * (_staticData.BulletSpeed + Math.Abs(stashipA.Velocities[stashipE].lineral.magnitude));
-
-                stashipA.FireInputBeginSignals.Del(stashipE);
+                newVelocity.Lineral = newTransformData.ToLocalVector(Vector3.forward) * (c.BulletSpeed + Math.Abs(stashipA.Velocities[stashipE].Lineral.magnitude));
             }
         }
     }

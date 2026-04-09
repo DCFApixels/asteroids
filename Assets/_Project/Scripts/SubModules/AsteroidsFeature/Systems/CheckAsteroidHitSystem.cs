@@ -1,19 +1,17 @@
 using Asteroids.Components;
-using Asteroids.Data;
 using Asteroids.MovementFeature;
 using Asteroids.StartshipsFeature;
-using Asteroids.Utils;
 using DCFApixels.DragonECS;
+using Modules.BoundsOverlaps;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Asteroids.Systems
 {
-    internal class CheckAsteroidHitSystem : IEcsRun //GAME_RULES
+    internal class CheckAsteroidHitSystem : IEcsRun
     {
-        [DI] RuntimeData _runtimeData;
-        [DI] StaticData _staticData;
-        [DI] PoolService _poolService;
+        [DI] RuntimeData r;
+        [DI] ConfigData c;
         [DI] EntityGraph _graph;
         List<int> _rels = new List<int>(32);
 
@@ -31,10 +29,10 @@ namespace Asteroids.Systems
         class AsteroidAspect : EcsAspect
         {
             public EcsPool<Asteroid> Asteroids = Inc;
-            public EcsPool<TransformData> TransformDatas = Inc;
-            public EcsPool<KillSignal> killSignals = Opt;
+            public EcsPool<BoundsSphere> BoundsSpheres = Inc;
+            public EcsPool<RigidTransform> TransformDatas = Inc;
+            public EcsPool<KillRequest> killSignals = Opt;
         }
-
         public void Run()
         {
             _graph.World.GetAspects(out AsteroidAspect asteroidA, out OtherAspect otherA);
@@ -44,6 +42,7 @@ namespace Asteroids.Systems
             foreach (var asteroidE in map.Nodes.Where(asteroidA))
             {
                 ref var asteroid = ref asteroidA.Asteroids[asteroidE];
+                ref var boundsSphere = ref asteroidA.BoundsSpheres[asteroidE];
                 ref var transformData = ref asteroidA.TransformDatas[asteroidE];
                 _rels.Clear();
 
@@ -73,11 +72,8 @@ namespace Asteroids.Systems
                         relA.HitAnswers.TryAddOrGet(relE).directionNormal = -directionNormalsSum;
                     }
 
-                    var explosion = _poolService.Get(_staticData.AsteroidExplosionPrefab, out var instanceID);
-                    explosion.transform.position = transformData.position;
-                    explosion.Play(_poolService, instanceID);
 
-                    _runtimeData.Score++;
+                    r.Score++;
                     asteroidA.killSignals.TryAddOrGet(asteroidE);
 
 
@@ -90,16 +86,17 @@ namespace Asteroids.Systems
                     {
                         forward = directionNormalsSum.normalized;
                     }
-                    var spawnPool = _graph.World.GetPool<SpawnAsteroidSignal>();
+                    var requestsPool = _graph.World.GetPool<SpawnAsteroidRequest>();
                     for (var i = 0; i < 2; i++)
                     {
                         var startForward = Quaternion.Euler(0, 90 + 180 * i, 0) * forward;
 
-                        ref var spawnAsteroid = ref spawnPool.NewEntity(out int newAsteroidE);
-                        spawnAsteroid.DeathsLeft = asteroid.DeathsLeft;
-                        spawnAsteroid.Position = transformData.position;
-                        spawnAsteroid.Rotation = Quaternion.LookRotation(startForward);
-                        spawnAsteroid.StartRadius = asteroid.Radius / 2f;
+                        ref var req = ref requestsPool.NewEntity(out int newAsteroidE);
+                        req.Description = asteroid.Description;
+                        req.OverrideRadius = boundsSphere.Radius * c.AsteroidSplitMultiplier;
+                        req.OverrideDeathsCount = asteroid.DeathsLeft;
+                        req.Position = transformData.Position;
+                        req.Rotation = Quaternion.LookRotation(startForward);
 
                         foreach (var relE in _rels)
                         {

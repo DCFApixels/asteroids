@@ -1,18 +1,29 @@
-﻿using Asteroids.BoundsOverlapsFeature;
-using DCFApixels.DragonECS;
-using System;
+﻿using DCFApixels.DragonECS;
+using Modules.BoundsOverlaps;
 using UnityEngine;
 
-namespace Asteroids.Data
+namespace Asteroids
 {
-    [Serializable]
-    internal class RuntimeData
+    internal enum GameState
+    {
+        None = 0,
+        Play,
+        Lose
+    }
+    [System.Serializable]
+    internal class RuntimeData : IInjectionBlock
     {
         public GameState GameState;
         public int LifeLeft;
         public int Score;
         public Vector2 FieldSize;
-        public AreaGrid2D<entlong> AreaGrid;
         public float LevelStartTime;
+
+        public BoundsOverlapsRuntime BoundsOverlapsRuntime;
+
+        public void InjectTo(Injector inj)
+        {
+            inj.Inject(BoundsOverlapsRuntime);
+        }
     }
 }

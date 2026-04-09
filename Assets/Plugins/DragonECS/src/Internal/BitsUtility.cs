@@ -6,10 +6,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using static DCFApixels.DragonECS.Internal.BitsUtility;
 
-namespace DCFApixels.DragonECS.Internal
+namespace DCFApixels.DragonECS.Core.Internal
 {
+    using static BitsUtility;
     internal unsafe static class BitsUtility
     {
         private const char DEFAULT_SEPARATOR = '_';
@@ -538,7 +538,7 @@ namespace DCFApixels.DragonECS.Internal
                 state ^= state >> 17;
                 state ^= state << 5;
                 return state;
-            };
+            }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long NextXorShiftState(long state)

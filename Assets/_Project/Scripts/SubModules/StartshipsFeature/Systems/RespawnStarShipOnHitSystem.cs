@@ -1,7 +1,6 @@
-﻿using Asteroids.BoundsOverlapsFeature;
-using Asteroids.Components;
-using Asteroids.Data;
+﻿using Asteroids.Components;
 using DCFApixels.DragonECS;
+using Modules.BoundsOverlaps;
 using System.Collections.Generic;
 
 namespace Asteroids.StartshipsFeature
@@ -9,12 +8,11 @@ namespace Asteroids.StartshipsFeature
     internal class RespawnStarShipOnHitSystem : IEcsRun, IEcsInit
     {
         [DI] EcsDefaultWorld _world;
-        [DI] RuntimeData _runtimeData;
-        [DI] SceneData _sceneData;
+        [DI] RuntimeData r;
+        [DI] SceneData s;
 
         //private EcsPool<OverlapsEvent> _hitEvents;
         private EcsPool<Asteroid> _asteroids;
-
 
         class StarshipAspect : EcsAspect
         {
@@ -27,21 +25,21 @@ namespace Asteroids.StartshipsFeature
         {
             var starshipA = _world.GetAspect<StarshipAspect>();
 
-            if (starshipA.Starships.Count != 0 || _runtimeData.GameState != GameState.Play)
+            if (starshipA.Starships.Count != 0 || r.GameState != GameState.Play)
             {
                 return;
             }
-            
-            _runtimeData.LifeLeft--;
-            if (_runtimeData.LifeLeft == 0)
+
+            r.LifeLeft--;
+            if (r.LifeLeft == 0)
             {
                 _world.GetPool<ChangeState>().Add(_world.NewEntity()).NextState = GameState.Lose;
             }
             else
             {
                 //kill all asteroids near spawn point. Fully kill!
-                _runtimeData.AreaGrid.FindAllInRadius(_sceneData.SpawnPosition.position.x,
-                    _sceneData.SpawnPosition.position.z, _sceneData.KillOnSpawnRadius, _hits);
+                r.BoundsOverlapsRuntime.AreaGrid.FindAllInRadius(s.SpawnPlayerPosition.position.x,
+                    s.SpawnPlayerPosition.position.z, s.KillOnSpawnRadius, _hits);
                 foreach (var hit in _hits)
                 {
                     if (hit.Id.TryGetID(out var asteroidEntity))
@@ -52,7 +50,7 @@ namespace Asteroids.StartshipsFeature
                 }
 
 
-                _world.GetPool<SpawnStarshipEvent>().NewEntity();
+                _world.GetPool<SpawnStarshipRequest>().NewEntity();
             }
         }
 

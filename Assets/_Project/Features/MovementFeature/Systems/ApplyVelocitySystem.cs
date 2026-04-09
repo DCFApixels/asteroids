@@ -5,31 +5,31 @@ namespace Asteroids.MovementFeature
 {
     [MetaGroup(MovementModule.META_GROUP)]
     [MetaColor(MovementModule.META_COLOR)]
-    internal class ApplyVelocitySystem : IEcsRun, IEcsDefaultAddParams, IEcsFixedRunProcess
+    internal class ApplyVelocitySystem : IEcsRun, IEcsDefaultAddParams, IEcsFixedRun
     {
         public AddParams AddParams => EcsConsts.END_LAYER;
-        class VeloctityDragAspect : EcsAspect
-        {
-            public EcsPool<Velocity> velocities = Inc;
-            public EcsPool<RigidbodyData> rigidbodyDatas = Inc;
-        }
-        class TransformAspect : EcsAspect
-        {
-            public EcsPool<TransformData> transformDatas = Inc;
-            public EcsPool<Velocity> velocities = Inc;
-        }
 
         [DI] EcsDefaultWorld _world;
 
+        class VeloctityDragAspect : EcsAspect
+        {
+            public EcsPool<RigidbodyData> RigidbodyDatas = Inc;
+            public EcsPool<Velocity> Velocities = Inc;
+        }
+        class TransformAspect : EcsAspect
+        {
+            public EcsPool<RigidTransform> RigidTransforms = Inc;
+            public EcsPool<Velocity> Velocities = Inc;
+        }
         public void FixedRun()
         {
             foreach (var e in _world.Where(out VeloctityDragAspect a))
             {
-                ref var velocity = ref a.velocities.Get(e);
-                ref var rigidbody = ref a.rigidbodyDatas.Get(e);
+                ref var velocity = ref a.Velocities[e];
+                ref var rigidbody = ref a.RigidbodyDatas[e];
 
-                velocity.lineral = velocity.lineral * Mathf.Clamp01(1f - rigidbody.lineralDrag * Time.deltaTime);
-                velocity.angular = velocity.angular * Mathf.Clamp01(1f - rigidbody.angularDrag * Time.deltaTime);
+                velocity.Lineral *= Mathf.Clamp01(1f - rigidbody.LineralDrag * Time.deltaTime);
+                velocity.Angular *= Mathf.Clamp01(1f - rigidbody.AngularDrag * Time.deltaTime);
             }
         }
 
@@ -37,22 +37,22 @@ namespace Asteroids.MovementFeature
         {
             foreach (var e in _world.Where(out TransformAspect a))
             {
-                ref var transform = ref a.transformDatas.Get(e);
-                var velocity = a.velocities.Read(e);
+                ref var transform = ref a.RigidTransforms[e];
+                var velocity = a.Velocities.Read(e);
 
-                transform.position += velocity.lineral * Time.deltaTime;
-                Rotate(ref transform, velocity.angular * Time.deltaTime);
+                transform.Position += velocity.Lineral * Time.deltaTime;
+                Rotate(ref transform, velocity.Angular * Time.deltaTime);
             }
         }
 
-        private void Rotate(ref TransformData transform, Vector3 velocity)
+        private void Rotate(ref RigidTransform transform, Vector3 velocity)
         {
             if(velocity.x == 0 && velocity.y == 0 && velocity.z == 0)
             {
                 return;
             }
             Quaternion velocityRotation = Quaternion.Euler(velocity);
-            transform.rotation = transform.rotation * ((Quaternion.Inverse(transform.rotation) * velocityRotation) * transform.rotation);
+            transform.Rotation = transform.Rotation * ((Quaternion.Inverse(transform.Rotation) * velocityRotation) * transform.Rotation);
         }
     }
 }

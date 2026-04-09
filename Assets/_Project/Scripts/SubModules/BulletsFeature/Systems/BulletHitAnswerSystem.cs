@@ -14,8 +14,8 @@ namespace Asteroids.BulletsFeature
         }
         class BulletAspect : EcsAspect
         {
-            public EcsPool<Bullet> Bullets = Inc;
-            public EcsPool<KillSignal> KillSignals = Exc;
+            public EcsPool<Projectile> Bullets = Inc;
+            public EcsPool<KillRequest> KillSignals = Exc;
         }
 
         public void Run()

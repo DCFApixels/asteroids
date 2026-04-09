@@ -1,17 +1,16 @@
-﻿using System;
-using Asteroids.Components;
-using Asteroids.Data;
+﻿using Asteroids.Components;
 using DCFApixels.DragonECS;
+using System;
 using UnityEngine;
 
 namespace Asteroids.Systems
 {
     internal class ChangeStateSystem : IEcsRun
     {
-        [DI] private SceneData _sceneData;
-        [DI] private RuntimeData _runtimeData;
+        [DI] private SceneData s;
+        [DI] private RuntimeData r;
+        [DI] private ConfigData c;
         [DI] private EcsDefaultWorld _world;
-        [DI] private StaticData _staticData;
 
         private class Aspect : EcsAspect
         {
@@ -23,27 +22,31 @@ namespace Asteroids.Systems
             foreach (var e in _world.Where(out Aspect a))
             {
                 ref var changeState = ref a.ChangeStates.Get(e);
-                if (_runtimeData.GameState != changeState.NextState)
+                if (r.GameState != changeState.NextState)
                 {
                     switch (changeState.NextState)
                     {
                         case GameState.Play:
-                            _world.GetPool<SpawnStarshipEvent>().Add(_world.NewEntity());
-                            _runtimeData.LevelStartTime = Time.time;
-                            _runtimeData.LifeLeft = _staticData.Lifes;
-                            _runtimeData.Score = 0;
-                            _sceneData.UI.GameScreen.Show(true);
-                            _sceneData.UI.LoseScreen.Show(false);
+                            _world.GetPool<SpawnStarshipRequest>().NewEntity() = new()
+                            {
+                                Position = s.SpawnPlayerPosition.position,
+                                Rotation = s.SpawnPlayerPosition.rotation,
+                            };
+                            r.LevelStartTime = Time.time;
+                            r.LifeLeft = c.Lifes;
+                            r.Score = 0;
+                            s.UI.GameScreen.Show(true);
+                            s.UI.LoseScreen.Show(false);
                             break;
                         case GameState.Lose:
-                            _sceneData.UI.GameScreen.Show(false);
-                            _sceneData.UI.LoseScreen.Show(_runtimeData.Score);
+                            s.UI.GameScreen.Show(false);
+                            s.UI.LoseScreen.Show(r.Score);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
 
-                    _runtimeData.GameState = changeState.NextState;
+                    r.GameState = changeState.NextState;
                 }
 
                 a.ChangeStates.Del(e);

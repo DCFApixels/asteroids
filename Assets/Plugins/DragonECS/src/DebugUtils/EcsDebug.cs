@@ -2,7 +2,7 @@
 #undef DEBUG
 #endif
 using DCFApixels.DragonECS.Core;
-using DCFApixels.DragonECS.Internal;
+using DCFApixels.DragonECS.Core.Internal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -174,6 +174,30 @@ namespace DCFApixels.DragonECS
             DebugService.CurrentThreadInstance.Print(tag, v);
 #endif
         }
+#if UNITY_2021_3_OR_NEWER
+        [UnityEngine.HideInCallstack]
+#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PrintJson(object v)
+        {
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
+            string json = JsonDebugger.ToJsonLog(v);
+            OnPrint(string.Empty, json);
+            DebugService.CurrentThreadInstance.Print(json);
+#endif
+        }
+#if UNITY_2021_3_OR_NEWER
+        [UnityEngine.HideInCallstack]
+#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void PrintJson(string tag, object v)
+        {
+#if DEBUG || DRAGONECS_ENABLE_DEBUG_SERVICE
+            string json = JsonDebugger.ToJsonLog(v);
+            OnPrint(tag, json);
+            DebugService.CurrentThreadInstance.Print(tag, json);
+#endif
+        }
         #endregion
 
         #region Other
@@ -247,7 +271,7 @@ namespace DCFApixels.DragonECS
         #region Static Constructor
         static DebugService()
         {
-#if !UNITY_5_3_OR_NEWER
+#if UNITY_5_3_OR_NEWER
             Set(new NullDebugService());
 #else
             Set(new DefaultDebugService());
@@ -284,6 +308,7 @@ namespace DCFApixels.DragonECS
                     }
                     oldService?.OnDisableBaseService(service);
                     service.OnEnableBaseService(oldService);
+                    _threadServiceClonesSet.Clear();
                     OnServiceChanged(service);
                 }
             }
@@ -409,7 +434,6 @@ namespace DCFApixels.DragonECS.Core
         {
             self.Print("");
         }
-        //TODO PrintJson возможно будет добавлено когда-то
     }
     #endregion
 
@@ -525,7 +549,7 @@ namespace DCFApixels.DragonECS.Core
         {
             if (id >= _stopwatchs.Length)
             {
-                Array.Resize(ref _stopwatchs, id << 1);
+                Array.Resize(ref _stopwatchs, ArrayUtility.NextPow2(id));
             }
             _stopwatchs[id] = new MarkerData(new System.Diagnostics.Stopwatch(), name, id);
         }

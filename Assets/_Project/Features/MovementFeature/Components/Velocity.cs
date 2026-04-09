@@ -9,7 +9,7 @@ namespace Asteroids.MovementFeature
     [System.Serializable]
     public struct Velocity : IEcsComponent
     {
-        public Vector3 lineral;
-        public Vector3 angular;
+        public Vector3 Lineral;
+        public Vector3 Angular;
     }
 }
