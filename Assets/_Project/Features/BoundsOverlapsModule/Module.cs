@@ -6,7 +6,7 @@ namespace Modules.BoundsOverlaps
     [MetaColor(META_COLOR)]
     internal class BoundsOverlapsModule : IEcsModule, IEcsDefaultAddParams
     {
-        public const string META_GROUP = nameof(Asteroids) + "/" + nameof(BoundsOverlaps);
+        public const string META_GROUP = nameof(Modules) + "/" + nameof(BoundsOverlaps);
         public const uint META_COLOR = MetaColor.Lime;
         public AddParams AddParams => META_GROUP;
         public void Import(EcsPipeline.Builder b)

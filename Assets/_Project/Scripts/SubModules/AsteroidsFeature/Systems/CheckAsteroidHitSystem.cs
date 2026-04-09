@@ -3,6 +3,7 @@ using Asteroids.MovementFeature;
 using Asteroids.StartshipsFeature;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
+using Modules.CameraController;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -76,6 +77,9 @@ namespace Asteroids.Systems
                     r.Score++;
                     asteroidA.killSignals.TryAddOrGet(asteroidE);
 
+                    ref var shake = ref _graph.World.GetPool<CameraShakeRequest>().NewEntity();
+                    shake.Strength = 1f;
+                    shake.Duration = 0.24f;
 
 
                     if (asteroid.DeathsLeft <= 0) { continue; }
@@ -86,6 +90,8 @@ namespace Asteroids.Systems
                     {
                         forward = directionNormalsSum.normalized;
                     }
+
+
                     var requestsPool = _graph.World.GetPool<SpawnAsteroidRequest>();
                     for (var i = 0; i < 2; i++)
                     {

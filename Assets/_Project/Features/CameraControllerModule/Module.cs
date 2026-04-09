@@ -1,19 +1,19 @@
 ﻿using DCFApixels.DragonECS;
 
-namespace Asteroids.CameraSmoothFollowFeature
+namespace Modules.CameraController
 {
     [MetaGroup(META_GROUP, EcsConsts.MODULES_GROUP)]
     [MetaColor(META_COLOR)]
-    internal class CameraSmoothFollowModule : IEcsModule, IEcsDefaultAddParams
+    internal class CameraControllerModule : IEcsModule, IEcsDefaultAddParams
     {
-        public const string META_GROUP = nameof(Asteroids) + "/" + nameof(CameraSmoothFollowFeature);
+        public const string META_GROUP = nameof(Modules) + "/" + nameof(CameraController);
         public const uint META_COLOR = MetaColor.BlueViolet;
         public AddParams AddParams => META_GROUP;
         public void Import(EcsPipeline.Builder b)
         {
             b.Layers.Add(META_GROUP).After(EcsConsts.BASIC_LAYER);
-            //b.Layers.InsertAfter(EcsConsts.BASIC_LAYER, META_GROUP);
             b.Add(new CameraSmoothFollowSystem());
+            b.Add(new CameraShakeSystem());
         }
     }
 }

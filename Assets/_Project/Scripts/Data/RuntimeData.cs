@@ -1,5 +1,6 @@
 ﻿using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
+using Modules.CameraController;
 using UnityEngine;
 
 namespace Asteroids
@@ -20,7 +21,7 @@ namespace Asteroids
         public float LevelStartTime;
 
         public BoundsOverlapsRuntime BoundsOverlapsRuntime;
-
+        public CameraBrain CameraBrain;
         public void InjectTo(Injector inj)
         {
             inj.Inject(BoundsOverlapsRuntime);

@@ -1,6 +1,5 @@
 ﻿using Asteroids;
 using Asteroids.BulletsFeature;
-using Asteroids.CameraSmoothFollowFeature;
 using Asteroids.Components;
 using Asteroids.LocalInputFeature;
 using Asteroids.MovementFeature;
@@ -10,6 +9,7 @@ using Asteroids.Views;
 using DCFApixels;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
+using Modules.CameraController;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

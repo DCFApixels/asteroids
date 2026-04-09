@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d226610980482ff47891a7d87a5358c5, type: 3}
-  m_Name: PlayerStarshipDescription
+  m_Name: StarshipDescription_Player
   m_EditorClassIdentifier: 
   _templates:
   - {fileID: 11400000, guid: c52a3ae0148d0e545b28a3f233f55d08, type: 2}

@@ -18,7 +18,7 @@ namespace Asteroids.Systems
 
         public void Run()
         {
-            var camera = s.Camera;
+            var camera = s.Camera.Camera;
             Vector2 size;
             if (camera.orthographic)
             {

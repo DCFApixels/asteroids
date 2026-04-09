@@ -49,7 +49,7 @@ namespace DCFApixels.DragonECS
             }
 
             var newSpan = UncheckedUtility.CreateSpan(pool.World.ID, new ReadOnlySpan<int>(_expiredEntitiesBuffer, 0, _expiredEntitiesBufferCount));
-#if DEBUG
+#if DRAGONECS_DEEP_DEBUG
             if (UncheckedUtility.CheckSpanValideDebug(newSpan) == false)
             {
                 Debug.LogError("Span имеет дубликкты");
@@ -89,7 +89,7 @@ namespace DCFApixels.DragonECS
                 }
                 if (c.Count < 0)
                 {
-                    throw new System.Exception("Increment/Decrement balans exception");
+                    throw new Exception("Increment/Decrement balans exception");
                 }
             }
         }

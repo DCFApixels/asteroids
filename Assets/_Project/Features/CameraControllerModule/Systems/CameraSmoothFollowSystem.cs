@@ -3,16 +3,16 @@ using DCFApixels.DragonECS;
 using System.Linq;
 using UnityEngine;
 
-namespace Asteroids.CameraSmoothFollowFeature
+namespace Modules.CameraController
 {
-    [MetaGroup(CameraSmoothFollowModule.META_GROUP)]
-    [MetaColor(CameraSmoothFollowModule.META_COLOR)]
+    [MetaGroup(CameraControllerModule.META_GROUP)]
+    [MetaColor(CameraControllerModule.META_COLOR)]
     internal class CameraSmoothFollowSystem : IEcsRun, IEcsDefaultAddParams
     {
         public AddParams AddParams => EcsConsts.POST_END_LAYER;
 
         [DI] EcsDefaultWorld _world;
-        [DI] SceneData s;
+        [DI] CameraBrain _brain;
 
         class Aspect : EcsAspect
         {
@@ -26,11 +26,11 @@ namespace Asteroids.CameraSmoothFollowFeature
                 ref var transformData = ref a.TransformDatas[e];
                 ref var cameraSmoothFollowTarget = ref a.cameraSmoothFollowTargets[e];
 
-                Vector3 campos = Vector3.Lerp(To2D(cameraSmoothFollowTarget.target), To2D(transformData.Position), cameraSmoothFollowTarget.positionsLerp);
-                campos.y = s.Camera.transform.position.y;
+                Vector3 campos = Vector3.Lerp(To2D(cameraSmoothFollowTarget.Target), To2D(transformData.Position), cameraSmoothFollowTarget.PositionsLerp);
+                campos.y = _brain.Pivod.position.y;
 
-                campos = Vector3.Lerp(s.Camera.transform.position, campos, cameraSmoothFollowTarget.moveLerp);
-                s.Camera.transform.position = campos;
+                campos = Vector3.Lerp(_brain.Pivod.position, campos, cameraSmoothFollowTarget.MoveLerp);
+                _brain.Pivod.position = campos;
             }
         }
         private static Vector3 To2D(Vector3 v)

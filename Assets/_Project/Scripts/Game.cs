@@ -1,5 +1,4 @@
 using Asteroids.BulletsFeature;
-using Asteroids.CameraSmoothFollowFeature;
 using Asteroids.GameFieldFueature;
 using Asteroids.LocalInputFeature;
 using Asteroids.MovementFeature;
@@ -8,6 +7,7 @@ using Asteroids.StartshipsFeature;
 using Asteroids.Systems;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
+using Modules.CameraController;
 using UnityEngine;
 
 namespace Asteroids
@@ -47,7 +47,7 @@ namespace Asteroids
                 .Add(new UIUpdateSystem())
                 .Add(new RestartSystem())
 
-                .AddModule(new CameraSmoothFollowModule())
+                .AddModule(new CameraControllerModule())
                 .AddModule(new StarshipInputControlModule())
                 .AddModule(new MovementModule())
                 .AddModule(new BulletsModule())

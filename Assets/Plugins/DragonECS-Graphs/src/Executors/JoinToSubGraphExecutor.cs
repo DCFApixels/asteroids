@@ -81,7 +81,11 @@ namespace DCFApixels.DragonECS.Graphs.Internal
                 //for (int i = 0; i < _sourceEntitiesCount; i++)
                 for (int i = 0; i < _sourceEntities.Count; i++)
                 {
-                    _linkedListSourceHeads[_sourceEntities[i]] = default;
+                    int index = _sourceEntities[i];
+                    if(index >= 0)
+                    {
+                        _linkedListSourceHeads[index] = default;
+                    }
                 }
             }
             //_sourceEntitiesCount = 0;
