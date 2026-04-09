@@ -9,7 +9,6 @@ namespace Asteroids.Systems
     {
         [DI] EcsDefaultWorld _world;
         [DI] ConfigData c;
-        [DI] SceneData s;
 
         class RequestAspect : EcsAspect
         {
