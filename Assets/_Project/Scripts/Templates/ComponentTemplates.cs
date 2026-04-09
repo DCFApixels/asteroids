@@ -2,7 +2,6 @@
 using Asteroids.BulletsFeature;
 using Asteroids.Components;
 using Asteroids.LocalInputFeature;
-using Asteroids.MovementFeature;
 using Asteroids.StarshipInputControlFeature;
 using Asteroids.StartshipsFeature;
 using Asteroids.Views;
@@ -10,6 +9,7 @@ using DCFApixels;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using Modules.CameraController;
+using Modules.Movement;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

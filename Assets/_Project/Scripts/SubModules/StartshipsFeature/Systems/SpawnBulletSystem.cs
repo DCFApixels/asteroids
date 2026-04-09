@@ -1,7 +1,6 @@
 ﻿using Asteroids.LocalInputFeature;
-using Asteroids.MovementFeature;
-using DCFApixels;
 using DCFApixels.DragonECS;
+using Modules.Movement;
 using System;
 using UnityEngine;
 

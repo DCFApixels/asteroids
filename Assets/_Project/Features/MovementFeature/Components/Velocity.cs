@@ -1,7 +1,7 @@
 using DCFApixels.DragonECS;
 using UnityEngine;
 
-namespace Asteroids.MovementFeature
+namespace Modules.Movement
 {
     [MetaGroup(MovementModule.META_GROUP)]
     [MetaColor(MovementModule.META_COLOR)]

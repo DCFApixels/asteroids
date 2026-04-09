@@ -1,7 +1,7 @@
 ﻿using Asteroids.Components;
-using Asteroids.MovementFeature;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
+using Modules.Movement;
 using UnityEngine;
 
 namespace Asteroids.Systems
