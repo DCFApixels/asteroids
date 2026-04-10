@@ -19,7 +19,7 @@ MonoBehaviour:
   BulletSpeed: 10
   AsteroidDescription: {fileID: 11400000, guid: 3632d911de607c54b8db15e757360eb3, type: 2}
   SpawnFrequency: 3
-  SpawnAmount: 3
+  SpawnAmount: 1
   AsteroidMaxSpeed: 1
   AsteroidMinSpeed: 5
   AsteroidSplitMultiplier: 0.65
