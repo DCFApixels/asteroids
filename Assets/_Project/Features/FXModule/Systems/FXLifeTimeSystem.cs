@@ -2,18 +2,18 @@ using Asteroids.Views;
 using DCFApixels.DragonECS;
 using UnityEngine;
 
-namespace Asteroids.VFX
+namespace Modules.FX
 {
-    [MetaGroup(VFXModule.META_GROUP)]
-    [MetaColor(VFXModule.META_COLOR)]
-    public class VFXLifeTimeSystem : IEcsRun
+    [MetaGroup(FXModule.META_GROUP)]
+    [MetaColor(FXModule.META_COLOR)]
+    public class FXLifeTimeSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
         class Aspect : EcsAspect
         {
-            public EcsRefPool<VFXView> Views = Inc;
-            public EcsPool<VFXLifeTime> LifeTimes = Inc;
-            public EcsTagPool<VFXLifeTimeElapsedEvent> ElapsedEvents = Exc;
+            public EcsRefPool<VFXAsset> Views = Inc;
+            public EcsPool<FXLifeTime> LifeTimes = Inc;
+            public EcsTagPool<FXLifeTimeElapsedEvent> ElapsedEvents = Exc;
         }
         public void Run()
         {

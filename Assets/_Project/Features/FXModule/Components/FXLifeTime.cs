@@ -1,14 +1,14 @@
 using DCFApixels.DragonECS;
 
-namespace Asteroids.VFX
+namespace Modules.FX
 {
     [System.Serializable]
-    internal struct VFXLifeTime : IEcsComponent, IEcsTimerComponent
+    internal struct FXLifeTime : IEcsComponent, IEcsTimerComponent
     {
         public float Duration;
         public float Time;
         float IEcsTimerComponent.Time { get => Time; set => Time = value; }
     }
     [System.Serializable]
-    internal struct VFXLifeTimeElapsedEvent : IEcsTagComponent { }
+    internal struct FXLifeTimeElapsedEvent : IEcsTagComponent { }
 }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2356916589024263989}
   - component: {fileID: 8837166039067066495}
   m_Layer: 0
-  m_Name: DefaultAudioSource
+  m_Name: SFXAudioSource
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -41,17 +41,17 @@ AudioSource:
   m_GameObject: {fileID: 4514385511767090040}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -7570830140943771073, guid: 9e488dbf9e14cca44ab8e4ee8114fb92, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 128
+  Priority: 256
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 500

@@ -16,12 +16,12 @@ MonoBehaviour:
   Clips:
   - Clip: {fileID: 8300000, guid: b66252dde1debbc41b4eb13ca2130c24, type: 3}
     Volume:
-      Min: 1
-      Max: 1
+      Min: 0.8
+      Max: 1.25
     Pitch:
-      Min: 1
-      Max: 1
+      Min: 0.8
+      Max: 1.25
     DurationMultiplier: 1
-  VolumeMultiplier: 0.7
-  PitchMultiplier: 1
+  VolumeMultiplier: 0.6
+  PitchMultiplier: 1.6
   DurationMultiplier: 1

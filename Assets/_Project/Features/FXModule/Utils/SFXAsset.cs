@@ -2,12 +2,11 @@ using DCFApixels;
 using TriInspector;
 using UnityEditor;
 using UnityEngine;
-using static NewMatch3.SoundEffect;
 
-namespace NewMatch3
+namespace Modules.FX
 {
     [CreateAssetMenu]
-    public class SoundEffect : ScriptableObject
+    public class SFXAsset : ScriptableObject
     {
         public AudioSource AudioSourcePrefab;
         public ClipRecord[] Clips = new ClipRecord[0];
@@ -121,11 +120,11 @@ namespace NewMatch3
 
     public static class SoundEffectExt
     {
-        public static void PlayOneShot(this AudioSource source, SoundEffect sfx)
+        public static void PlayOneShot(this AudioSource source, SFXAsset sfx)
         {
             PlayOneShot(source, sfx.GetRandomClip());
         }
-        public static void PlayOneShot(this AudioSource source, SoundEffect.ResultClip sfx)
+        public static void PlayOneShot(this AudioSource source, SFXAsset.ResultClip sfx)
         {
             source.volume = sfx.Volume;
             source.pitch = sfx.Pitch;
@@ -155,7 +154,7 @@ namespace NewMatch3
 #if UNITY_EDITOR
     namespace Editors
     {
-        [CustomPropertyDrawer(typeof(MinMaxRange))]
+        [CustomPropertyDrawer(typeof(SFXAsset.MinMaxRange))]
         internal class MiMaxRangeDrawer : PropertyDrawer
         {
             private GUIContent _label;

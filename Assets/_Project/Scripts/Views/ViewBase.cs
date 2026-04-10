@@ -2,6 +2,7 @@ using DCFApixels;
 using DCFApixels.DragonECS;
 using DCFApixels.DragonECS.Core;
 using UnityEngine;
+using Modules.FX;
 
 namespace Asteroids.Views
 {

@@ -94,6 +94,10 @@ namespace DCFApixels
             pool = null;
             return false;
         }
+        public static bool TryFind(int poolID, out UPool poolRaw)
+        {
+            return _pools.TryGetValue(poolID, out poolRaw);
+        }
         public static UPool<T> GetFor<T>(T prefab, bool checkPrefab = true) where T : Component
         {
 #if UNITY_EDITOR
@@ -143,6 +147,11 @@ namespace DCFApixels
             return pool;
         }
 
+        public UPool(int id)
+        {
+            ID = id;
+        }
+
 
         [SerializeField]
         protected bool _isUnloaded = false;
@@ -153,7 +162,7 @@ namespace DCFApixels
                 return Root == null ||  _isUnloaded;
             }
         }
-
+        public readonly int ID;
         public abstract UnityObject PrefabRaw { get; }
         protected abstract Transform Root { get; }
         public abstract int PrewarmedCount { get; }
@@ -239,6 +248,7 @@ namespace DCFApixels
         private Transform _root;
         [SerializeField]
         private T _prefab;
+
         private IUPoolUnit<T> _prefabInterface;
         private readonly bool _isHasInterface;
         private readonly List<T> _pool = new List<T>(128);
@@ -261,7 +271,7 @@ namespace DCFApixels
             get { return _pool.Count; }
         }
 
-        public UPool(Transform root, T prefab)
+        public UPool(Transform root, T prefab) : base(prefab.GetInstanceID())
         {
             _root = root;
             _prefab = prefab;
