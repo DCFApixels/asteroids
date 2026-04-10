@@ -22,6 +22,6 @@ MonoBehaviour:
   SpawnAmount: 1
   AsteroidMaxSpeed: 1
   AsteroidMinSpeed: 5
-  AsteroidSplitMultiplier: 0.65
+  AsteroidSplitMultiplier: 0.45
   AdditionalKillOffset: 1.1
   ScreenBorderOffset: 0.5

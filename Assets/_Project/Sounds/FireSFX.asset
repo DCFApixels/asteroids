@@ -25,3 +25,5 @@ MonoBehaviour:
   VolumeMultiplier: 0.9
   PitchMultiplier: 1
   DurationMultiplier: 1
+  Cooldown: 0
+  SpatialCooldownPreset: {fileID: 11400000, guid: 145e42ca66623a34184c0f1e4a6decdd, type: 2}

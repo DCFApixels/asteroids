@@ -17,7 +17,7 @@ MonoBehaviour:
   _componentTemplates:
   - rid: 4213516789838774606
   ViewPrefab: {fileID: 4782241617648703718, guid: cfda0d7cd365f48488a2261a96329186, type: 3}
-  BoundsRadius: 0.25
+  BoundsRadius: 0.34
   LifeTime: 3
   references:
     version: 2

@@ -8,18 +8,28 @@ namespace Modules.FX
     [CreateAssetMenu]
     public class SFXAsset : ScriptableObject
     {
+        [Title("Main")]
         public AudioSource AudioSourcePrefab;
         public ClipRecord[] Clips = new ClipRecord[0];
         public float VolumeMultiplier = 1;
         public float PitchMultiplier = 1;
         public float DurationMultiplier = 1;
 
+        [Title("Cooldown")]
+        public float Cooldown = 0.1f;
+        public SpatialCooldownPreset SpatialCooldownPreset;
+
+        public bool HasCooldown
+        {
+            get => Cooldown > 0;
+        }
+
         [Button]
-        protected void Play()
+        protected void Play_Editor()
         {
             if (Application.isPlaying)
             {
-                this.Play(Vector3.zero);
+                Play(Vector3.zero);
                 return;
             }
             PlayInEditor();
@@ -70,8 +80,6 @@ namespace Modules.FX
             AudioSourcePrefab.SpawnTemp(out var source, null, position).Duration(clip.GetDuration() + 0.1f);
             source.PlayOneShot(clip);
         }
-        
-        
         [System.Serializable]
         public struct ClipRecord
         {
@@ -81,7 +89,6 @@ namespace Modules.FX
             public MinMaxRange Pitch;
             public float DurationMultiplier;
         }
-        
         [System.Serializable]
         public struct ResultClip
         {
@@ -112,7 +119,6 @@ namespace Modules.FX
             {
                 return new MinMaxRange(a.Min * b.Min, a.Max * b.Max);
             }
-
             public static MinMaxRange operator *(MinMaxRange range, float scalar) { return new MinMaxRange(range.Min * scalar, range.Max * scalar); }
             public static MinMaxRange operator *(float scalar, MinMaxRange range) { return range * scalar; }
         }

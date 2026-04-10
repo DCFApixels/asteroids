@@ -21,7 +21,7 @@ MonoBehaviour:
   - rid: 4213516781011599511
   - rid: 4213516781011599512
   ViewPrefab: {fileID: 646751663581237465, guid: 863b4d63a5413314197562c04df1f781, type: 3}
-  BoundsRadius: 1
+  BoundsRadius: 0.76
   references:
     version: 2
     RefIds:
@@ -46,9 +46,9 @@ MonoBehaviour:
       type: {class: Template_D7729ECC9501F8D9D9868FBACC0F97B5, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
-          target: {x: 0, y: 0, z: 0}
-          positionsLerp: 0.03
-          moveLerp: 0.02
+          Target: {x: 0, y: 0, z: 0}
+          PositionsLerp: 0.03
+          MoveLerp: 0.02
         _offset: 0
     - rid: 4213516781011599512
       type: {class: Template_35CA21CB95018BE256CAA78659C23B59, ns: ComponentTemplates, asm: Assembly-CSharp}
