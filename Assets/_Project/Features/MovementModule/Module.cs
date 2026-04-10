@@ -12,8 +12,7 @@ namespace Modules.Movement
         public void Import(EcsPipeline.Builder b)
         {
             b.Layers.Add(META_GROUP).After(EcsConsts.BASIC_LAYER);
-            b.Add(new TransformTickSystem());
-           // b.Add(new ReadTransformSystem());
+            b.Add(new RigidTransformSnapshotSystem());
             b.Add(new ApplyVelocitySystem());
             b.Add(new DebugVelocitySystem());
             b.Add(new ApplyTransformSystem());
