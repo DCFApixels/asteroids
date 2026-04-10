@@ -45,14 +45,14 @@ namespace Modules.Movement
             }
         }
 
-        private void Rotate(ref RigidTransform transform, Vector3 velocity)
+        private void Rotate(ref RigidTransform transform, Vector3 angular)
         {
-            if(velocity.x == 0 && velocity.y == 0 && velocity.z == 0)
+            if(angular.x == 0 && angular.y == 0 && angular.z == 0)
             {
                 return;
             }
-            Quaternion velocityRotation = Quaternion.Euler(velocity);
-            transform.Rotation = transform.Rotation * ((Quaternion.Inverse(transform.Rotation) * velocityRotation) * transform.Rotation);
+            Quaternion velocityRotation = Quaternion.Euler(angular);
+            transform.Rotation *= Quaternion.Inverse(transform.Rotation) * velocityRotation * transform.Rotation;
         }
     }
 }

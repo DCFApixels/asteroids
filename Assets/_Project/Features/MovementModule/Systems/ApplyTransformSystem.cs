@@ -20,11 +20,30 @@ namespace Modules.Movement
         {
             foreach (var e in _world.Where(out Aspect a))
             {
-                ref var transform = ref a.RigidTransforms.TryAddOrGet(e);
-                var goc = a.Transforms[e].transform;
+                ref var rigidTransform = ref a.RigidTransforms.TryAddOrGet(e);
+                var transform = a.Transforms[e].transform;
 
-                goc.position = transform.Position;
-                goc.rotation = transform.Rotation;
+                rigidTransform.Rotation = rigidTransform.Rotation.normalized;
+                for (int i = 0; i < 4; i++)
+                {
+                    var v = rigidTransform.Rotation[i];
+                    if (float.IsNaN(v))
+                    {
+                        rigidTransform.Rotation = Quaternion.identity;
+                        break;
+                    }
+                }
+                for (int i = 0; i < 3; i++)
+                {
+                    var v = rigidTransform.Position[i];
+                    if (float.IsNaN(v))
+                    {
+                        rigidTransform.Position[0] = 0;
+                    }
+                }
+
+                transform.position = rigidTransform.Position;
+                transform.rotation = rigidTransform.Rotation;
             }
         }
     }

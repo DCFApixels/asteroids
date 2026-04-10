@@ -20,17 +20,15 @@ namespace Asteroids.StarshipInputControlFeature
         public void Run()
         {
             _world.GetAspects(out Aspect a);
-          //  EcsDebug.Print("P 1 " + _world.Where(EcsStaticMask.Inc(typeof(StarshipMovmentData)).Build()).Count);
 
             foreach (var e in _world.Where(a))
             {
-               // EcsDebug.Print("P 2");
-                ref var transformData = ref a.RigidTransforms[e];
+                ref var rigidTransform = ref a.RigidTransforms[e];
                 ref var velocity = ref a.Velocities[e];
                 ref var movementData = ref a.MovementDatas[e];
                 ref var moveAxisInputSignal = ref a.MoveAxisInputSignals[e];
 
-                var forward = transformData.Rotation * Vector3.forward;
+                var forward = rigidTransform.Rotation * Vector3.forward;
                 forward.y = 0;
                 forward = forward.normalized;
 

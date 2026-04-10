@@ -12,11 +12,11 @@ namespace Modules.Movement
         public void Import(EcsPipeline.Builder b)
         {
             b.Layers.Add(META_GROUP).After(EcsConsts.BASIC_LAYER);
-            //b.Layers.InsertAfter(EcsConsts.BASIC_LAYER, META_GROUP);
-            b.Add(new ReadTransformSystem());
-            b.Add(new ApplyTransformSystem());
+            b.Add(new TransformTickSystem());
+           // b.Add(new ReadTransformSystem());
             b.Add(new ApplyVelocitySystem());
             b.Add(new DebugVelocitySystem());
+            b.Add(new ApplyTransformSystem());
         }
     }
 }

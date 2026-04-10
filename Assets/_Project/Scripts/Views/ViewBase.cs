@@ -1,4 +1,5 @@
 using DCFApixels;
+using DCFApixels.DragonECS;
 using DCFApixels.DragonECS.Core;
 using UnityEngine;
 
@@ -8,7 +9,11 @@ namespace Asteroids.Views
     {
         [SerializeField]
         private int _preWarmCount = 8;
+        [SerializeField]
+        private entlong _entity;
+
         public VFXDescription DeathVFX;
+
 
 
         private UPool _sourcePool;
@@ -28,10 +33,14 @@ namespace Asteroids.Views
         {
             self._sourcePool = null;
         }
-        void IEcsComponentLifecycle<ViewBase>.OnAdd(ref ViewBase component, short worldID, int entityID) { }
+        void IEcsComponentLifecycle<ViewBase>.OnAdd(ref ViewBase component, short worldID, int entityID)
+        {
+            component._entity = (EcsWorld.GetWorld(worldID), entityID);
+        }
         void IEcsComponentLifecycle<ViewBase>.OnDel(ref ViewBase component, short worldID, int entityID)
         {
-            Despawn();
+            component.Despawn();
+            component._entity = entlong.NULL;
         }
     }
 }
