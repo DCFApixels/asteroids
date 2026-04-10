@@ -15,15 +15,6 @@ namespace Modules.FX
         public float PitchMultiplier = 1;
         public float DurationMultiplier = 1;
 
-        [Title("Cooldown")]
-        public float Cooldown = 0.1f;
-        public SpatialCooldownPreset SpatialCooldownPreset;
-
-        public bool HasCooldown
-        {
-            get => Cooldown > 0;
-        }
-
         [Button]
         protected void Play_Editor()
         {
