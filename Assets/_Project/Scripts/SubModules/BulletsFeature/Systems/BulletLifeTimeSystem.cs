@@ -8,8 +8,8 @@ namespace Asteroids.BulletsFeature
         [DI] EcsDefaultWorld _world;
         class Aspect : EcsAspect
         {
-            public EcsPool<Projectile> Bullets = Inc;
-            public EcsPool<ProjectileLifetime> BulletLifetimes = Inc;
+            public EcsPool<Bullet> Bullets = Inc;
+            public EcsPool<BulletLifeTime> BulletLifetimes = Inc;
 
             public EcsPool<OutOfGameFieldBehavior> OutOfGameFieldBehaviors = Opt;
         }

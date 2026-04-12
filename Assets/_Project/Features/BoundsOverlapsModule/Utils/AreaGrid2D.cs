@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace Modules.BoundsOverlaps
 {
@@ -122,7 +123,7 @@ namespace Modules.BoundsOverlaps
                             continue;
                         }
                         
-                        var hit = new Hit(item.Id, sqrDistance);
+                        var hit = new Hit(item.ID, sqrDistance, new Vector2(item.X, item.Y));
                         if (hits.Count == 0)
                         {
                             hits.Add(hit);
@@ -180,27 +181,27 @@ namespace Modules.BoundsOverlaps
 
         private struct Container
         {
-            public readonly T Id;
+            public readonly T ID;
             public readonly float X;
             public readonly float Y;
-
             public Container(T id, float x, float y)
             {
-                Id = id;
+                ID = id;
                 X = x;
                 Y = y;
             }
         }
     
-        public struct Hit
+        public readonly struct Hit
         {
             public readonly T Id;
             public readonly float SqrDistance;
-
-            public Hit(T id, float sqrDistance)
+            public readonly Vector2 Other;
+            public Hit(T id, float sqrDistance, Vector2 other)
             {
                 Id = id;
                 SqrDistance = sqrDistance;
+                Other = other;
             }
         }
     }

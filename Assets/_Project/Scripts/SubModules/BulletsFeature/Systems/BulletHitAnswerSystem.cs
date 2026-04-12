@@ -14,8 +14,8 @@ namespace Asteroids.BulletsFeature
         }
         class BulletAspect : EcsAspect
         {
-            public EcsPool<Projectile> Bullets = Inc;
-            public EcsPool<KillRequest> KillSignals = Exc;
+            public EcsPool<Bullet> Bullets = Inc;
+            public EcsPool<KillRequest> KillRequests = Exc;
         }
 
         public void Run()
@@ -25,10 +25,12 @@ namespace Asteroids.BulletsFeature
 
             foreach (var relE in _graph.GraphWorld.Where(relA))
             {
+                ref var answ = ref relA.HitAnswers[relE];
                 var bulletE = _graph.GetRelationStart(relE);
                 if (bulletEs.Has(bulletE))
                 {
-                    bulletA.KillSignals.TryAddOrGet(bulletE);
+                    ref var killReq = ref bulletA.KillRequests.TryAddOrGet(bulletE);
+                    killReq.Normal = answ.CollisionNormal;
                 }
             }
 

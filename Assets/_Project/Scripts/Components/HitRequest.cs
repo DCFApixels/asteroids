@@ -7,13 +7,15 @@ namespace Asteroids.Components
     [System.Serializable]
     public struct HitRequest : IEcsComponent
     {
-        public Vector3 directionNormal;
+        public Vector3 DirectionNormal;
+        public Vector3 CollisionNormal;
     }
 
     [AllowedInWorlds("Graph", "Event")]
     [System.Serializable]
     public struct HitAnswer : IEcsComponent
     {
-        public Vector3 directionNormal;
+        public Vector3 DirectionNormal;
+        public Vector3 CollisionNormal;
     }
 }

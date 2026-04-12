@@ -3,6 +3,7 @@ using Modules.Movement;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UnityEngine;
 
 namespace Modules.BoundsOverlaps
 {
@@ -76,9 +77,12 @@ namespace Modules.BoundsOverlaps
                             if (hit.SqrDistance <= overlapRadius * overlapRadius)
                             {
                                 var relE = _graph.GetOrNewRelation(otherE, e);
-                                relA.OverlapsEvents.TryAddOrGet(relE);
+
+                                ref var ev = ref relA.OverlapsEvents.TryAddOrGet(relE);
+                                ev.Diff = new Vector3(hit.Other.x, 0, hit.Other.y) - position;
                                 var relEInverse = _graph.GetOrNewRelation(e, otherE);
-                                relA.OverlapsEvents.TryAddOrGet(relEInverse);
+                                ev = ref relA.OverlapsEvents.TryAddOrGet(relEInverse);
+                                ev.Diff = -ev.Diff;
                             }
                         }
 

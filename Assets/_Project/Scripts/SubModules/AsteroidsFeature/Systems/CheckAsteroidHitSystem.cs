@@ -33,7 +33,7 @@ namespace Asteroids.Systems
             public EcsPool<Asteroid> Asteroids = Inc;
             public EcsPool<BoundsSphere> BoundsSpheres = Inc;
             public EcsPool<RigidTransform> TransformDatas = Inc;
-            public EcsPool<KillRequest> killSignals = Opt;
+            public EcsPool<KillRequest> KillRequests = Opt;
         }
         public void Run()
         {
@@ -53,12 +53,16 @@ namespace Asteroids.Systems
                     Vector3 directionNormalsSum = default;
                     foreach (var relE in map.GetRelations(asteroidE))
                     {
+                        ref var req = ref relA.HitRequests[relE];
                         var otherE = _graph.GetRelationOpposite(relE, asteroidE);
                         if(_graph.World.IsMatchesMask(otherA, otherE))
                         {
-                            directionNormalsSum += relA.HitRequests[relE].directionNormal;
+                            directionNormalsSum += req.DirectionNormal;
                             _rels.Add(relE);
-                            relA.HitAnswers.TryAddOrGet(relE).directionNormal = -directionNormalsSum;
+
+                            ref var answ = ref relA.HitAnswers.TryAddOrGet(relE);
+                            answ.DirectionNormal = -directionNormalsSum.normalized;
+                            answ.CollisionNormal = req.CollisionNormal;
                         } 
                     }
                 }
@@ -69,14 +73,17 @@ namespace Asteroids.Systems
                     _rels.Clear();
                     foreach (var relE in map.GetRelations(asteroidE))
                     {
-                        directionNormalsSum += relA.HitRequests[relE].directionNormal;
+                        ref var req = ref relA.HitRequests[relE];
+                        directionNormalsSum += relA.HitRequests[relE].DirectionNormal;
                         _rels.Add(relE);
-                        relA.HitAnswers.TryAddOrGet(relE).directionNormal = -directionNormalsSum;
+
+                        ref var answ = ref relA.HitAnswers.TryAddOrGet(relE);
+                        answ.DirectionNormal = -directionNormalsSum.normalized;
+                        answ.CollisionNormal = req.CollisionNormal;
                     }
 
-
                     r.Score++;
-                    asteroidA.killSignals.TryAddOrGet(asteroidE);
+                    ref var killReq = ref asteroidA.KillRequests.TryAddOrGet(asteroidE);
 
                     ref var shake = ref _graph.World.GetPool<CameraShakeRequest>().NewEntity();
                     shake.Strength = 1f;

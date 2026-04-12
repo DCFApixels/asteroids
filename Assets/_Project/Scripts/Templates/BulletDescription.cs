@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Asteroids
 {
     [CreateAssetMenu]
-    public class ProjectileDescription : ScriptableEntityTemplate
+    public class BulletDescription : ScriptableEntityTemplate
     {
         public ProjectileView ViewPrefab;
         public float BoundsRadius = 1;
@@ -24,9 +24,9 @@ namespace Asteroids
             world.GetPool<Transform>().Set(e, view.transform);
             ref var sphere = ref world.GetPool<BoundsSphere>().TryAddOrGet(e);
             sphere.Radius = BoundsRadius;
-            ref var projectile = ref world.GetPool<Projectile>().TryAddOrGet(e);
+            ref var projectile = ref world.GetPool<Bullet>().TryAddOrGet(e);
             projectile.Description = this;
-            ref var lifeTime = ref world.GetPool<ProjectileLifetime>().TryAddOrGet(e);
+            ref var lifeTime = ref world.GetPool<BulletLifeTime>().TryAddOrGet(e);
             lifeTime.Time = LifeTime;
         }
     }

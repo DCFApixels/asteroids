@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 4252962896969317083}
   - component: {fileID: 4782241617648703718}
   m_Layer: 0
-  m_Name: ProjectileView
+  m_Name: BulletView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -274,5 +274,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _preWarmCount: 8
-  DeathVFX: {fileID: 0}
+  _entity:
+    _full: 0
+  DeathVFX: {fileID: 7848642253514846668, guid: e32d45aeb8fd62d408277fc03b12e63a, type: 3}
   Radius: 0.25

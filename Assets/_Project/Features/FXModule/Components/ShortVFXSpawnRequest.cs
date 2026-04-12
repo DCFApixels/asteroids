@@ -20,6 +20,7 @@ namespace Modules.FX
         public Quaternion Rotation;
         public Nlb<float> Scale;
         public Nlb<Color> Color;
+        public Nlb<Vector3> Direction;
 
         void IEcsComponentLifecycle<ShortVFXSpawnRequest>.OnAdd(ref ShortVFXSpawnRequest component, short worldID, int entityID)
         {

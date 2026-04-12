@@ -12,7 +12,7 @@ namespace Asteroids
 
     
         [Header("Bullets")]
-        public ProjectileDescription ProjectileDescription;
+        public BulletDescription ProjectileDescription;
         public float BulletSpeed = 10;
     
         [Header("Asteroid")]

@@ -1,5 +1,6 @@
 using DCFApixels;
 using DCFApixels.DragonECS;
+using UnityEngine;
 
 namespace Modules.FX
 {
@@ -22,7 +23,18 @@ namespace Modules.FX
             {
                 ref var req = ref reqA.Requests[reqE];
                 var pool = UPool.GetFor(req.Prefab);
-                var view = pool.Spawn(null, req.Position, req.Rotation);
+
+                Quaternion rot;
+                if(req.Direction == null)
+                {
+                    rot = req.Rotation;
+                }
+                else
+                {
+                    rot = Quaternion.LookRotation(req.Direction.Value);
+                }
+
+                var view = pool.Spawn(null, req.Position, rot);
                 view.Play(req.Scale, req.Color);
                 reqA.LifeTimes.Add(reqE) = new()
                 {

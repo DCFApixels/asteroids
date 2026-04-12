@@ -24,7 +24,7 @@ namespace ComponentTemplates
     [MetaID("Template_2A352BCB9501428C5C1093F487E54C83")] class Template_2A352BCB9501428C5C1093F487E54C83 : ComponentTemplate<Asteroid> { }
     [MetaID("Template_AACF2FCB950110F7165389DD708F1671")] class Template_AACF2FCB950110F7165389DD708F1671 : ComponentTemplate<Starship> { }
     [MetaID("Template_D7729ECC9501F8D9D9868FBACC0F97B5")] class Template_D7729ECC9501F8D9D9868FBACC0F97B5 : ComponentTemplate<CameraSmoothFollowTarget> { }
-    [MetaID("Template_CB79ECCA950122BC3E7CE6C8397659EB")] class Template_CB79ECCA950122BC3E7CE6C8397659EB : ComponentTemplate<Projectile> { }
+    [MetaID("Template_CB79ECCA950122BC3E7CE6C8397659EB")] class Template_CB79ECCA950122BC3E7CE6C8397659EB : ComponentTemplate<Bullet> { }
     [MetaID("Template_395668D195011D0C128ED015E17731C5")] class Template_395668D195011D0C128ED015E17731C5 : ComponentTemplate<BoundsSphere> { }
     [MetaID("Template_60B433E69501E56AA53E7EED0A72BA83")] class Template_60B433E69501E56AA53E7EED0A72BA83 : ComponentTemplate<HitImmunity> { }
     

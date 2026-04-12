@@ -3,12 +3,12 @@
 namespace Asteroids.BulletsFeature
 {
     [System.Serializable]
-    public struct Projectile : IEcsComponent
+    public struct Bullet : IEcsComponent
     {
-        public ProjectileDescription Description;
+        public BulletDescription Description;
     }
     [System.Serializable]
-    public struct ProjectileLifetime : IEcsComponent, IEcsTimerComponent
+    public struct BulletLifeTime : IEcsComponent, IEcsTimerComponent
     {
         public float Time { get; set; }
     }

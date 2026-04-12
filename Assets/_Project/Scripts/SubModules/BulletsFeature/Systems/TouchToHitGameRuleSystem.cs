@@ -9,9 +9,9 @@ namespace Asteroids.BulletsFeature
 {
     class TouchToHitGameRuleSystem : IEcsRun, IEcsDefaultAddParams
     {
-        [DI] EntityGraph _graph;
-
         public AddParams AddParams => -1;
+
+        [DI] EntityGraph _graph;
 
         class RelAspect : EcsAspect
         {
@@ -40,15 +40,16 @@ namespace Asteroids.BulletsFeature
             foreach (var relE in _graph.GraphWorld.Where(relA))
             {
                 var (bulletE, otehrE) = _graph.GetRelationStartEnd(relE);
-                if (bulletEs.Has(bulletE) &&
-                    otherEs.Has(otehrE))
+                ref var overlaps = ref relA.OverlapsEvents[relE];
+                if (bulletEs.Has(bulletE) && otherEs.Has(otehrE))
                 {
                     ref var velocity = ref bulletA.Velocities[bulletE];
 
                     ref var hit = ref relA.HitRequests.Add(relE);
                     ref var immunity = ref relA.Immunities.Add(relE);
                     immunity.TimeLeft = 0.2f;
-                    hit.directionNormal = velocity.Lineral.normalized;
+                    hit.DirectionNormal = velocity.Lineral.normalized;
+                    hit.CollisionNormal = overlaps.Diff.normalized;
                 }
 
             }

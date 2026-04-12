@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73efbf361c6730f4db4e69fb43c97f20, type: 3}
-  m_Name: ProjectileDescription
+  m_Script: {fileID: 11500000, guid: c1ef4c23a5bab7e4da644bbdcbfeb46e, type: 3}
+  m_Name: BulletDescription
   m_EditorClassIdentifier: 
   _templates:
   - {fileID: 11400000, guid: c52a3ae0148d0e545b28a3f233f55d08, type: 2}
