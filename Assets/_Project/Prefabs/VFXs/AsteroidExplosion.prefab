@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5134476555898370605}
-  - component: {fileID: 161898772272626303}
+  - component: {fileID: 7848642253514846668}
   - component: {fileID: 5550351083482419086}
   m_Layer: 0
   m_Name: AsteroidExplosion
@@ -34,7 +34,7 @@ Transform:
   - {fileID: 7834278571726566293}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &161898772272626303
+--- !u!114 &7848642253514846668
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -43,13 +43,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 1376010837199149625}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7671ce2bb58b2149912b87198d5ec93, type: 3}
+  m_Script: {fileID: 11500000, guid: 20bdaaa30718c384891f4c75dae16ab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Duration: 1
+  Duration: 2
   Root: {fileID: 6593614984008684100}
   AudioSource: {fileID: 5550351083482419086}
-  SFX: {fileID: 11400000, guid: e8fda93a20e71784aa4deb2612ab989b, type: 2}
+  SoundEffect: {fileID: 11400000, guid: e8fda93a20e71784aa4deb2612ab989b, type: 2}
+  ScaleBlend: 0.5
+  ColoredParticles:
+  - {fileID: 1071294621756655842}
+  - {fileID: 8912767121265694472}
+  - {fileID: 454051669718892160}
+  - {fileID: 1372065693073386846}
+  - {fileID: 1300649240571491901}
+  - {fileID: 6858824459875448457}
 --- !u!82 &5550351083482419086
 AudioSource:
   m_ObjectHideFlags: 0

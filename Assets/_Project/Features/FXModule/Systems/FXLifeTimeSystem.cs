@@ -11,13 +11,13 @@ namespace Modules.FX
         [DI] EcsDefaultWorld _world;
         class Aspect : EcsAspect
         {
-            public EcsRefPool<VFXAsset> Views = Inc;
             public EcsPool<FXLifeTime> LifeTimes = Inc;
             public EcsTagPool<FXLifeTimeElapsedEvent> ElapsedEvents = Exc;
         }
         public void Run()
         {
             _world.GetAspects(out Aspect a);
+            a.ElapsedEvents.ClearAll();
             foreach (var e in a.LifeTimes.UpdateTime(Time.deltaTime))
             {
                 a.ElapsedEvents.Add(e);

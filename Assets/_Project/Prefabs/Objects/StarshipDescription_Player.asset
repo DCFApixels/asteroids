@@ -30,7 +30,7 @@ MonoBehaviour:
       data:
         component:
           MaxSpeed: 10
-          MaxRotationSpeed: 450
+          MaxRotationSpeed: 320
           Acceleration: 5
           Power: 0
         _offset: 0
@@ -39,8 +39,7 @@ MonoBehaviour:
       data:
         component:
           LineralDrag: 0.3
-          AngularDrag: 0.5
-          Mass: 1
+          AngularDrag: 0.6
         _offset: 0
     - rid: 4213516781011599511
       type: {class: Template_D7729ECC9501F8D9D9868FBACC0F97B5, ns: ComponentTemplates, asm: Assembly-CSharp}

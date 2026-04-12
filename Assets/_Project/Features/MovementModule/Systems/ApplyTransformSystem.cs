@@ -38,12 +38,11 @@ namespace Modules.Movement
                     var v = rigidTransform.Position[i];
                     if (float.IsNaN(v))
                     {
-                        rigidTransform.Position[0] = 0;
+                        rigidTransform.Position[i] = 0;
                     }
                 }
 
-                transform.position = rigidTransform.Position;
-                transform.rotation = rigidTransform.Rotation;
+                transform.SetPositionAndRotation(rigidTransform.Position, rigidTransform.Rotation);
             }
         }
     }

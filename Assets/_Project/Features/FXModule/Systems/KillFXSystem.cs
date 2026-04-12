@@ -9,7 +9,6 @@ namespace Modules.FX
         [DI] EcsDefaultWorld _world;
         class Aspect : EcsAspect
         {
-            public EcsRefPool<VFXAsset> Views = Inc;
             public EcsTagPool<FXLifeTimeElapsedEvent> ElapsedEvents = Inc;
         }
         public void Run()

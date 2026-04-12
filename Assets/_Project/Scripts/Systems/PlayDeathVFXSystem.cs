@@ -1,7 +1,7 @@
 ﻿using Asteroids.Components;
 using Asteroids.Views;
 using DCFApixels.DragonECS;
-using UnityEngine;
+using Modules.FX;
 
 namespace Asteroids
 {
@@ -12,6 +12,7 @@ namespace Asteroids
         {
             public EcsRefPool<ViewBase> Views = Inc;
             public EcsPool<KillRequest> KillRequests = Inc;
+            public EcsPool<ShortVFXSpawnRequest> ShortVFXSpawnRequest = Opt;
         }
         public void Run()
         {
@@ -20,8 +21,10 @@ namespace Asteroids
                 var view = a.Views[e];
                 if (view.DeathVFX)
                 {
-                    var vfx = view.DeathVFX.Spawn(_world, view.transform.position, Quaternion.identity);
-                    vfx.view.Play();
+                    ref var r = ref a.ShortVFXSpawnRequest.NewEntity();
+                    r.Prefab = view.DeathVFX;
+                    r.Position = view.transform.position;
+                    r.Scale = view.GetScale();
                 }
             }
         }

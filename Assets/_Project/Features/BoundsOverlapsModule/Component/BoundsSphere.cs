@@ -7,6 +7,10 @@ namespace Modules.BoundsOverlaps
     [System.Serializable]
     public struct BoundsSphere : IEcsComponent
     {
+        public static readonly BoundsSphere Default = new BoundsSphere
+        {
+            Radius = 1f,
+        };
         public float Radius;
     }
 }

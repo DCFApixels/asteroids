@@ -20,8 +20,8 @@ namespace Asteroids.StartshipsFeature
         }
         class SpawnAspect : EcsAspect
         {
-            public EcsPool<Velocity> Velocities = Inc;
             public EcsPool<RigidTransform> TransformDatas = Inc;
+            public EcsPool<Velocity> Velocities = Inc;
         }
 
         public void Run()

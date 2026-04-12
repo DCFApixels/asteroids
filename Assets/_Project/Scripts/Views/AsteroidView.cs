@@ -10,10 +10,17 @@ namespace Asteroids.Views
         public Transform Light;
         public float Radius = 2;
 
+        public override float GetScale()
+        {
+            return Radius;
+        }
+
         public void SetRadius(float radius)
         {
             var points = new NativeArray<Vector3>(LineRenderer.positionCount, Allocator.Temp);
             LineRenderer.GetPositions(points);
+
+            Radius = radius;
 
             var angleStep = 2 * Mathf.PI / points.Length;
             var quarterRadius = radius * 0.25f;

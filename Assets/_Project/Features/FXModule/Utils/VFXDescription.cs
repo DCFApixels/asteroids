@@ -7,15 +7,15 @@ namespace Modules.FX
     [CreateAssetMenu]
     public class VFXDescription : ScriptableEntityTemplate
     {
-        public VFXAsset ViewRefab;
+        public ShortVFXView ViewRefab;
         public float Duration => ViewRefab.Duration;
-        public (VFXAsset view, int entityID) Spawn(EcsWorld world, Vector3 position, Quaternion rotation)
+        public (ShortVFXView view, int entityID) Spawn(EcsWorld world, Vector3 position, Quaternion rotation)
         {
             var e = world.NewEntity();
             Apply(world.ID, e);
             var view = world.GetPool<FX>()[e].PooledInstance;  
             view.transform.SetPositionAndRotation(position, rotation);
-            return ((VFXAsset)view, e);
+            return ((ShortVFXView)view, e);
         }
         public override void Apply(short worldID, int e)
         {

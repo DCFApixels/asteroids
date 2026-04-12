@@ -13,7 +13,7 @@ namespace Modules.Movement
 
         class VeloctityDragAspect : EcsAspect
         {
-            public EcsPool<RigidbodyData> RigidbodyDatas = Inc;
+            public EcsPool<VelocityDrag> VelocityDrags = Inc;
             public EcsPool<Velocity> Velocities = Inc;
         }
         class TransformAspect : EcsAspect
@@ -26,10 +26,10 @@ namespace Modules.Movement
             foreach (var e in _world.Where(out VeloctityDragAspect a))
             {
                 ref var velocity = ref a.Velocities[e];
-                ref var rigidbody = ref a.RigidbodyDatas[e];
+                ref var velocityDrag = ref a.VelocityDrags[e];
 
-                velocity.Lineral *= Mathf.Clamp01(1f - rigidbody.LineralDrag * Time.deltaTime);
-                velocity.Angular *= Mathf.Clamp01(1f - rigidbody.AngularDrag * Time.deltaTime);
+                velocity.Lineral *= Mathf.Clamp01(1f - velocityDrag.LineralDrag * Time.deltaTime);
+                velocity.Angular *= Mathf.Clamp01(1f - velocityDrag.AngularDrag * Time.deltaTime);
             }
         }
 

@@ -16,14 +16,13 @@ MonoBehaviour:
   Clips:
   - Clip: {fileID: 8300000, guid: c76173c3cb6a0314588e5a72f348c12a, type: 3}
     Volume:
-      Min: 1
-      Max: 1
+      Min: 0.9
+      Max: 1.1
     Pitch:
       Min: 1
-      Max: 1
+      Max: 1.3
     DurationMultiplier: 1
   VolumeMultiplier: 0.9
   PitchMultiplier: 1
   DurationMultiplier: 1
-  Cooldown: 0
-  SpatialCooldownPreset: {fileID: 11400000, guid: 145e42ca66623a34184c0f1e4a6decdd, type: 2}
+  ScaleBlend: 0.5

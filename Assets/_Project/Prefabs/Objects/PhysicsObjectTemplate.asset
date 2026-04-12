@@ -26,31 +26,30 @@ MonoBehaviour:
       type: {class: Template_E2272BB99501499999DA540D0B04344B, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
-          lineralDrag: 0.05
-          angularDrag: 0.05
-          mass: 1
+          LineralDrag: 0.05
+          AngularDrag: 0.05
         _offset: 0
     - rid: 1520753779500646427
       type: {class: Template_986A2BB9950107332FCFF43280030220, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
-          lineral: {x: 0, y: 0, z: 0}
-          angular: {x: 0, y: 0, z: 0}
+          Lineral: {x: 0, y: 0, z: 0}
+          Angular: {x: 0, y: 0, z: 0}
         _offset: 0
     - rid: 1520753779500646428
       type: {class: Template_E9522BB9950115AD62A48B42DEA0B5ED, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
-          position: {x: 0, y: 0, z: 0}
-          rotation: {x: 0, y: 0, z: 0, w: 1}
-          lastPosition: {x: 0, y: 0, z: 0}
-          lastRotation: {x: 0, y: 0, z: 0, w: 1}
+          Position: {x: 0, y: 0, z: 0}
+          Rotation: {x: 0, y: 0, z: 0, w: 1}
+          LastPosition: {x: 0, y: 0, z: 0}
+          LastRotation: {x: 0, y: 0, z: 0, w: 1}
         _offset: 0
     - rid: 1520753799220166827
       type: {class: Template_395668D195011D0C128ED015E17731C5, ns: ComponentTemplates, asm: Assembly-CSharp}
       data:
         component:
-          radius: 0.5
+          Radius: 0.5
         _offset: 0
     - rid: 1520753917188113407
       type: {class: Tempalte_B4F66F791607DD802EC7793F70E6D6D9, ns: ComponentTemplates, asm: Assembly-CSharp}

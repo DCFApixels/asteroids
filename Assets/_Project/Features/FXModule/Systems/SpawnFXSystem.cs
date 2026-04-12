@@ -1,3 +1,4 @@
+using DCFApixels;
 using DCFApixels.DragonECS;
 
 namespace Modules.FX
@@ -9,8 +10,10 @@ namespace Modules.FX
         [DI] EcsDefaultWorld _world;
         class RequestAspect : EcsAspect
         {
-            public EcsPool<SpawnFXRequest> Requests = Inc;
+            public EcsPool<ShortVFXSpawnRequest> Requests = Inc;
             public EcsPool<FXSpawnedEvent> Events = Opt;
+            public EcsPool<FXLifeTime> LifeTimes = Opt;
+            public EcsPool<FX> FXs = Opt;
         }
         public void Run()
         {
@@ -18,8 +21,20 @@ namespace Modules.FX
             foreach (var reqE in _world.Where(reqA))
             {
                 ref var req = ref reqA.Requests[reqE];
+                var pool = UPool.GetFor(req.Prefab);
+                var view = pool.Spawn(null, req.Position, req.Rotation);
+                view.Play(req.Scale, req.Color);
+                reqA.LifeTimes.Add(reqE) = new()
+                {
+                    Duration = view.Duration,
+                    Time = view.Duration,
+                };
+                reqA.FXs.Add(reqE) = new()
+                {
+                    Pool = pool,
+                    PooledInstance = view,
+                };
 
-                req.Template.Apply(_world.ID, reqE);
                 reqA.Events.TryAddOrGet(reqE);
             }
 

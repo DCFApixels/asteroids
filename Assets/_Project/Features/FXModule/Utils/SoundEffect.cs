@@ -6,26 +6,23 @@ using UnityEngine;
 namespace Modules.FX
 {
     [CreateAssetMenu]
-    public class SFXAsset : ScriptableObject
+    public class SoundEffect : ScriptableObject
     {
-        [Title("Main")]
         public AudioSource AudioSourcePrefab;
         public ClipRecord[] Clips = new ClipRecord[0];
         public float VolumeMultiplier = 1;
         public float PitchMultiplier = 1;
         public float DurationMultiplier = 1;
+        public float ScaleBlend = 0.5f;
 
-        [Button]
-        protected void Play_Editor()
+        private QuasiRandom _pitchRandom;
+        private void OnEnable()
         {
-            if (Application.isPlaying)
-            {
-                Play(Vector3.zero);
-                return;
-            }
-            PlayInEditor();
+            _pitchRandom = new QuasiRandom(GetInstanceID());
         }
-        private async void PlayInEditor()
+
+        [Button("Play")]
+        protected async void PlayInEditor()
         {
             var src = Instantiate(AudioSourcePrefab);
             src.gameObject.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSave;
@@ -39,11 +36,11 @@ namespace Modules.FX
         
         public ResultClip GetRandomClip()
         {
-            return GetRandomClip(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+            return GetRandomClip(UnityEngine.Random.value, UnityEngine.Random.value, _pitchRandom.NextFloat());
         }
         public ResultClip GetRandomClip(float clipValue)
         {
-            return GetRandomClip(clipValue, UnityEngine.Random.value, UnityEngine.Random.value);
+            return GetRandomClip(clipValue, UnityEngine.Random.value, _pitchRandom.NextFloat());
         }
         public ResultClip GetRandomClip(float clipValue, float volumeValue, float pitchValue)
         {
@@ -57,20 +54,20 @@ namespace Modules.FX
         }
         
         
-        public void Play(Vector3 position)
-        {
-            Play(position, UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
-        }
-        public void Play(Vector3 position, float clipValue)
-        {
-            Play(position, clipValue, UnityEngine.Random.value, UnityEngine.Random.value);
-        }
-        public void Play(Vector3 position, float clipValue, float volumeValue, float pitchValue)
-        {
-            var clip = GetRandomClip(clipValue, volumeValue, pitchValue);
-            AudioSourcePrefab.SpawnTemp(out var source, null, position).Duration(clip.GetDuration() + 0.1f);
-            source.PlayOneShot(clip);
-        }
+        //public void Play(Vector3 position)
+        //{
+        //    Play(position, UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+        //}
+        //public void Play(Vector3 position, float clipValue)
+        //{
+        //    Play(position, clipValue, UnityEngine.Random.value, UnityEngine.Random.value);
+        //}
+        //public void Play(Vector3 position, float clipValue, float volumeValue, float pitchValue)
+        //{
+        //    var clip = GetRandomClip(clipValue, volumeValue, pitchValue);
+        //    AudioSourcePrefab.SpawnTemp(out var source, null, position).Duration(clip.GetDuration() + 0.1f);
+        //    source.PlayOneShot(clip);
+        //}
         [System.Serializable]
         public struct ClipRecord
         {
@@ -117,11 +114,11 @@ namespace Modules.FX
 
     public static class SoundEffectExt
     {
-        public static void PlayOneShot(this AudioSource source, SFXAsset sfx)
+        public static void PlayOneShot(this AudioSource source, SoundEffect sfx)
         {
             PlayOneShot(source, sfx.GetRandomClip());
         }
-        public static void PlayOneShot(this AudioSource source, SFXAsset.ResultClip sfx)
+        public static void PlayOneShot(this AudioSource source, SoundEffect.ResultClip sfx)
         {
             source.volume = sfx.Volume;
             source.pitch = sfx.Pitch;
@@ -131,9 +128,14 @@ namespace Modules.FX
         internal static ref T GetRandom<T>(this T[] array, float t)
         {
             if (array == null)
+            {
                 throw new System.ArgumentNullException(nameof(array));
+
+            }
             if (array.Length == 0)
+            {
                 throw new System.ArgumentException("Array cannot be empty", nameof(array));
+            }
 
             // Ограничиваем t в пределах [0, 1]
             float clampedT = Mathf.Clamp(t, 0f, 1f);
@@ -151,7 +153,7 @@ namespace Modules.FX
 #if UNITY_EDITOR
     namespace Editors
     {
-        [CustomPropertyDrawer(typeof(SFXAsset.MinMaxRange))]
+        [CustomPropertyDrawer(typeof(SoundEffect.MinMaxRange))]
         internal class MiMaxRangeDrawer : PropertyDrawer
         {
             private GUIContent _label;

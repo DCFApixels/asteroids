@@ -196,7 +196,7 @@ MonoBehaviour:
   _preWarmCount: 8
   _entity:
     _full: 0
-  DeathVFX: {fileID: 11400000, guid: 6a5cd183517f4da4a8548cc15344caf3, type: 2}
+  DeathVFX: {fileID: 7848642253514846668, guid: a7cff06f99c379a4fbb10c4094a4a49d, type: 3}
   LineRenderer: {fileID: 6506862308472665275}
   Light: {fileID: 8424757450355758658}
   Radius: 1

@@ -7,6 +7,7 @@ using Asteroids.Systems;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using Modules.CameraController;
+using Modules.FX;
 using Modules.Movement;
 using UnityEngine;
 
@@ -43,7 +44,6 @@ namespace Asteroids
                 .AddModule(new AsteroidModule())
 
                 .Add(new OutOfGameFieldBehaviorSystem())
-                .Add(new PlayDeathVFXSystem())
                 .Add(new UIUpdateSystem())
                 .Add(new RestartSystem())
 
@@ -51,6 +51,8 @@ namespace Asteroids
                 .AddModule(new StarshipInputControlModule())
                 .AddModule(new MovementModule())
                 .AddModule(new BulletsModule())
+                .AddModule(new FXModule())
+                .Add(new PlayDeathVFXSystem())
 
                 .AddModule(new GameFieldModule())
                 .AddModule(new BoundsOverlapsModule())

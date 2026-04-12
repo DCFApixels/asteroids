@@ -3,6 +3,7 @@ using Asteroids.StartshipsFeature;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using Modules.CameraController;
+using Modules.FX;
 using Modules.Movement;
 using System.Collections.Generic;
 using UnityEngine;

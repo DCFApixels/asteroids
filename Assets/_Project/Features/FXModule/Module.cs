@@ -13,7 +13,6 @@ namespace Modules.FX
         {
             b.Layers.Add(META_GROUP).After(EcsConsts.BASIC_LAYER);
             b.Add(new SpawnFXSystem());
-            b.Add(new PathSpawnedFXPoseSystem());
             b.Add(new FXLifeTimeSystem());
             b.Add(new KillFXSystem());
         }

@@ -13,7 +13,12 @@ namespace Asteroids.Views
         [SerializeField]
         private entlong _entity;
 
-        public VFXDescription DeathVFX;
+        public ShortVFXView DeathVFX;
+
+        public virtual float GetScale()
+        {
+            return transform.localScale.x;
+        }
 
 
 
