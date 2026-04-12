@@ -9,7 +9,7 @@ using DCFApixels;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using Modules.CameraController;
-using Modules.Movement;
+using Modules.Motion;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

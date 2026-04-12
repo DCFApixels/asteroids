@@ -1,7 +1,7 @@
 using DCFApixels.DragonECS;
 using UnityEngine;
 
-namespace Modules.Movement
+namespace Modules.Motion
 {
     [MetaGroup(MovementModule.META_GROUP)]
     [MetaColor(MovementModule.META_COLOR)]

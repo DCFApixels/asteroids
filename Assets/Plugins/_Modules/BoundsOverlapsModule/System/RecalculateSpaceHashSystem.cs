@@ -1,5 +1,5 @@
 ﻿using DCFApixels.DragonECS;
-using Modules.Movement;
+using Modules.Motion;
 
 namespace Modules.BoundsOverlaps
 {

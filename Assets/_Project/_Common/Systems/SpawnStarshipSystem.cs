@@ -1,7 +1,7 @@
 ﻿using Asteroids.Components;
 using Asteroids.StartshipsFeature;
 using DCFApixels.DragonECS;
-using Modules.Movement;
+using Modules.Motion;
 
 namespace Asteroids.Systems
 {

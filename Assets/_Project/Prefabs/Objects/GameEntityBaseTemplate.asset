@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3d2b62f9703592042befb46ac1fee09c, type: 3}
-  m_Name: PhysicsObjectTemplate
+  m_Name: GameEntityBaseTemplate
   m_EditorClassIdentifier: 
   _templates: []
   _componentTemplates:

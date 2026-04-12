@@ -1,6 +1,6 @@
 ﻿using Asteroids.LocalInputFeature;
 using DCFApixels.DragonECS;
-using Modules.Movement;
+using Modules.Motion;
 using UnityEngine;
 
 namespace Asteroids.StarshipInputControlFeature
