@@ -6,7 +6,7 @@ using Utils;
 namespace Modules.FX
 {
     [System.Serializable]
-    internal struct ShortVFXSpawnRequest : IEcsComponent, IEcsComponentLifecycle<ShortVFXSpawnRequest>
+    public struct ShortVFXSpawnRequest : IEcsComponent, IEcsComponentLifecycle<ShortVFXSpawnRequest>
     {
         public readonly static ShortVFXSpawnRequest Default = new()
         {
@@ -26,9 +26,6 @@ namespace Modules.FX
         {
             component = Default;
         }
-        void IEcsComponentLifecycle<ShortVFXSpawnRequest>.OnDel(ref ShortVFXSpawnRequest component, short worldID, int entityID)
-        {
-            component = Default;
-        }
+        void IEcsComponentLifecycle<ShortVFXSpawnRequest>.OnDel(ref ShortVFXSpawnRequest component, short worldID, int entityID) { }
     }
 }

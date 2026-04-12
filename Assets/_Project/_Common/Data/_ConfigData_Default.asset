@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d9332747f7cd8d84c9f75106abbd6d8b, type: 3}
-  m_Name: ConfigData
+  m_Name: _ConfigData_Default
   m_EditorClassIdentifier: 
   PlayerStarshipTemplate: {fileID: 11400000, guid: b5b84482a6e5e3b4c9111d81c84dfca5, type: 2}
   Lifes: 3
