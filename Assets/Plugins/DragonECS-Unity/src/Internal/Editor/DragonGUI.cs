@@ -605,7 +605,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
         {
             EntityField(position, DragonGUIContent.Empty, entity);
         }
-        public static unsafe void EntityField(Rect position, DragonGUIContent label, entlong entity)
+        public static void EntityField(Rect position, DragonGUIContent label, entlong entity)
         {
             EntityField(position, label, (EntitySlotInfo)entity);
         }
