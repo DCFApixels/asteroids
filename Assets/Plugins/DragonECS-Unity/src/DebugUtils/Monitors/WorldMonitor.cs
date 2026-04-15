@@ -130,5 +130,7 @@ namespace DCFApixels.DragonECS.Unity.Internal
                 _entityMonitorRef.Set(_world.GetEntityLong(entityID));
             }
         }
+
+        public void OnMigrateEntity(int entityID) { }
     }
 }
