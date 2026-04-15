@@ -1,7 +1,7 @@
 ﻿#if DISABLE_DEBUG
 #undef DEBUG
 #endif
-using DCFApixels.DragonECS.RunnersCore;
+using DCFApixels.DragonECS.Core;
 using DCFApixels.DragonECS.Unity.Internal;
 using System;
 using System.Collections.Generic;
@@ -103,8 +103,8 @@ namespace DCFApixels.DragonECS.Unity
         public struct Record
         {
             [SerializeReference]
-            [ReferenceButton(true, typeof(IEcsModule), typeof(IEcsProcess))]
-            [ReferenceButtonWithOut(typeof(IEcsRunner))]
+            [ReferenceDropDown(true, typeof(IEcsModule), typeof(IEcsProcess))]
+            [ReferenceDropDownWithout(typeof(IEcsRunner))]
             [ArrayElement]
             public object target;// нельзя менять поярдок полей, иначе это поломает отрисовку в инспекторе изза применения property.Next(bool);
             public AddParams parameters;

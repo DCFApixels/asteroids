@@ -1,6 +1,7 @@
 ﻿#if DISABLE_DEBUG
 #undef DEBUG
 #endif
+using DCFApixels.DragonECS.Unity;
 using DCFApixels.DragonECS.Unity.Internal;
 using System;
 using System.Collections.Generic;
@@ -8,14 +9,27 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using static DCFApixels.DragonECS.IComponentTemplate;
+
+namespace DCFApixels.DragonECS.Unity
+{
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = true, AllowMultiple = false)]
+    public sealed class DragonMemberWrapperAttribute : Attribute
+    {
+        public string WrappedFieldName;
+        public DragonMemberWrapperAttribute(string wrappedFieldName)
+        {
+            WrappedFieldName = wrappedFieldName;
+        }
+    }
+}
 
 namespace DCFApixels.DragonECS
 {
+
     public interface IComponentTemplate : ITemplateNode
     {
         #region Properties
-        Type Type { get; }
+        Type ComponentType { get; }
         bool IsUnique { get; }
         #endregion
 
@@ -34,26 +48,50 @@ namespace DCFApixels.DragonECS
     }
 
     [Serializable]
-    public abstract class ComponentTemplateBase : IComponentTemplate, ITypeMeta
+    [DragonMemberWrapper("component")]
+    [MetaColor(MetaColor.DragonCyan)]
+    [MetaGroup(EcsUnityConsts.PACK_GROUP, EcsConsts.OTHER_GROUP)]
+    [MetaProxy(typeof(ComponentTemplateMetaProxy))]
+    public abstract class ComponentTemplateBase : IComponentTemplate
     {
         #region Properties
-        public abstract Type Type { get; }
-        public virtual ITypeMeta BaseMeta { get { return null; } }
-        public virtual string Name { get { return string.Empty; } }
-        public virtual MetaColor Color { get { return new MetaColor(MetaColor.Black); } }
-        public virtual MetaGroup Group { get { return MetaGroup.Empty; } }
-        public virtual MetaDescription Description { get { return MetaDescription.Empty; } }
-        public virtual IReadOnlyList<string> Tags { get { return Array.Empty<string>(); } }
+        public abstract Type ComponentType { get; }
         public virtual bool IsUnique { get { return true; } }
         #endregion
 
         #region Methods
         public abstract object GetRaw();
         public abstract void SetRaw(object raw);
-        public virtual void OnGizmos(Transform transform, GizmosMode mode) { }
+        public virtual void OnGizmos(Transform transform, IComponentTemplate.GizmosMode mode) { }
         public virtual void OnValidate(UnityEngine.Object obj) { }
 
         public abstract void Apply(short worldID, int entityID);
+        #endregion
+
+        #region MetaProxy
+        protected class ComponentTemplateMetaProxy : MetaProxyBase
+        {
+            protected TypeMeta Meta;
+            public override string Name { get { return Meta?.Name; } }
+            public override MetaColor? Color { get { return Meta != null && Meta.IsCustomColor ? Meta.Color : null; } }
+            public override MetaGroup Group { get { return Meta?.Group; } }
+            public override MetaDescription Description { get { return Meta?.Description; } }
+            public override IEnumerable<string> Tags { get { return Meta?.Tags; } }
+            public ComponentTemplateMetaProxy(Type type) : base(type)
+            {
+                Meta = null;
+                var fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+                foreach (var field in fields)
+                {
+                    if (field.Name == "component")
+                    {
+                        Meta = field.FieldType.GetMeta();
+                        return;
+                    }
+                }
+
+            }
+        }
         #endregion
     }
     [Serializable]
@@ -142,15 +180,7 @@ namespace DCFApixels.DragonECS
             component = DefaultComponent;
         }
 
-        #region Properties
-        public sealed override ITypeMeta BaseMeta { get { return Meta; } }
-        public sealed override Type Type { get { return typeof(T); } }
-        public override string Name { get { return Meta.Name; } }
-        public override MetaColor Color { get { return Meta.Color; } }
-        public override MetaGroup Group { get { return Meta.Group; } }
-        public override MetaDescription Description { get { return Meta.Description; } }
-        public override IReadOnlyList<string> Tags { get { return Meta.Tags; } }
-        #endregion
+        public sealed override Type ComponentType { get { return typeof(T); } }
 
         #region Methods
         public sealed override object GetRaw() { return component; }
@@ -176,8 +206,8 @@ namespace DCFApixels.DragonECS
         }
         #endregion
     }
-
-    public abstract class ComponentTemplate<T> : ComponentTemplateBase<T>
+    [System.Serializable]
+    public class ComponentTemplate<T> : ComponentTemplateBase<T>
         where T : struct, IEcsComponent
     {
         public override void Apply(short worldID, int entityID)
@@ -185,7 +215,8 @@ namespace DCFApixels.DragonECS
             EcsPool<T>.Apply(ref component, entityID, worldID);
         }
     }
-    public abstract class TagComponentTemplate<T> : ComponentTemplateBase<T>
+    [System.Serializable]
+    public class TagComponentTemplate<T> : ComponentTemplateBase<T>
         where T : struct, IEcsTagComponent
     {
         public override void Apply(short worldID, int entityID)
@@ -285,7 +316,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
             {
                 var ct = (IComponentTemplate)Activator.CreateInstance(type);
                 IsUnique = ct.IsUnique;
-                ComponentType = ct.Type;
+                ComponentType = ct.ComponentType;
             }
             else
             {

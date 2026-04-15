@@ -8,11 +8,12 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Color = UnityEngine.Color;
 
 namespace DCFApixels.DragonECS.Unity.Editors
 {
-    internal static partial class EcsGUI
+    internal static partial class DragonGUI
     {
         #region Scores
         private static int _changedCounter = 0;
@@ -70,6 +71,20 @@ namespace DCFApixels.DragonECS.Unity.Editors
                     _changed = _delayedChanged;
                     _delayedChanged = false;
                 }
+            }
+        }
+        public static SerializedProperty CurrentTrackedArrayProperty;
+        public readonly struct TrackArrayPropertyScope : IDisposable
+        {
+            private readonly SerializedProperty _sp;
+            public TrackArrayPropertyScope(SerializedProperty sp)
+            {
+                _sp = sp;
+                CurrentTrackedArrayProperty = null;
+            }
+            public void Dispose()
+            {
+                CurrentTrackedArrayProperty = _sp;
             }
         }
         public readonly struct CheckChangedScopeWithAutoApply : IDisposable
@@ -375,35 +390,33 @@ namespace DCFApixels.DragonECS.Unity.Editors
         #endregion
 
         #region small elems
-        public static void DrawTextureSoftColor(Rect position, Texture texture)
-        {
-            if (Event.current.type == EventType.Repaint)
-            {
-                Graphics.DrawTexture(position, texture, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, GUI.color * 0.5f, null);
-            }
-        }
         public static void DrawTexture(Rect position, Texture texture)
         {
-            if (Event.current.type == EventType.Repaint)
-            {
-                Graphics.DrawTexture(position, texture, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, GUI.color, null);
-            }
-        }
-        public static void DrawRectSoftColor(Rect position, Color color)
-        {
-            if (Event.current.type == EventType.Repaint)
-            {
-                Texture texture = UnityEditorUtility.GetWhiteTexture();
-                Graphics.DrawTexture(position, texture, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, GUI.color * color * 0.5f, null);
-            }
+            DrawTex(position, texture, GUI.color);
         }
         public static void DrawRect(Rect position, Color color)
         {
-            if (Event.current.type == EventType.Repaint)
+            Texture texture = UnityEditorUtility.GetWhiteTexture();
+            DrawTex(position, texture, GUI.color * color);
+        }
+        private static void DrawTex(Rect position, Texture texture, Color color)
+        {
+            //GUI.DrawTexture(position, texture, ScaleMode.StretchToFill, true, 0, color, 0, 0);
+            using (SetColor(color))
             {
-                Texture texture = UnityEditorUtility.GetWhiteTexture();
-                Graphics.DrawTexture(position, texture, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, GUI.color * color, null);
+                GUI.DrawTexture(position, texture, ScaleMode.StretchToFill);
             }
+
+            //if (Event.current.type == EventType.Repaint)
+            //{
+            //    Graphics.DrawTexture(position, texture, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, GUI.color * color, null);
+            //}
+
+            //var x = GUIClip.visibleRect;
+            //Rect visibleRect = new Rect(0, 0, scrollViewWidth, scrollViewHeight); // свой прямоугольник обрезки
+            //GUI.BeginClip(visibleRect);
+            //Graphics.DrawTexture(new Rect(position.x - visibleRect.x, position.y - visibleRect.y, position.width, position.height), texture);
+            //GUI.EndClip();
         }
         public static void DrawIcon(Rect position, Texture icon, float iconPadding, string tooltip)
         {
@@ -418,7 +431,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
             using (SetColor(GUI.enabled ? GUI.color : GUI.color * new Color(1f, 1f, 1f, 0.4f)))
             {
                 GUI.Label(position, UnityEditorUtility.GetLabel(string.Empty, tooltip));
-                DrawTextureSoftColor(RectUtility.AddPadding(position, iconPadding), icon);
+                DrawTexture(RectUtility.AddPadding(position, iconPadding), icon);
             }
         }
         public static (bool, bool) IconButtonGeneric(Rect position)
@@ -426,8 +439,8 @@ namespace DCFApixels.DragonECS.Unity.Editors
             using (SetAlpha(0))
             {
                 bool result = GUI.Button(position, string.Empty, EditorStyles.miniButtonMid);
-                var current = Event.current;
-                return (GUI.enabled && HitTest(position, current), result);
+                var currentEvent = Event.current;
+                return (GUI.enabled && HitTest(position, currentEvent), result);
             }
         }
         public static bool IconHoverScan(Rect position, Event current)
@@ -486,11 +499,13 @@ namespace DCFApixels.DragonECS.Unity.Editors
                     if (current.type == EventType.MouseUp)
                     {
                         EditorGUIUtility.PingObject(script);
+                        Event.current.Use();
                     }
                     else if (current.type == EventType.MouseDown && current.clickCount >= 2)
                     {
                         //UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(); //TODO
                         AssetDatabase.OpenAsset(script);
+                        Event.current.Use();
                     }
                 }
             }
@@ -671,7 +686,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 w.a = 0.6f;
                 Color b = Color.black;
                 b.a = 0.55f;
-                DrawRectSoftColor(position, w);
+                DrawRect(position, w);
 
                 var (idRect, genWorldRect) = RectUtility.HorizontalSliceLerp(position, 0.4f);
                 var (genRect, worldRect) = RectUtility.HorizontalSliceLerp(genWorldRect, 0.5f);
@@ -679,9 +694,9 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 idRect = RectUtility.AddPadding(idRect, 2, 1, 0, 0);
                 genRect = RectUtility.AddPadding(genRect, 1, 1, 0, 0);
                 worldRect = RectUtility.AddPadding(worldRect, 1, 2, 0, 0);
-                DrawRectSoftColor(idRect, b);
-                DrawRectSoftColor(genRect, b);
-                DrawRectSoftColor(worldRect, b);
+                DrawRect(idRect, b);
+                DrawRect(genRect, b);
+                DrawRect(worldRect, b);
 
                 GUIStyle style = UnityEditorUtility.GetInputFieldCenterAnhor();
 
@@ -715,23 +730,24 @@ namespace DCFApixels.DragonECS.Unity.Editors
             return DrawTypeMetaBlockPadding * 2 + contentHeight;
         }
 
-        public static bool DrawTypeMetaElementBlock(ref Rect rect, SerializedProperty arrayProperty, int elementIndex, SerializedProperty elementRootProperty, ITypeMeta meta)
+        public static (bool skip, float optionsWidth) DrawTypeMetaElementBlock(ref Rect rect, SerializedProperty arrayProperty, int elementIndex, SerializedProperty elementRootProperty, ITypeMeta meta)
         {
             var result = DrawTypeMetaBlock_Internal(ref rect, elementRootProperty, meta, elementIndex, arrayProperty.arraySize);
-            if (result.HasFlag(DrawTypeMetaBlockResultFlags.CloseButtonClicked))
+            if (result.flags.HasFlag(DrawTypeMetaBlockResultFlags.CloseButtonClicked))
             {
                 arrayProperty.DeleteArrayElementAtIndex(elementIndex);
             }
-            return result != DrawTypeMetaBlockResultFlags.None;
+            return (result.flags != DrawTypeMetaBlockResultFlags.None, result.optionsWidth);
         }
-        public static bool DrawTypeMetaBlock(ref Rect rect, SerializedProperty rootProperty, ITypeMeta meta, int index = -1, int total = -1)
+        public static (bool skip, float optionsWidth) DrawTypeMetaBlock(ref Rect rect, SerializedProperty rootProperty, ITypeMeta meta, int index = -1, int total = -1)
         {
             var result = DrawTypeMetaBlock_Internal(ref rect, rootProperty, meta, index, total);
-            if (result.HasFlag(DrawTypeMetaBlockResultFlags.CloseButtonClicked))
+            if (result.flags.HasFlag(DrawTypeMetaBlockResultFlags.CloseButtonClicked))
             {
                 rootProperty.ResetValues();
+                rootProperty.DeleteCommand();
             }
-            return result.HasFlag(DrawTypeMetaBlockResultFlags.DropExpanded);
+            return (result.flags.HasFlag(DrawTypeMetaBlockResultFlags.DropExpanded), result.optionsWidth);
         }
 
         [Flags]
@@ -741,14 +757,14 @@ namespace DCFApixels.DragonECS.Unity.Editors
             DropExpanded = 1 << 0,
             CloseButtonClicked = 1 << 1,
         }
-       
 
-        private static DrawTypeMetaBlockResultFlags DrawTypeMetaBlock_Internal(ref Rect rect, SerializedProperty rootProperty, ITypeMeta meta, int index = -1, int total = -1)
+
+        private static (DrawTypeMetaBlockResultFlags flags, float optionsWidth) DrawTypeMetaBlock_Internal(ref Rect rect, SerializedProperty rootProperty, ITypeMeta meta, int index = -1, int total = -1)
         {
             if (meta == null)
             {
                 EditorGUI.DrawRect(rect, Color.black.SetAlpha(EscEditorConsts.COMPONENT_DRAWER_ALPHA));
-                return DrawTypeMetaBlockResultFlags.None;
+                return (DrawTypeMetaBlockResultFlags.None, 0f);
             }
 
             //string name = meta.Name;
@@ -772,6 +788,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
 
             EditorGUI.DrawRect(rect, panelColor);
 
+            float optionsWidth = 0f;
             Rect optionRect = rect;
             rect = rect.AddPadding(DrawTypeMetaBlockPadding * 2f);
 
@@ -781,38 +798,37 @@ namespace DCFApixels.DragonECS.Unity.Editors
             optionRect.xMin = optionRect.xMax - 64;
             optionRect.center += Vector2.up * DrawTypeMetaBlockPadding;
 
+
             DrawTypeMetaBlockResultFlags result = DrawTypeMetaBlockResultFlags.None;
             using (CheckChanged())
             {
-                //Canceling isExpanded
-                bool oldIsExpanded = rootProperty.isExpanded;
-                if (ClickTest(optionRect))
-                {
-                    rootProperty.isExpanded = oldIsExpanded;
-                    result |= DrawTypeMetaBlockResultFlags.DropExpanded;
-                }
-
                 //Close button
                 optionRect.xMin = optionRect.xMax - HeadIconsRect.width;
+                optionsWidth += optionRect.width;
+
                 if (CloseButton(optionRect))
                 {
                     result |= DrawTypeMetaBlockResultFlags.CloseButtonClicked;
-                    return result;
+                    return (result, optionsWidth);
                 }
                 //Edit script button
                 if (ScriptsCache.TryGetScriptAsset(meta.FindRootTypeMeta(), out MonoScript script))
                 {
                     optionRect = HeadIconsRect.MoveTo(optionRect.center - (Vector2.right * optionRect.width));
+                    optionsWidth += optionRect.width;
+
                     ScriptAssetButton(optionRect, script);
                 }
                 //Description icon
                 if (string.IsNullOrEmpty(description) == false)
                 {
                     optionRect = HeadIconsRect.MoveTo(optionRect.center - (Vector2.right * optionRect.width));
+                    optionsWidth += optionRect.width;
+
                     DescriptionIcon(optionRect, description);
                 }
             }
-            return result;
+            return (result, optionsWidth);
         }
         #endregion
 
@@ -833,6 +849,10 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 depth = property.depth;
             }
             return property.Next(child) && property.depth >= depth;
+        }
+        internal static bool IsNullManagedReference(this SerializedProperty property)
+        {
+            return property.managedReferenceId == ManagedReferenceUtility.RefIdNull;
         }
         internal static int GetChildPropertiesCount(this SerializedProperty property, Type type, out bool isEmpty)
         {
@@ -860,7 +880,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
             bool next = propsCounter.Next(true) && lastDepth < propsCounter.depth;
             while (next)
             {
-                if(propsCounter.propertyType != SerializedPropertyType.Generic)
+                if (propsCounter.propertyType != SerializedPropertyType.Generic)
                 {
                     return true;
                 }
@@ -978,11 +998,11 @@ namespace DCFApixels.DragonECS.Unity.Editors
         #region Init
         private static ReferenceDropDown GetReferenceDropDown(Type[] predicatTypes, Type[] sortedWithOutTypes)
         {
-            if (_predicatTypesMenus.TryGetValue((predicatTypes, sortedWithOutTypes), out ReferenceDropDown menu) == false)
+            if (_predicatTypesMenus.TryGetValue(new PredicateTypesKey(predicatTypes[0], predicatTypes, sortedWithOutTypes), out ReferenceDropDown menu) == false)
             {
                 menu = new ReferenceDropDown(predicatTypes, sortedWithOutTypes);
                 menu.OnSelected += SelectComponent;
-                _predicatTypesMenus.Add((predicatTypes, sortedWithOutTypes), menu);
+                _predicatTypesMenus.Add(new PredicateTypesKey(predicatTypes[0], predicatTypes, sortedWithOutTypes), menu);
             }
 
             return menu;

@@ -7,6 +7,7 @@ using Asteroids.StartshipsFeature;
 using Asteroids.Views;
 using DCFApixels;
 using DCFApixels.DragonECS;
+using DCFApixels.DragonECS.Core;
 using Modules.BoundsOverlaps;
 using Modules.CameraController;
 using Modules.Motion;
@@ -32,26 +33,28 @@ namespace ComponentTemplates
     [MetaID("Template_35CA21CB95018BE256CAA78659C23B59")] class Template_35CA21CB95018BE256CAA78659C23B59 : ComponentTemplate<OutOfGameFieldBehavior> { }
 
     [MetaID("Template_9419F76F9D013E770643E72DB705C9F8")]
-    class Template_9419F76F9D013E770643E72DB705C9F8 : ITemplateNode, IEcsComponentMember, ITypeMeta
+    [MetaProxy(typeof(MetaProxy))]
+    class Template_9419F76F9D013E770643E72DB705C9F8 : ITemplateNode, IEcsComponentMember
     {
         [SerializeField]
         private ViewBase _viewPrefab;
-
-        private readonly static TypeMeta _meta = typeof(ViewBase).GetMeta();
-        public Type Type => _meta.Type;
-        private readonly static string _name = $"{_meta.Name}(Auto Spawn)";
-        public string Name => _name;
-        public MetaColor Color => _meta.Color;
-        public MetaDescription Description => _meta.Description;
-        public MetaGroup Group => _meta.Group;
-        public IReadOnlyList<string> Tags => _meta.Tags;
-        public ITypeMeta BaseMeta => _meta;
 
         public void Apply(short worldID, int entityID)
         {
             var inst = _viewPrefab.Spawn(null, Vector3.zero, Quaternion.identity);
             EcsRefPool<ViewBase>.Apply(inst, entityID, worldID);
             inst.Connect((EcsWorld.GetWorld(worldID), entityID), false);
+        }
+        private class MetaProxy : MetaProxyBase
+        {
+            private readonly static TypeMeta _meta = typeof(ViewBase).GetMeta();
+            private readonly static string _name = $"{_meta.Name}(Auto Spawn)";
+            public override string Name => _name;
+            public override MetaColor? Color => _meta.Color;
+            public override MetaGroup Group => _meta.Group;
+            public override MetaDescription Description => _meta.Description;
+            public override IEnumerable<string> Tags => _meta.Tags;
+            public MetaProxy(Type type) : base(type) { }
         }
     }
 }

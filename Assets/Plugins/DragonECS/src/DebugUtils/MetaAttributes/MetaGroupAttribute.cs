@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 namespace DCFApixels.DragonECS
 {
     [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Interface, Inherited = false, AllowMultiple = false)]
-    public sealed class MetaGroupAttribute : EcsMetaAttribute
+    public sealed class MetaGroupAttribute : DragonMetaAttribute
     {
         public const char SEPARATOR = MetaGroup.SEPARATOR;
         public readonly string Name = string.Empty;
@@ -72,6 +72,10 @@ namespace DCFApixels.DragonECS
                 return Empty;
             }
             return new MetaGroup(name);
+        }
+        public static MetaGroup FromName(params string[] path)
+        {
+            return FromName(string.Join(SEPARATOR, path));
         }
         public static MetaGroup FromNameSpace(Type type)
         {

@@ -4,6 +4,7 @@ namespace Modules.BoundsOverlaps
 {
     [MetaGroup(META_GROUP, EcsConsts.MODULES_GROUP)]
     [MetaColor(META_COLOR)]
+    [System.Serializable]
     public class BoundsOverlapsModule : IEcsModule, IEcsDefaultAddParams
     {
         public const string META_GROUP = nameof(Modules) + "/" + nameof(BoundsOverlaps);
@@ -16,6 +17,12 @@ namespace Modules.BoundsOverlaps
             b.Add(new DebugCheckShpereOverlapsSystem());
             b.Add(new RecalculateSpaceHashSystem());
         }
+
+
+
+        public float X_1;
+        public float X_2;
+        public float X_3;
     }
     [System.Serializable]
     public class BoundsOverlapsRuntime

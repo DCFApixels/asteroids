@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using DCFApixels.DragonECS;
+using DCFApixels.DragonECS.Unity;
+using Modules.BoundsOverlaps;
+using UnityEngine;
 
 namespace Asteroids
 {
@@ -27,5 +30,17 @@ namespace Asteroids
 
         [Header("Other")]
         public float ScreenBorderOffset = 0.5f;
+
+
+        [DragonMetaBlock]
+        [ReferenceDropDown(typeof(IEcsModule))]
+        [SerializeReference]
+        public IEcsModule[] Features;
+
+
+
+        [DragonMetaBlock]
+        [ReferenceDropDown(typeof(IEcsModule))]
+        public BoundsOverlapsModule[] Features_2;
     }
 }

@@ -3,7 +3,6 @@
 #endif
 using DCFApixels.DragonECS.Core;
 using DCFApixels.DragonECS.Core.Internal;
-using DCFApixels.DragonECS.PoolsCore;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -344,6 +343,9 @@ namespace DCFApixels.DragonECS
 #if ENABLE_IL2CPP
     [Il2CppSetOption(Option.NullChecks, false)]
 #endif
+    [MetaTags(MetaTags.HIDDEN)]
+    [MetaColor(MetaColor.DragonRose)]
+    [MetaGroup(EcsConsts.PACK_GROUP, EcsConsts.OTHER_GROUP)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public readonly struct ReadonlyEcsTagPool<T> : IEcsReadonlyPool //IEnumerable<T> - IntelliSense hack
     where T : struct, IEcsTagComponent

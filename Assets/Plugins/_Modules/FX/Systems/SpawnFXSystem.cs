@@ -25,7 +25,7 @@ namespace Modules.FX
                 var pool = UPool.GetFor(req.Prefab);
 
                 Quaternion rot;
-                if(req.Direction == null)
+                if(req.Direction == null || req.Direction == Vector3.zero)
                 {
                     rot = req.Rotation;
                 }

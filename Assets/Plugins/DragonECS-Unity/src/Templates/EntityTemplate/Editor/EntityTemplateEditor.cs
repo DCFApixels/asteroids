@@ -10,14 +10,14 @@ namespace DCFApixels.DragonECS.Unity.Editors
 {
     internal abstract class EntityTemplateEditorBase : ExtendedEditor
     {
-        private ComponentTemplatesDropDown _componentDropDown;
+        private DragonFieldDropDown _componentDropDown;
 
         private SerializedProperty _componentTemplatesProp;
         private SerializedProperty _templatesProp;
         private ReorderableList _reorderableComponentsList;
         private int _reorderableComponentsListLastCount;
 
-        private static readonly Type[] _predicateTypes = new Type[] { typeof(ITemplateNode) };
+        private static readonly Type[] _predicateTypes = new Type[] { typeof(IComponentTemplate), typeof(IEcsComponentMember) };
 
         protected abstract bool IsSO { get; }
 
@@ -25,7 +25,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
         protected override bool IsInit { get { return _componentDropDown != null; } }
         protected override void OnInit()
         {
-            _componentDropDown = ComponentTemplatesDropDown.Get(new PredicateTypesKey(_predicateTypes, Type.EmptyTypes));
+            _componentDropDown = DragonFieldDropDown.Get(new PredicateTypesKey(typeof(ITemplateNode), _predicateTypes, Type.EmptyTypes));
 
             _componentTemplatesProp = serializedObject.FindProperty("_componentTemplates");
             _templatesProp = serializedObject.FindProperty("_templates");
@@ -52,7 +52,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
 
         private void OnReorderableListReorder(ReorderableList list)
         {
-            EcsGUI.Changed = true;
+            DragonGUI.Changed = true;
         }
 
         private SerializedProperty GetTargetProperty(SerializedProperty prop)
@@ -75,65 +75,74 @@ namespace DCFApixels.DragonECS.Unity.Editors
 
         private float OnReorderableComponentsListElementHeight(int index)
         {
-            var componentProperty = GetTargetProperty(_componentTemplatesProp.GetArrayElementAtIndex(index));
-            float result = EditorGUI.GetPropertyHeight(componentProperty);
-            return EcsGUI.GetTypeMetaBlockHeight(result) + Spacing * 2f;
+            SerializedProperty prop = _componentTemplatesProp.GetArrayElementAtIndex(index);
+            GUIContent label = UnityEditorUtility.GetLabelTemp();
+            return EditorGUI.GetPropertyHeight(prop, label) + Spacing * 2f;
+            //var componentProperty = GetTargetProperty(_componentTemplatesProp.GetArrayElementAtIndex(index));
+            //float result = EditorGUI.GetPropertyHeight(componentProperty);
+            //return EcsGUI.GetTypeMetaBlockHeight(result) + Spacing * 2f;
         }
         private void OnReorderableComponentsListDrawElement(Rect rect, int index, bool isActive, bool isFocused)
         {
             if (index < 0 || Event.current.type == EventType.Used) { return; }
+            SerializedProperty prop = _componentTemplatesProp.GetArrayElementAtIndex(index);
+            GUIContent label = UnityEditorUtility.GetLabelTemp();
             rect = rect.AddPadding(OneLineHeight + Spacing, Spacing * 2f, Spacing, Spacing);
-            using (EcsGUI.CheckChanged())
-            {
-                SerializedProperty prop = _componentTemplatesProp.GetArrayElementAtIndex(index);
 
-                var template = prop.managedReferenceValue;
-                if (template == null)
-                {
-                    //DrawDamagedComponent_Replaced(prop, index);
-                    EditorGUI.PropertyField(rect, prop, UnityEditorUtility.GetLabel(prop.displayName), true);
-                    return;
-                }
-                IComponentTemplate componentTemplate = template as IComponentTemplate;
-                var componentProp = GetTargetProperty(prop);
-
-                ITypeMeta meta = template as ITypeMeta;
-                if(meta == null)
-                {
-                    if (componentTemplate != null)
-                    {
-                        meta = componentTemplate.Type.GetMeta();
-                    }
-                    else
-                    {
-                        meta = template.GetMeta();
-                    }
-                }
-
-                if (EcsGUI.DrawTypeMetaElementBlock(ref rect, _componentTemplatesProp, index, componentProp, meta))
-                {
-                    return;
-                }
-
-
-                GUIContent label = UnityEditorUtility.GetLabel(meta.Name);
-                if (componentProp.propertyType == SerializedPropertyType.Generic)
-                {
-                    EditorGUI.PropertyField(rect, componentProp, label, true);
-                }
-                else
-                {
-                    EditorGUI.PropertyField(rect.AddPadding(0, 20f, 0, 0), componentProp, label, true);
-                }
-
-            }
+            EditorGUI.PropertyField(rect, prop, label);
+            return;
+            //rect = rect.AddPadding(OneLineHeight + Spacing, Spacing * 2f, Spacing, Spacing);
+            //using (EcsGUI.CheckChanged())
+            //{
+            //    SerializedProperty prop = _componentTemplatesProp.GetArrayElementAtIndex(index);
+            //
+            //    var template = prop.managedReferenceValue;
+            //    if (template == null)
+            //    {
+            //        //DrawDamagedComponent_Replaced(prop, index);
+            //        EditorGUI.PropertyField(rect, prop, UnityEditorUtility.GetLabel(prop.displayName), true);
+            //        return;
+            //    }
+            //    IComponentTemplate componentTemplate = template as IComponentTemplate;
+            //    var componentProp = GetTargetProperty(prop);
+            //
+            //    ITypeMeta meta = template as ITypeMeta;
+            //    if(meta == null)
+            //    {
+            //        if (componentTemplate != null)
+            //        {
+            //            meta = componentTemplate.ComponentType.GetMeta();
+            //        }
+            //        else
+            //        {
+            //            meta = template.GetMeta();
+            //        }
+            //    }
+            //
+            //    if (EcsGUI.DrawTypeMetaElementBlock(ref rect, _componentTemplatesProp, index, componentProp, meta).skip)
+            //    {
+            //        return;
+            //    }
+            //
+            //
+            //    GUIContent label = UnityEditorUtility.GetLabel(meta.Name);
+            //    if (componentProp.propertyType == SerializedPropertyType.Generic)
+            //    {
+            //        EditorGUI.PropertyField(rect, componentProp, label, true);
+            //    }
+            //    else
+            //    {
+            //        EditorGUI.PropertyField(rect.AddPadding(0, 20f, 0, 0), componentProp, label, true);
+            //    }
+            //
+            //}
         }
 
         private void OnReorderableComponentsListAdd(ReorderableList list)
         {
             list.serializedProperty.arraySize += 1;
             list.serializedProperty.GetArrayElementAtIndex(list.serializedProperty.arraySize - 1).ResetValues();
-            EcsGUI.Changed = true;
+            DragonGUI.Changed = true;
         }
         private void OnReorderableListRemove(ReorderableList list)
         {
@@ -149,7 +158,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
             {
                 list.serializedProperty.DeleteArrayElementAtIndex(list.selectedIndices[i]);
             }
-            EcsGUI.Changed = true;
+            DragonGUI.Changed = true;
         }
         #endregion
 
@@ -163,7 +172,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
 
             if (IsSO)
             {
-                EcsGUI.Layout.ManuallySerializeButton(targets);
+                DragonGUI.Layout.ManuallySerializeButton(targets);
             }
 
             if (IsMultipleTargets)
@@ -176,17 +185,17 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 //костыль который насильно заставляет _reorderableComponentsList пересчитать высоту
                 if (_reorderableComponentsListLastCount != _reorderableComponentsList.count)
                 {
-                    EcsGUI.Changed = true;
+                    DragonGUI.Changed = true;
                     _reorderableComponentsListLastCount = _reorderableComponentsList.count;
                 }
             }
 
             if (IsMultipleTargets == false && SerializationUtility.HasManagedReferencesWithMissingTypes(target))
             {
-                using (EcsGUI.Layout.BeginHorizontal(EditorStyles.helpBox))
+                using (DragonGUI.Layout.BeginHorizontal(EditorStyles.helpBox))
                 {
                     GUILayout.Label(UnityEditorUtility.GetLabel(Icons.Instance.WarningIcon), GUILayout.ExpandWidth(false));
-                    using (EcsGUI.Layout.BeginVertical())
+                    using (DragonGUI.Layout.BeginVertical())
                     {
                         GUILayout.Label("This object contains SerializeReference types which are missing.", EditorStyles.miniLabel);
                         if (GUILayout.Button("Repaire References Tool", EditorStyles.miniButton, GUILayout.MaxWidth(200f)))
@@ -200,7 +209,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
 
             SerializedProperty iterator = serializedObject.GetIterator();
             iterator.NextVisible(true);
-            using (EcsGUI.Disable)
+            using (DragonGUI.Disable)
             {
                 EditorGUILayout.PropertyField(iterator, true);
             }
@@ -221,7 +230,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
             {
                 EditorGUILayout.PropertyField(_templatesProp, true);
             }
-            using (EcsGUI.Layout.BeginVertical(UnityEditorUtility.GetTransperentBlackBackgrounStyle()))
+            using (DragonGUI.Layout.BeginVertical(UnityEditorUtility.GetTransperentBlackBackgrounStyle()))
             {
                 DrawTop(_componentTemplatesProp);
                 _reorderableComponentsList.DoLayoutList();
@@ -231,13 +240,13 @@ namespace DCFApixels.DragonECS.Unity.Editors
         {
             GUILayout.Space(2f);
 
-            switch (EcsGUI.Layout.AddClearComponentButtons(out Rect rect))
+            switch (DragonGUI.Layout.AddClearComponentButtons(out Rect rect))
             {
-                case EcsGUI.AddClearButton.Add:
+                case DragonGUI.AddClearButton.Add:
                     Init();
                     _componentDropDown.OpenForArray(rect, componentsProp, true);
                     break;
-                case EcsGUI.AddClearButton.Clear:
+                case DragonGUI.AddClearButton.Clear:
                     Init();
                     componentsProp.ClearArray();
                     serializedObject.ApplyModifiedProperties();

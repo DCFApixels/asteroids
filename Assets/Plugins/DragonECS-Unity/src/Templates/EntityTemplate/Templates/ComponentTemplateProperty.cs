@@ -1,7 +1,7 @@
 ﻿#if DISABLE_DEBUG
 #undef DEBUG
 #endif
-using DCFApixels.DragonECS.Unity.Editors;
+using DCFApixels.DragonECS.Unity;
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -12,7 +12,10 @@ namespace DCFApixels.DragonECS
     public struct ComponentTemplateProperty : IEquatable<ComponentTemplateProperty>
     {
         [SerializeReference]
+        [ReferenceDropDown]
+        [DragonMetaBlock]
         private ITemplateNode _template;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ComponentTemplateProperty(ITemplateNode template)
         {
@@ -28,7 +31,7 @@ namespace DCFApixels.DragonECS
         public Type Type
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _template is IComponentTemplate tml ? tml.Type : _template.GetType(); }
+            get { return _template is IComponentTemplate tml ? tml.ComponentType : _template.GetType(); }
         }
         public bool IsNull
         {
@@ -82,13 +85,4 @@ namespace DCFApixels.DragonECS
         public static bool operator !=(Null? a, ComponentTemplateProperty b) { return !b.IsNull; }
         public readonly struct Null { }
     }
-
-    public sealed class ComponentTemplateFieldAttribute : PropertyAttribute, IReferenceButtonAttribute
-    {
-        public Type[] PredicateTypes;
-        Type[] IReferenceButtonAttribute.PredicateTypes { get { return PredicateTypes; } }
-        bool IReferenceButtonAttribute.IsHideButtonIfNotNull { get { return true; } }
-        public ComponentTemplateFieldAttribute() { }
-    }
-    public sealed class ComponentTemplateAttribute : PropertyAttribute { }
 }

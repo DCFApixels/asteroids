@@ -4,6 +4,7 @@ namespace Modules.FX
 {
     [MetaGroup(META_GROUP, EcsConsts.MODULES_GROUP)]
     [MetaColor(META_COLOR)]
+    [System.Serializable]
     public class FXModule : IEcsModule, IEcsDefaultAddParams
     {
         public const string META_GROUP = nameof(Modules) + "/" + nameof(FX);

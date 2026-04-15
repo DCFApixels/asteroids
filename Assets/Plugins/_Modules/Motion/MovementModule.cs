@@ -4,6 +4,7 @@ namespace Modules.Motion
 {
     [MetaGroup(META_GROUP, EcsConsts.MODULES_GROUP)]
     [MetaColor(META_COLOR)]
+    [System.Serializable]
     public class MovementModule : IEcsModule, IEcsDefaultAddParams
     {
         public const string META_GROUP = nameof(Modules) + "/" + nameof(Motion);
