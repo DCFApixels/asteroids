@@ -19,6 +19,9 @@ namespace DCFApixels.DragonECS.Unity.Internal
         public void Set(EcsWorld world)
         {
             _world = world;
+#if UNITY_EDITOR
+            world.Get<DragonGUI.EntityLinksComponent>().SetWorldMonitor(this);
+#endif
         }
     }
 

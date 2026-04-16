@@ -291,7 +291,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
             EditorGUILayout.IntField("Entites Count: ", executor.LastCachedCount);
             if (GUILayout.Button("Snapshot"))
             {
-                QuerySnapshotEditor.ShowNew(executor.Snapshot());
+                QuerySnapshotWindow.ShowNew(executor.Snapshot());
             }
 
             //var rect = GUILayoutUtility.GetLastRect();
