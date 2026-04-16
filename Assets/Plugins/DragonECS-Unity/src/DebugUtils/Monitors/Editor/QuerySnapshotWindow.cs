@@ -15,12 +15,17 @@ namespace DCFApixels.DragonECS.Unity.Editors
         private readonly Color _selectionColor = new Color(0.12f, 0.5f, 1f, 0.40f);
         private readonly Color _isAliveColor = new Color(0.2f, 0.6f, 1f);
         private readonly Color _hoverColor = new Color(1f, 1f, 1f, 0.12f);
+
         public static void ShowNew(EcsSpan entites)
         {
             var newWin = CreateWindow<QuerySnapshotWindow>("Query Snapshot");
             newWin.Setup(entites);
             newWin.ShowUtility();
 
+            if (UserSettingsPrefs.instance.IsPauseOnSnapshot)
+            {
+                Debug.Break();
+            }
         }
         private void Setup(EcsSpan entites)
         {
@@ -40,30 +45,28 @@ namespace DCFApixels.DragonECS.Unity.Editors
             int selectedEntity = -1;
             var selectedGO = Selection.activeGameObject;
             if (selectedGO != null &&
-                selectedGO.TryGetComponent<EntityMonitor>(out var selectedMonitor) && 
+                selectedGO.TryGetComponent<EntityMonitor>(out var selectedMonitor) &&
                 selectedMonitor.Entity.TryUnpack(_world, out selectedEntity) == false)
             {
                 selectedEntity = -1;
             }
+            SelectEvent selectEvent = default;
+
 
             var line = EditorGUIUtility.singleLineHeight;
             var space = EditorGUIUtility.standardVerticalSpacing;
             var step = line + space;
             Event current = Event.current;
 
-            int prevEntity = 0;
-            int nextEntity = 0;
-
-            int moveSign = 0;
             if (hasFocus && current.type == EventType.KeyUp && current.isKey)
             {
                 if (current.keyCode == KeyCode.DownArrow)
                 {
-                    moveSign = 1;
+                    selectEvent.Type = SelectEventType.Down;
                 }
                 if (current.keyCode == KeyCode.UpArrow)
                 {
-                    moveSign = -1;
+                    selectEvent.Type = SelectEventType.Up;
                 }
             }
 
@@ -72,16 +75,18 @@ namespace DCFApixels.DragonECS.Unity.Editors
             rect.y = 0;
 
             Rect hyperlinkButtonRect;
-            Rect worldRect;
-            (worldRect, rect) = rect.VerticalSliceTop(line + space);
-            worldRect = worldRect.AddPadding(0, 0, 0, space);
-            (worldRect, hyperlinkButtonRect) = worldRect.HorizontalSliceRight(18f);
-
-            EditorGUI.IntField(worldRect, "World: ", _world.ID);
+            Rect topLineRect;
+            (topLineRect, rect) = rect.VerticalSliceTop(line + space);
+            topLineRect = topLineRect.AddPadding(0, 0, 0, space);
+            (topLineRect, hyperlinkButtonRect) = topLineRect.HorizontalSliceRight(18f);
+            EditorGUI.IntField(topLineRect, "World: ", _world.ID);
             using (DragonGUI.SetEnable(_world != null))
             {
                 DragonGUI.WorldHyperlinkButton(hyperlinkButtonRect, _world);
             }
+
+            (topLineRect, rect) = rect.VerticalSliceTop(line + space);
+            UserSettingsPrefs.instance.IsPauseOnSnapshot = EditorGUI.ToggleLeft(topLineRect, "Pause On Snapshot", UserSettingsPrefs.instance.IsPauseOnSnapshot);
 
             var viewRect = rect;
             viewRect.x = 0;
@@ -96,8 +101,8 @@ namespace DCFApixels.DragonECS.Unity.Editors
             (statusR, lineRect) = lineRect.HorizontalSliceLeft(3f);
 
             _scrollState = GUI.BeginScrollView(rect, _scrollState, viewRect, false, true);
-            var scheckRect = rect;
-            scheckRect.position = Vector2.zero;
+            var checkRect = rect;
+            checkRect.position = Vector2.zero;
 
             bool foundSelected = false;
             for (int i = 0; i < _list.Count; i++)
@@ -109,8 +114,7 @@ namespace DCFApixels.DragonECS.Unity.Editors
                 bool isClick = false;
 
 
-                
-                bool visible = lineRect.Overlaps(scheckRect.AddOffset(_scrollState));
+                bool visible = lineRect.Overlaps(checkRect.AddOffset(_scrollState));
                 if (visible)
                 {
                     using (DragonGUI.SetAlpha(0)) { GUI.Label(lineRect, string.Empty, GUI.skin.button); }
@@ -136,25 +140,37 @@ namespace DCFApixels.DragonECS.Unity.Editors
                     GUI.Label(labelR, "Entity", GUI.skin.label);
                     EditorGUI.IntField(lR, entity.id, GUI.skin.label);
                     EditorGUI.IntField(rR, entity.gen, GUI.skin.label);
-                }
 
-
-
-
-                if (isClick && isAlive)
-                {
-                    SelectEntity(entity.id);
+                    if (isClick && isAlive)
+                    {
+                        selectEvent.Type = SelectEventType.Click;
+                        selectEvent.EntityID = entity.id;
+                        selectEvent.Index = i;
+                    }
                 }
 
                 if (isAlive)
                 {
-                    if (foundSelected == false)
+                    switch (selectEvent.Type)
                     {
-                        prevEntity = entity.id;
-                    }
-                    if (foundSelected && selected == false && nextEntity == 0)
-                    {
-                        nextEntity = entity.id;
+                        case SelectEventType.Up:
+                            {
+                                if (foundSelected == false)
+                                {
+                                    selectEvent.EntityID = entity.id;
+                                    selectEvent.Index = i;
+                                }
+                            }
+                            break;
+                        case SelectEventType.Down:
+                            {
+                                if (foundSelected && selected == false && selectEvent.EntityID == 0)
+                                {
+                                    selectEvent.EntityID = entity.id;
+                                    selectEvent.Index = i;
+                                }
+                            }
+                            break;
                     }
                 }
 
@@ -164,18 +180,27 @@ namespace DCFApixels.DragonECS.Unity.Editors
             GUI.EndScrollView();
 
 
-            if (moveSign != 0)
+            if (selectEvent.IsSelected && selectedEntity != selectEvent.EntityID)
             {
-                if(moveSign < 0)
+                float top = selectEvent.Index * step;
+                float bottom = top + step;
+
+                if (top < _scrollState.y)
                 {
-                    SelectEntity(prevEntity);
+                    _scrollState.y = top;
                 }
-                else
+                else if (bottom > _scrollState.y + checkRect.height)
                 {
-                    SelectEntity(nextEntity);
+                    _scrollState.y = bottom - checkRect.height;
                 }
+                GUIUtility.keyboardControl = 0;
+
+                SelectEntity(selectEvent.EntityID);
+            }
 
 
+            if (selectEvent.IsSelected)
+            {
                 Repaint();
                 return;
             }
@@ -188,6 +213,22 @@ namespace DCFApixels.DragonECS.Unity.Editors
             Selection.activeObject = monitor;
         }
         private void OnDestroy() { }
+
+
+        private struct SelectEvent
+        {
+            public SelectEventType Type;
+            public int EntityID;
+            public int Index;
+            public bool IsSelected { get { return Type != SelectEventType.None && EntityID != 0; } }
+        }
+        private enum SelectEventType
+        {
+            None,
+            Click,
+            Up,
+            Down,
+        }
     }
 }
 #endif
