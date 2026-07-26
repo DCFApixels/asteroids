@@ -37,7 +37,7 @@ namespace Asteroids.Views
         }
         void IUPoolUnit<ViewBase>.Static_ResetUnit(ViewBase self, ViewBase prefab)
         {
-            self._sourcePool = null;
+            // The pool reference is stable for the instance lifetime and is needed after respawn.
         }
         void IEcsComponentLifecycle<ViewBase>.OnAdd(ref ViewBase component, short worldID, int entityID)
         {
