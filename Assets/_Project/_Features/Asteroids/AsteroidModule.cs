@@ -1,6 +1,6 @@
-﻿using DCFApixels.DragonECS;
+using DCFApixels.DragonECS;
 
-namespace Asteroids.Systems
+namespace Asteroids.AsteroidsFeature
 {
     internal class AsteroidModule : IEcsModule
     {

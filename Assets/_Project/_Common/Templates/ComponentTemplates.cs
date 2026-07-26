@@ -1,9 +1,11 @@
-﻿using Asteroids;
+using Asteroids.GameFieldFeature;
+using Asteroids.AsteroidsFeature;
+using Asteroids;
 using Asteroids.BulletsFeature;
 using Asteroids.Components;
 using Asteroids.LocalInputFeature;
 using Asteroids.StarshipInputControlFeature;
-using Asteroids.StartshipsFeature;
+using Asteroids.StarshipsFeature;
 using Asteroids.Views;
 using DCFApixels;
 using DCFApixels.DragonECS;

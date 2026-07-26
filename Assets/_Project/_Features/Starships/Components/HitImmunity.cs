@@ -1,6 +1,6 @@
-﻿using DCFApixels.DragonECS;
+using DCFApixels.DragonECS;
 
-namespace Asteroids.StartshipsFeature
+namespace Asteroids.StarshipsFeature
 {
     [System.Serializable]
     public struct HitImmunity : IEcsComponent

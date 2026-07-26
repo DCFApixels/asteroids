@@ -1,8 +1,9 @@
+using Asteroids.AsteroidsFeature;
 using Asteroids.BulletsFeature;
-using Asteroids.GameFieldFueature;
+using Asteroids.GameFieldFeature;
 using Asteroids.LocalInputFeature;
 using Asteroids.StarshipInputControlFeature;
-using Asteroids.StartshipsFeature;
+using Asteroids.StarshipsFeature;
 using Asteroids.Systems;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
@@ -38,12 +39,10 @@ namespace Asteroids
                 .Add(new InitSystem())
                 .Add(new ChangeStateSystem())
 
-                .Add(new SpawnStarshipSystem())
                 .AddModule(new LocalInputModule())
 
                 .AddModule(new AsteroidModule())
 
-                .Add(new OutOfGameFieldBehaviorSystem())
                 .Add(new UIUpdateSystem())
                 .Add(new RestartSystem())
 
@@ -57,7 +56,7 @@ namespace Asteroids
                 .AddModule(new GameFieldModule())
                 .AddModule(new BoundsOverlapsModule())
 
-                .AddModule(new StartshipsModule())
+                .AddModule(new StarshipsModule())
                 .Add(new DeleteKilledEntitesSystem())
 
                 // Injecting into systems.

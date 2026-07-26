@@ -1,10 +1,10 @@
-﻿using Asteroids.LocalInputFeature;
+using Asteroids.LocalInputFeature;
 using DCFApixels.DragonECS;
 using Modules.Motion;
 using System;
 using UnityEngine;
 
-namespace Asteroids.StartshipsFeature
+namespace Asteroids.StarshipsFeature
 {
     internal class SpawnBulletSystem : IEcsRun
     {

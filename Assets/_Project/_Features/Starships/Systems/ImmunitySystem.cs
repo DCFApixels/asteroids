@@ -1,7 +1,7 @@
-﻿using DCFApixels.DragonECS;
+using DCFApixels.DragonECS;
 using UnityEngine;
 
-namespace Asteroids.StartshipsFeature
+namespace Asteroids.StarshipsFeature
 {
     internal class ImmunitySystem : IEcsRun
     {

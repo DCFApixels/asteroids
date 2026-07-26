@@ -1,9 +1,10 @@
-﻿using Asteroids.Components;
-using Asteroids.StartshipsFeature;
+using Asteroids.GameFieldFeature;
+using Asteroids.Components;
+using Asteroids.StarshipsFeature;
 using DCFApixels.DragonECS;
 using Modules.Motion;
 
-namespace Asteroids.Systems
+namespace Asteroids.StarshipsFeature
 {
     internal class SpawnStarshipSystem : IEcsRun
     {

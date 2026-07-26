@@ -1,7 +1,7 @@
-﻿using Asteroids.Views;
+using Asteroids.Views;
 using DCFApixels.DragonECS;
 
-namespace Asteroids.StartshipsFeature
+namespace Asteroids.StarshipsFeature
 {
     [System.Serializable]
     public struct Starship : IEcsComponent

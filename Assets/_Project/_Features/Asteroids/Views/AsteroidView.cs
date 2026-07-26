@@ -1,9 +1,10 @@
-﻿using TriInspector;
+using Asteroids.Views;
+using TriInspector;
 using Unity.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Asteroids.Views
+namespace Asteroids.AsteroidsFeature
 {
     public class AsteroidView : ViewBase
     {

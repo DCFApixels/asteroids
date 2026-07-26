@@ -1,13 +1,14 @@
-﻿using Asteroids.Systems;
 using DCFApixels.DragonECS;
 
-namespace Asteroids.StartshipsFeature
+namespace Asteroids.StarshipsFeature
 {
-    internal class StartshipsModule : IEcsModule
+    internal class StarshipsModule : IEcsModule
     {
         public void Import(EcsPipeline.Builder b)
         {
+            b.Add(new SpawnStarshipSystem());
             b.Add(new ImmunitySystem());
+            b.Add(new StarshipAsteroidCollisionSystem());
             b.Add(new SpawnBulletSystem());
             b.Add(new RespawnStarShipOnHitSystem());
         }

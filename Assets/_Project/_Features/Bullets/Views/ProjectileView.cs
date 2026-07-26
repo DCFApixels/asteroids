@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+using Asteroids.Views;
+using UnityEngine;
 
-namespace Asteroids.Views
+namespace Asteroids.BulletsFeature
 {
     public class ProjectileView : ViewBase
     {

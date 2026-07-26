@@ -1,13 +1,12 @@
-﻿using Asteroids.Systems;
 using DCFApixels.DragonECS;
 
-namespace Asteroids.GameFieldFueature
+namespace Asteroids.GameFieldFeature
 {
     [MetaGroup(META_GROUP, EcsConsts.MODULES_GROUP)]
     [MetaColor(META_COLOR)]
     internal class GameFieldModule : IEcsModule, IEcsDefaultAddParams
     {
-        public const string META_GROUP = nameof(Asteroids) + "/" + nameof(GameFieldFueature);
+        public const string META_GROUP = nameof(Asteroids) + "/" + nameof(GameFieldFeature);
         public const uint META_COLOR = MetaColor.BlueViolet;
         public AddParams AddParams => META_GROUP;
         public void Import(EcsPipeline.Builder b)
@@ -16,6 +15,7 @@ namespace Asteroids.GameFieldFueature
             //b.Layers.Insert(EcsConsts.END_LAYER, META_GROUP);
             b.Add(new UpdateGameFieldSizeSystem());
             b.Add(new OutOfGameFieldDetectionSystem());
+            b.Add(new OutOfGameFieldBehaviorSystem());
         }
     }
 }

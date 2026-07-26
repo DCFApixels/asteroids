@@ -1,9 +1,9 @@
-﻿using Asteroids.GameFieldFueature;
+using Asteroids.GameFieldFeature;
 using DCFApixels;
 using DCFApixels.DragonECS;
 using UnityEngine;
 
-namespace Asteroids.Systems
+namespace Asteroids.GameFieldFeature
 {
     [MetaGroup(GameFieldModule.META_GROUP)]
     [MetaColor(GameFieldModule.META_COLOR)]

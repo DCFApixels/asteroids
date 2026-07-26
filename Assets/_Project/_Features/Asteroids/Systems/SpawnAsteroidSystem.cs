@@ -1,10 +1,10 @@
-﻿using Asteroids.Components;
+using Asteroids.Components;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using Modules.Motion;
 using UnityEngine;
 
-namespace Asteroids.Systems
+namespace Asteroids.AsteroidsFeature
 {
     internal class SpawnAsteroidSystem : IEcsRun
     {

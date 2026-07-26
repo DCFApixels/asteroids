@@ -1,7 +1,7 @@
-﻿using Asteroids.Views;
+using Asteroids.Views;
 using DCFApixels.DragonECS;
 
-namespace Asteroids.Components
+namespace Asteroids.AsteroidsFeature
 {
     [System.Serializable]
     public struct Asteroid : IEcsComponent

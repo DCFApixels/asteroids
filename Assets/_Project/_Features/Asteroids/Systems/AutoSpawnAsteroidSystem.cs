@@ -1,8 +1,8 @@
-﻿using Asteroids.Components;
+using Asteroids.Components;
 using DCFApixels.DragonECS;
 using UnityEngine;
 
-namespace Asteroids.Systems
+namespace Asteroids.AsteroidsFeature
 {
     public class AutoSpawnAsteroidSystem : IEcsRun
     {
@@ -14,6 +14,11 @@ namespace Asteroids.Systems
         
         public void Run()
         {
+            if (r.GameState != GameState.Play)
+            {
+                return;
+            }
+
             var gameTime = (int)(Time.time - r.LevelStartTime);
             if (gameTime != _previousSpawnTime && gameTime >= c.SpawnFrequency &&
                 gameTime % c.SpawnFrequency == 0)

@@ -1,7 +1,7 @@
-﻿using DCFApixels.DragonECS;
+using DCFApixels.DragonECS;
 using UnityEngine;
 
-namespace Asteroids.Components
+namespace Asteroids.AsteroidsFeature
 {
     internal struct SpawnAsteroidRequest : IEcsComponent
     {

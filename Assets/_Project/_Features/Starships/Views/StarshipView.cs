@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using Asteroids.Views;
+using UnityEngine;
 using Color = UnityEngine.Color;
 
-namespace Asteroids.Views
+namespace Asteroids.StarshipsFeature
 {
     public class StarshipView : ViewBase
     {

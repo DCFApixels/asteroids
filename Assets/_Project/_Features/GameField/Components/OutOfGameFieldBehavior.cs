@@ -1,6 +1,6 @@
-﻿using DCFApixels.DragonECS;
+using DCFApixels.DragonECS;
 
-namespace Asteroids
+namespace Asteroids.GameFieldFeature
 {
     [System.Serializable]
     public struct OutOfGameFieldBehavior : IEcsComponent

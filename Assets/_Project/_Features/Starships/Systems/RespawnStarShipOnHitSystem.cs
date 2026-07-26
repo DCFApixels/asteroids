@@ -1,9 +1,10 @@
-﻿using Asteroids.Components;
+using Asteroids.AsteroidsFeature;
+using Asteroids.Components;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using System.Collections.Generic;
 
-namespace Asteroids.StartshipsFeature
+namespace Asteroids.StarshipsFeature
 {
     internal class RespawnStarShipOnHitSystem : IEcsRun, IEcsInit
     {

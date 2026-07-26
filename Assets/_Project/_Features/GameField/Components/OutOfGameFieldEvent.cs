@@ -1,7 +1,7 @@
-﻿using DCFApixels.DragonECS;
+using DCFApixels.DragonECS;
 using UnityEngine;
 
-namespace Asteroids.GameFieldFueature
+namespace Asteroids.GameFieldFeature
 {
     [System.Serializable]
     [MetaGroup(GameFieldModule.META_GROUP)]

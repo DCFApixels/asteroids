@@ -1,11 +1,11 @@
-﻿using Asteroids.Components;
-using Asteroids.GameFieldFueature;
+using Asteroids.Components;
+using Asteroids.GameFieldFeature;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using Modules.Motion;
 using UnityEngine;
 
-namespace Asteroids
+namespace Asteroids.GameFieldFeature
 {
     internal class OutOfGameFieldBehaviorSystem : IEcsRun
     {

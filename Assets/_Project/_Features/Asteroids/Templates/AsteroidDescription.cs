@@ -5,7 +5,7 @@ using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using UnityEngine;
 
-namespace Asteroids
+namespace Asteroids.AsteroidsFeature
 {
     [CreateAssetMenu]
     public class AsteroidDescription : ScriptableEntityTemplate

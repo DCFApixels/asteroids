@@ -1,5 +1,5 @@
 using Asteroids.Components;
-using Asteroids.StartshipsFeature;
+using Asteroids.StarshipsFeature;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using Modules.CameraController;
@@ -8,7 +8,7 @@ using Modules.Motion;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Asteroids.Systems
+namespace Asteroids.AsteroidsFeature
 {
     internal class CheckAsteroidHitSystem : IEcsRun
     {

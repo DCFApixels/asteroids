@@ -1,5 +1,5 @@
-﻿using Asteroids.Components;
-using Asteroids.StartshipsFeature;
+using Asteroids.Components;
+using Asteroids.StarshipsFeature;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using Modules.Motion;
