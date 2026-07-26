@@ -11,6 +11,7 @@ Shader "Simple CRT"
         _MonochoromeIntensity ("Monochorome Intensity", Float) = 0.5
         [Toggle] _WhiteNoise("White Noise", Float) = 0
         _WhiteNoiseIntensity("White Noise Intensity", Float) = 1
+        [HideInInspector] _WhiteNoiseGate("White Noise Gate", Float) = 1
         [Toggle] _ScreenJump("Screen Jump", Float) = 0
         _ScreenJumpLevel("Screen Jump Level", Float) = 1
         [Toggle] _Flickering("Flickering", Float) = 0
@@ -20,7 +21,7 @@ Shader "Simple CRT"
         _SlippageStrength ("Slippage Strength", Float) = 0
         _SlippageInterval ("Slippage Interval", Float) = 0
         _SlippageScrollSpeed ("Slippage ScrollSpeed", Float) = 0
-        //_SlippageNoiseOnOff ("Slippage Noise OnOff", Float) = 0
+        [HideInInspector] _SlippageNoiseOnOff ("Slippage Noise OnOff", Float) = 1
         _SlippageSize ("Slippage Size", Float) = 0
         [Toggle] _ChromaticAberration("Chromatic Aberration", Float) = 0
         _ChromaticAberrationIntensity("Chromatic Aberration Intensity", Float) = 1
@@ -31,18 +32,29 @@ Shader "Simple CRT"
         _MultipleGhostStrength("Multiple Ghost Strength", Float) = 0
         _MultipleGhostIntensity("Multiple Ghost Intensity", Float) = 1
     }
+
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
-        LOD 100
+        Tags
+        {
+            "RenderType" = "Opaque"
+            "RenderPipeline" = "UniversalPipeline"
+        }
+
+        ZWrite Off
+        ZTest Always
+        Cull Off
 
         Pass
         {
-            CGPROGRAM
-            #include "UnityCG.cginc"
+            Name "CRTPostProcess"
 
-            #pragma vertex vert
-            #pragma fragment frag
+            HLSLPROGRAM
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
+
+            #pragma vertex Vert
+            #pragma fragment Frag
             #pragma multi_compile_instancing
             #pragma shader_feature_local _WHITENOISE_ON
             #pragma shader_feature_local _SCANLINE_ON
@@ -52,95 +64,54 @@ Shader "Simple CRT"
             #pragma shader_feature_local _MULTIPLEGHOST_ON
             #pragma shader_feature_local _FLICKERING_ON
             #pragma shader_feature_local _SLIPPAGE_ON
-            
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
 
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
-            };
-
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
-            float4 _MainTex_TexelSize;
-
-#if _WHITENOISE_ON
-            float _WhiteNoiseIntensity;
-#endif
-
-#if _SCANLINE_ON
-            float _ScanlineIntensity;
-            float _ScanlineSpeed;
-#endif
-#if _MONOCHOROME_ON
-            float _MonochoromeIntensity;
-#endif
-
-            int _LetterBoxOnOff;
-            int _LetterBoxEdgeBlur;
-            int _LetterBoxType;
-
-#if _SCREENJUMP_ON
-            float _ScreenJumpLevel;
-#endif
-            
-#if _FLICKERING_ON
-            float _FlickeringStrength;
-            float _FlickeringCycle;
-#endif
-            
-#if _SLIPPAGE_ON
-            float _SlippageStrength;
-            float _SlippageInterval;
-            float _SlippageScrollSpeed;
-            float _SlippageNoiseOnOff;
-            float _SlippageSize;
-#endif
-
-#if _CHROMATICABERRATION_ON
-            float _ChromaticAberrationIntensity;
-            float _ChromaticAberrationStrength;
-            float _ChromaticAberrationStrengthMin;
-            float _ChromaticAberrationStrengthPolar;
-#endif
-
-#if _MULTIPLEGHOST_ON
-            float _MultipleGhostStrength;
-            float _MultipleGhostIntensity;
-#endif
+            CBUFFER_START(UnityPerMaterial)
+                float4 _MainTex_ST;
+                float4 _MainTex_TexelSize;
+                float _WhiteNoiseIntensity;
+                float _WhiteNoiseGate;
+                float _ScanlineIntensity;
+                float _ScanlineSpeed;
+                float _MonochoromeIntensity;
+                float _ScreenJumpLevel;
+                float _FlickeringStrength;
+                float _FlickeringCycle;
+                float _SlippageStrength;
+                float _SlippageInterval;
+                float _SlippageScrollSpeed;
+                float _SlippageNoiseOnOff;
+                float _SlippageSize;
+                float _ChromaticAberrationIntensity;
+                float _ChromaticAberrationStrength;
+                float _ChromaticAberrationStrengthMin;
+                float _ChromaticAberrationStrengthPolar;
+                float _MultipleGhostStrength;
+                float _MultipleGhostIntensity;
+            CBUFFER_END
 
             float GetRandom(float x)
             {
-                return frac(sin(dot(x, float2(12.9898, 78.233))) * 43758.5453);
+                return frac(sin(dot(float2(x, x), float2(12.9898, 78.233))) * 43758.5453);
             }
-            float EaseIn(float t0, float t1, float t)
+
+            float2 PolarCoordinates(float2 uv, float2 center, float radialScale, float lengthScale)
             {
-                return 2.0 * smoothstep(t0, 2.0 * t1 - t0, t);
-            }
-            float2 polarCoordinates(float2 UV, float2 Center, float RadialScale, float LengthScale)
-            {
-                float2 delta = UV - Center;
-                float radius = length(delta) * 2 * RadialScale;
-                float angle = atan2(delta.x, delta.y) * 1.0/6.28 * LengthScale;
+                float2 delta = uv - center;
+                float radius = length(delta) * 2.0 * radialScale;
+                float angle = atan2(delta.x, delta.y) * 1.0 / 6.28 * lengthScale;
                 return float2(radius, angle);
             }
 
-            v2f vert (appdata v)
+            half4 SampleSource(float2 uv)
             {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                return o;
+                return SAMPLE_TEXTURE2D_X_LOD(_BlitTexture, sampler_LinearRepeat, uv, _BlitMipLevel);
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            half4 Frag(Varyings input) : SV_Target0
             {
-                float2 uv = i.uv;
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+                float2 uv = input.texcoord.xy;
 
 #if _SCREENJUMP_ON
                 uv.y = frac(uv.y + _ScreenJumpLevel);
@@ -148,62 +119,53 @@ Shader "Simple CRT"
 
 #if _FLICKERING_ON
                 float flickeringNoise = GetRandom(_Time.y);
-                float flickeringMask = pow(abs(sin(i.uv.y * _FlickeringCycle + _Time.y)), 10);
-                uv.x = uv.x + (flickeringNoise * _FlickeringStrength * flickeringMask); 
+                float flickeringMask = pow(abs(sin(input.texcoord.y * _FlickeringCycle + _Time.y)), 10.0);
+                uv.x = uv.x + (flickeringNoise * _FlickeringStrength * flickeringMask);
 #endif
 
 #if _SLIPPAGE_ON
                 float scrollSpeed = _Time.x * _SlippageScrollSpeed;
-                float slippageMask = pow(abs(sin(i.uv.y * _SlippageInterval + scrollSpeed)), _SlippageSize);
-                float stepMask = round(sin(i.uv.y * _SlippageInterval + scrollSpeed - 1));
-                uv.x = uv.x + (_SlippageNoiseOnOff * _SlippageStrength * slippageMask * stepMask); 
+                float slippageMask = pow(abs(sin(input.texcoord.y * _SlippageInterval + scrollSpeed)), _SlippageSize);
+                float stepMask = round(sin(input.texcoord.y * _SlippageInterval + scrollSpeed - 1.0));
+                uv.x = uv.x + (_SlippageNoiseOnOff * _SlippageStrength * slippageMask * stepMask);
 #endif
 
-                float4 color = tex2D(_MainTex, float2(uv.x, uv.y));
+                half4 color = SampleSource(float2(uv.x, uv.y));
 
 #if _CHROMATICABERRATION_ON
-
-                float polar = pow(polarCoordinates(i.uv, float2(0.5, 0.5), 1, 1).r, _ChromaticAberrationStrengthPolar);
+                float polar = pow(PolarCoordinates(input.texcoord, float2(0.5, 0.5), 1.0, 1.0).r, _ChromaticAberrationStrengthPolar);
                 float polarScale = lerp(_ChromaticAberrationStrengthMin, _ChromaticAberrationStrength, polar);
 
-                float red = tex2D(_MainTex, float2(uv.x - polarScale, uv.y)).r;
-                float green = tex2D(_MainTex, float2(uv.x, uv.y)).g;
-                float blue = tex2D(_MainTex, float2(uv.x + polarScale, uv.y)).b; 
-                color.xyz = lerp(color.xyz, float3(red, green, blue), _ChromaticAberrationIntensity);
+                half red = SampleSource(float2(uv.x - polarScale, uv.y)).r;
+                half green = SampleSource(float2(uv.x, uv.y)).g;
+                half blue = SampleSource(float2(uv.x + polarScale, uv.y)).b;
+                color.rgb = lerp(color.rgb, half3(red, green, blue), _ChromaticAberrationIntensity);
 #endif
 
 #if _MULTIPLEGHOST_ON
-                float3 ghost1st = tex2D(_MainTex, uv - float2(1, 0) * _MultipleGhostStrength);
-                float3 ghost2nd = tex2D(_MainTex, uv - float2(1, 0) * _MultipleGhostStrength * 2);
+                half3 ghost1st = SampleSource(uv - float2(1.0, 0.0) * _MultipleGhostStrength).rgb;
+                half3 ghost2nd = SampleSource(uv - float2(1.0, 0.0) * _MultipleGhostStrength * 2.0).rgb;
                 color.rgb = lerp(color.rgb, (color.rgb * 0.8 + ghost1st * 0.15 + ghost2nd * 0.05), _MultipleGhostIntensity);
 #endif
 
 #if _WHITENOISE_ON
-                float whiteNoise = frac(sin(dot(i.uv, float2(12.9898, 78.233)) + _Time.x) * 43758.5453);
-                color.rgb = lerp(color.rgb, whiteNoise, _WhiteNoiseIntensity);
+                half whiteNoise = frac(sin(dot(input.texcoord, float2(12.9898, 78.233)) + _Time.x) * 43758.5453);
+                color.rgb = lerp(color.rgb, whiteNoise.xxx, _WhiteNoiseIntensity * _WhiteNoiseGate);
 #endif
 
 #if _SCANLINE_ON
-                float scanline = sin((i.uv.y + _Time.x * _ScanlineSpeed) * 800.0) * 0.04 * _ScanlineIntensity;
+                half scanline = sin((input.texcoord.y + _Time.x * _ScanlineSpeed) * 800.0) * 0.04 * _ScanlineIntensity;
                 color -= scanline;
-
-                //// noise
-                //float noiseAlpha = 01;
-                //if(pow(sin(uv.y + _Time.y * 2), 200) >= 0.999)
-                //{
-                //    noiseAlpha *= GetRandom(uv.y);
-                //    color *= noiseAlpha;
-                //}
 #endif
 
 #if _MONOCHOROME_ON
-                float mc =  0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
-                color.xyz = lerp(color.xyz, mc, _MonochoromeIntensity); 
+                half mc = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
+                color.rgb = lerp(color.rgb, mc.xxx, _MonochoromeIntensity);
 #endif
 
                 return color;
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }
