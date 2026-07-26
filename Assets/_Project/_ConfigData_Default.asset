@@ -25,18 +25,8 @@ MonoBehaviour:
   AsteroidSplitMultiplier: 0.45
   AdditionalKillOffset: 1.1
   ScreenBorderOffset: 0.5
-  Features:
-  - rid: -2
-  - rid: -2
-  - rid: -2
-  - rid: -2
-  - rid: -2
-  - rid: -2
-  - rid: -2
-  - rid: -2
+  Features: []
   Features_2: []
   references:
     version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    RefIds: []

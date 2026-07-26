@@ -1,5 +1,6 @@
 ﻿using DCFApixels.DragonECS;
 using DCFApixels.DragonECS.Unity;
+using DCFApixels.DragonECS.Unity.Attributes;
 using Modules.BoundsOverlaps;
 using UnityEngine;
 

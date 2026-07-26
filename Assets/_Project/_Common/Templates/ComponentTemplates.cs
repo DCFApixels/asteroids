@@ -54,7 +54,7 @@ namespace ComponentTemplates
             public override MetaGroup Group => _meta.Group;
             public override MetaDescription Description => _meta.Description;
             public override IEnumerable<string> Tags => _meta.Tags;
-            public MetaProxy(Type type) : base(type) { }
+            public MetaProxy(Type type, Type declaredType) : base(type, declaredType) { }
         }
     }
 }

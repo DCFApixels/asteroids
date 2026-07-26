@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 
@@ -94,21 +93,17 @@ namespace DCFApixels
             pool = null;
             return false;
         }
-        public static bool TryFind(int poolID, out UPool poolRaw)
-        {
-            return _pools.TryGetValue(poolID, out poolRaw);
-        }
         public static UPool<T> GetFor<T>(T prefab, bool checkPrefab = true) where T : Component
         {
 #if UNITY_EDITOR
-            if (checkPrefab && UnityEditor.PrefabUtility.IsPartOfPrefabAsset(prefab.gameObject) == false) { Debug.LogWarning($"Соспавнен объект не из префаба. {prefab.name}"); }
+            //if (checkPrefab && UnityEditor.PrefabUtility.IsPartOfPrefabAsset(prefab.gameObject) == false) { Debug.LogWarning($"Соспавнен объект не из префаба. {prefab.name}"); }
 #endif
             UPool<T> result = null;
             int id = prefab.GetInstanceID();
             bool createNew = true;
             if (_pools.TryGetValue(id, out UPool poolRaw))
             {
-                result = UnsafeUtility.As<UPool, UPool<T>>(ref poolRaw);
+                result = (UPool<T>)poolRaw;
                 createNew = !result.Root;
                 if (createNew)
                 {
@@ -147,11 +142,6 @@ namespace DCFApixels
             return pool;
         }
 
-        public UPool(int id)
-        {
-            ID = id;
-        }
-
 
         [SerializeField]
         protected bool _isUnloaded = false;
@@ -162,7 +152,7 @@ namespace DCFApixels
                 return Root == null ||  _isUnloaded;
             }
         }
-        public readonly int ID;
+
         public abstract UnityObject PrefabRaw { get; }
         protected abstract Transform Root { get; }
         public abstract int PrewarmedCount { get; }
@@ -248,7 +238,6 @@ namespace DCFApixels
         private Transform _root;
         [SerializeField]
         private T _prefab;
-
         private IUPoolUnit<T> _prefabInterface;
         private readonly bool _isHasInterface;
         private readonly List<T> _pool = new List<T>(128);
@@ -271,7 +260,7 @@ namespace DCFApixels
             get { return _pool.Count; }
         }
 
-        public UPool(Transform root, T prefab) : base(prefab.GetInstanceID())
+        public UPool(Transform root, T prefab)
         {
             _root = root;
             _prefab = prefab;
@@ -315,6 +304,10 @@ namespace DCFApixels
         private T Create()
         {
             T result = UnityObject.Instantiate(_prefab, _root);
+            if (_isHasInterface)
+            {
+                _prefabInterface.Static_InitPoolUnit(result, this);
+            }
             return result;
         }
 
@@ -331,10 +324,6 @@ namespace DCFApixels
             {
                 result = Create();
             }
-            if (_isHasInterface)
-            {
-                _prefabInterface.Static_InitPoolUnit(result, this);
-            }
             _spawnedCount++;
             return result;
         }
@@ -350,7 +339,7 @@ namespace DCFApixels
             T result = TakeObject();
             var t = result.transform;
             t.SetParent(parent);
-            t.position = localPos;
+            t.localPosition = localPos;
             result.gameObject.SetActive(true);
             return result;
         }
@@ -359,7 +348,7 @@ namespace DCFApixels
             T result = TakeObject();
             var t = result.transform;
             t.SetParent(parent);
-            t.SetPositionAndRotation(localPos, localRot);
+            t.SetLocalPositionAndRotation(localPos, localRot);
             result.gameObject.SetActive(true);
             return result;
         }
@@ -369,7 +358,7 @@ namespace DCFApixels
             var t = result.transform;
             t.SetParent(parent);
             t.localScale = scale;
-            t.SetPositionAndRotation(localPos, localRot);
+            t.SetLocalPositionAndRotation(localPos, localRot);
             result.gameObject.SetActive(true);
             return result;
         }
