@@ -2,6 +2,11 @@
 <img width="800" height="600" alt="image" src="https://github.com/user-attachments/assets/d09818ab-79cf-4ee5-8004-40588093621b" />
 </p>
 
+<p align="center" >
+<img width="800" height="600" alt="image" src="https://github.com/user-attachments/assets/f60908e8-ae67-41ad-ad74-61187f6b7a8a" />
+</p>
+
+
 # Asteroids DragonECS Sample
 
 This project is a small Asteroids-style sample built around [DragonECS](https://github.com/DCFApixels/DragonECS). It is meant as a practical sandbox for exploring the framework in a game-like context: entity templates, systems, modules, feature boundaries, injection, runtime data, pooling, events, and Unity-facing views.
