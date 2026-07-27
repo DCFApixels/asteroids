@@ -8,6 +8,8 @@ One of the main ideas here is modularity. The project experiments with splitting
 
 Use this repository as a reference point, a playground, or a source of examples when trying DragonECS patterns in Unity. It is a demonstration of one possible direction for organizing a project, with room for iteration depending on the needs of a real game.
 
+Special thanks to [GreatVV](https://github.com/GreatVV), whose Asteroids project was used as the starting point for this sample.
+
 ## Packages
 
 The sample uses a small set of non-Unity packages and embedded plugins:
