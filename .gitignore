@@ -60,4 +60,5 @@ ProjectSettings/ProjectVersion.txt
 /[Cc]odeCoverage/
 /MemoryCaptures/
 /.utmp/
-
+/Assets/Fonts/Aldrich
+PROJECT_RULES.md

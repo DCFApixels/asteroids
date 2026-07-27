@@ -1,199 +1,338 @@
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.RenderGraphModule;
+using UnityEngine.Rendering.RenderGraphModule.Util;
+using UnityEngine.Rendering.Universal;
 
-[ExecuteInEditMode, ImageEffectAllowedInSceneView]
-public class CRTPostEffecter : MonoBehaviour
+public sealed class CRTPostEffecter : ScriptableRendererFeature
 {
+    private const int ShaderPassIndex = 0;
+
+    [Header("Render")]
     public Material material;
+    public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
+    public bool applyInSceneView = true;
+
+    [Header("White Noise Burst")]
     public int whiteNoiseFrequency = 1;
     public float whiteNoiseLength = 0.1f;
-    private float whiteNoiseTimeLeft;
 
+    [Header("Screen Jump")]
     public int screenJumpFrequency = 1;
     public float screenJumpLength = 0.2f;
     public float screenJumpMinLevel = 0.1f;
     public float screenJumpMaxLevel = 0.9f;
-    private float screenJumpTimeLeft;
 
-    public float flickeringStrength = 0.002f;
-    public float flickeringCycle = 111f;
-
-    public bool isSlippage = true;
+    [Header("Slippage")]
     public bool isSlippageNoise = true;
     public float slippageStrength = 0.005f;
     public float slippageInterval = 1f;
     public float slippageScrollSpeed = 33f;
     public float slippageSize = 11f;
 
-    public float chromaticAberrationStrength = 0.005f;
-    public bool isChromaticAberration = true;
-
-    public bool isMultipleGhost = true;
-    public float multipleGhostStrength = 0.01f;
-
-    public bool isScanline = true;
-    public bool isMonochrome = false;
-
-    public bool isLetterBox = false;
-    public bool isLetterBoxEdgeBlur = false;
-    public LeterBoxType letterBoxType;
-    public enum LeterBoxType
-    {
-        Black,
-        Blur
-    }
-
-    public bool isFilmDirt = false;
-    public Texture2D filmDirtTex;
-
-    public bool isDecalTex = false;
-    public Texture2D decalTex;
-    public Vector2 decalTexPos;
-    public Vector2 decalTexScale;
-
+    [Header("Low Resolution")]
     public bool isLowResolution = true;
     public Vector2Int resolutions;
+    public FilterMode lowResolutionFilterMode = FilterMode.Point;
 
-    #region Properties in shader
-    private int _WhiteNoiseOnOff;
-    private int _ScanlineOnOff;
-    private int _MonochormeOnOff;
-    private int _ScreenJumpLevel;
-    private int _FlickeringStrength;
-    private int _FlickeringCycle;
-    private int _SlippageStrength;
-    private int _SlippageSize;
-    private int _SlippageInterval;
-    private int _SlippageScrollSpeed;
-    private int _SlippageNoiseOnOff;
-    private int _SlippageOnOff;
-    private int _ChromaticAberrationStrength;
-    private int _ChromaticAberrationOnOff;
-    private int _MultipleGhostOnOff;
-    private int _MultipleGhostStrength;
-    private int _LetterBoxOnOff;
-    private int _LetterBoxType;
-    private int _LetterBoxEdgeBlurOnOff;
-    private int _DecalTex;
-    private int _DecalTexOnOff;
-    private int _DecalTexPos;
-    private int _DecalTexScale;
-    private int _FilmDirtOnOff;
-    private int _FilmDirtTex;
-    #endregion
+    private CRTPostPass _pass;
 
-    private void Start()
+    public override void Create()
     {
-        _WhiteNoiseOnOff = Shader.PropertyToID("_WhiteNoiseOnOff");
-        _ScanlineOnOff = Shader.PropertyToID("_ScanlineOnOff");
-        _MonochormeOnOff = Shader.PropertyToID("_MonochormeOnOff");
-        _ScreenJumpLevel = Shader.PropertyToID("_ScreenJumpLevel");
-        _FlickeringStrength = Shader.PropertyToID("_FlickeringStrength");
-        _FlickeringCycle = Shader.PropertyToID("_FlickeringCycle");
-        _SlippageStrength = Shader.PropertyToID("_SlippageStrength");
-        _SlippageSize = Shader.PropertyToID("_SlippageSize");
-        _SlippageInterval = Shader.PropertyToID("_SlippageInterval");
-        _SlippageScrollSpeed = Shader.PropertyToID("_SlippageScrollSpeed");
-        _SlippageNoiseOnOff = Shader.PropertyToID("_SlippageNoiseOnOff");
-        _SlippageOnOff = Shader.PropertyToID("_SlippageOnOff");
-        _ChromaticAberrationStrength = Shader.PropertyToID("_ChromaticAberrationStrength");
-        _ChromaticAberrationOnOff = Shader.PropertyToID("_ChromaticAberrationOnOff");
-        _MultipleGhostOnOff = Shader.PropertyToID("_MultipleGhostOnOff");
-        _MultipleGhostStrength = Shader.PropertyToID("_MultipleGhostStrength");
-        _LetterBoxOnOff = Shader.PropertyToID("_LetterBoxOnOff");
-        _LetterBoxType = Shader.PropertyToID("_LetterBoxType");
-        _DecalTex = Shader.PropertyToID("_DecalTex");
-        _DecalTexOnOff = Shader.PropertyToID("_DecalTexOnOff");
-        _DecalTexPos = Shader.PropertyToID("_DecalTexPos");
-        _DecalTexScale = Shader.PropertyToID("_DecalTexScale");
-        _FilmDirtOnOff = Shader.PropertyToID("_FilmDirtOnOff");
-        _FilmDirtTex = Shader.PropertyToID("_FilmDirtTex");
+        _pass ??= new CRTPostPass();
+        _pass.renderPassEvent = renderPassEvent;
     }
 
-    private void OnRenderImage(RenderTexture src, RenderTexture dest)
+    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
-        ///////White noise
-        whiteNoiseTimeLeft -= 0.01f;
-        if (whiteNoiseTimeLeft <= 0)
+        if (material == null || material.shader == null)
         {
-            if (Random.Range(0, 1000) < whiteNoiseFrequency)
-            {
-                material.SetInteger(_WhiteNoiseOnOff, 1);
-                whiteNoiseTimeLeft = whiteNoiseLength;
-            }
-            else
-            {
-                material.SetInteger(_WhiteNoiseOnOff, 0); 
-            }
+            Debug.LogWarning($"{nameof(CRTPostEffecter)} skipped: material is missing.");
+            return;
         }
-        //////
-        
-        material.SetInteger(_LetterBoxOnOff, isLetterBox ? 0 : 1); 
-        //material.SetInteger(_LetterBoxEdgeBlurOnOff, isLetterBoxEdgeBlur ? 0 : 1); 
-        material.SetInteger(_LetterBoxType, (int)letterBoxType);
 
-        material.SetInteger(_ScanlineOnOff, isScanline ? 1 : 0); 
-        material.SetInteger(_MonochormeOnOff, isMonochrome ? 1 : 0);
-        material.SetFloat(_FlickeringStrength, flickeringStrength);
-        material.SetFloat(_FlickeringCycle, flickeringCycle);
-        //material.SetFloat(_ChromaticAberrationStrength, chromaticAberrationStrength);
-        //material.SetInteger(_ChromaticAberrationOnOff, isChromaticAberration ? 1 : 0);
-        material.SetInteger(_MultipleGhostOnOff, isMultipleGhost ? 1 : 0);
-        if (isMultipleGhost)
+        if (material.passCount <= ShaderPassIndex)
         {
-            material.SetFloat(_MultipleGhostStrength, multipleGhostStrength);
+            Debug.LogWarning($"{nameof(CRTPostEffecter)} skipped: material has no shader pass {ShaderPassIndex}.");
+            return;
         }
-        material.SetInteger(_FilmDirtOnOff, isFilmDirt ? 1 : 0);
-        material.SetTexture(_FilmDirtTex, filmDirtTex);
 
-        //////Slippage
-        material.SetInteger(_SlippageOnOff, isSlippage ? 1 : 0);
-        material.SetFloat(_SlippageInterval, slippageInterval);
-        material.SetFloat(_SlippageNoiseOnOff, isSlippageNoise ? Random.Range(0, 1f) : 1);
-        material.SetFloat(_SlippageScrollSpeed, slippageScrollSpeed);
-        material.SetFloat(_SlippageStrength, slippageStrength); 
-        material.SetFloat(_SlippageSize, slippageSize);
-        //////
-        
-        //////Screen Jump Noise
-        if(screenJumpFrequency > 0)
+        CameraData cameraData = renderingData.cameraData;
+        if (cameraData.cameraType == CameraType.Preview || cameraData.cameraType == CameraType.Reflection)
         {
-            screenJumpTimeLeft -= 0.01f;
-            if (screenJumpTimeLeft <= 0)
+            return;
+        }
+
+        if (!applyInSceneView && cameraData.isSceneViewCamera)
+        {
+            return;
+        }
+
+        _pass.renderPassEvent = renderPassEvent;
+        _pass.Setup(this, cameraData.cameraTargetDescriptor);
+        renderer.EnqueuePass(_pass);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        _pass?.Dispose();
+        _pass = null;
+    }
+
+    private sealed class CRTPostPass : ScriptableRenderPass
+    {
+        private const string PassName = "CRT Post Effect";
+        private const string FullResolutionTextureName = "_CRTPostEffectTexture";
+        private const string LowResolutionTextureName = "_CRTPostEffectLowResolutionTexture";
+
+        private static readonly int ScreenJumpLevel = Shader.PropertyToID("_ScreenJumpLevel");
+        private static readonly int WhiteNoiseGate = Shader.PropertyToID("_WhiteNoiseGate");
+        private static readonly int SlippageStrength = Shader.PropertyToID("_SlippageStrength");
+        private static readonly int SlippageSize = Shader.PropertyToID("_SlippageSize");
+        private static readonly int SlippageInterval = Shader.PropertyToID("_SlippageInterval");
+        private static readonly int SlippageScrollSpeed = Shader.PropertyToID("_SlippageScrollSpeed");
+        private static readonly int SlippageNoiseOnOff = Shader.PropertyToID("_SlippageNoiseOnOff");
+
+        private readonly ProfilingSampler _profilingSampler = new(PassName);
+
+        private Material _sourceMaterial;
+        private Material _runtimeMaterial;
+        private RTHandle _fullResolutionHandle;
+        private RTHandle _lowResolutionHandle;
+
+        private bool _isLowResolution;
+        private Vector2Int _resolutionOverride;
+        private FilterMode _lowResolutionFilterMode;
+        private float _whiteNoiseTimeLeft;
+        private float _screenJumpTimeLeft;
+        private float _currentScreenJumpLevel;
+
+        public void Setup(CRTPostEffecter settings, RenderTextureDescriptor cameraTextureDescriptor)
+        {
+            requiresIntermediateTexture = true;
+
+            _isLowResolution = settings.isLowResolution;
+            _resolutionOverride = settings.resolutions;
+            _lowResolutionFilterMode = settings.lowResolutionFilterMode;
+
+            UpdateRuntimeMaterial(settings.material);
+            UpdateRuntimeProperties(settings, cameraTextureDescriptor);
+        }
+
+        private void UpdateRuntimeMaterial(Material sourceMaterial)
+        {
+            if (_sourceMaterial != sourceMaterial || _runtimeMaterial == null)
             {
-                if (Random.Range(0, 1000) < screenJumpFrequency)
+                CoreUtils.Destroy(_runtimeMaterial);
+                _sourceMaterial = sourceMaterial;
+                _runtimeMaterial = CoreUtils.CreateEngineMaterial(sourceMaterial.shader);
+            }
+
+            _runtimeMaterial.CopyPropertiesFromMaterial(sourceMaterial);
+        }
+
+        private void UpdateRuntimeProperties(CRTPostEffecter settings, RenderTextureDescriptor cameraTextureDescriptor)
+        {
+            float deltaTime = Application.isPlaying ? Time.unscaledDeltaTime : 1f / 60f;
+
+            _whiteNoiseTimeLeft = Mathf.Max(0f, _whiteNoiseTimeLeft - deltaTime);
+            if (_whiteNoiseTimeLeft <= 0f && ShouldStartBurst(settings.whiteNoiseFrequency))
+            {
+                _whiteNoiseTimeLeft = Mathf.Max(0f, settings.whiteNoiseLength);
+            }
+
+            float screenJumpLevel = 0f;
+            _screenJumpTimeLeft = Mathf.Max(0f, _screenJumpTimeLeft - deltaTime);
+            if (settings.screenJumpFrequency > 0)
+            {
+                if (_screenJumpTimeLeft <= 0f && ShouldStartBurst(settings.screenJumpFrequency))
                 {
-                    var level = Random.Range(screenJumpMinLevel, screenJumpMaxLevel);
-                    material.SetFloat(_ScreenJumpLevel, level);
-                    screenJumpTimeLeft = screenJumpLength;
+                    _currentScreenJumpLevel = Random.Range(settings.screenJumpMinLevel, settings.screenJumpMaxLevel);
+                    screenJumpLevel = _currentScreenJumpLevel;
+                    _screenJumpTimeLeft = Mathf.Max(0f, settings.screenJumpLength);
+                }
+                else if (_screenJumpTimeLeft > 0f)
+                {
+                    screenJumpLevel = _currentScreenJumpLevel;
                 }
                 else
                 {
-                    material.SetFloat(_ScreenJumpLevel, 0);
+                    _currentScreenJumpLevel = 0f;
                 }
             }
+
+            _runtimeMaterial.SetFloat(WhiteNoiseGate, _whiteNoiseTimeLeft > 0f || settings.whiteNoiseFrequency <= 0 ? 1f : 0f);
+            _runtimeMaterial.SetFloat(ScreenJumpLevel, screenJumpLevel);
+            _runtimeMaterial.SetFloat(SlippageInterval, settings.slippageInterval);
+            _runtimeMaterial.SetFloat(SlippageNoiseOnOff, settings.isSlippageNoise ? Random.value : 1f);
+            _runtimeMaterial.SetFloat(SlippageScrollSpeed, settings.slippageScrollSpeed);
+            _runtimeMaterial.SetFloat(SlippageStrength, settings.slippageStrength);
+            _runtimeMaterial.SetFloat(SlippageSize, settings.slippageSize);
+
+            _resolutionOverride.x = Mathf.Min(_resolutionOverride.x, cameraTextureDescriptor.width);
+            _resolutionOverride.y = Mathf.Min(_resolutionOverride.y, cameraTextureDescriptor.height);
         }
-        //////
 
-        //////Decal Texture
-        material.SetTexture(_DecalTex, decalTex);
-        material.SetInteger(_DecalTexOnOff, isDecalTex ? 1 : 0);
-        material.SetVector(_DecalTexPos, decalTexPos);
-        material.SetVector(_DecalTexScale, decalTexScale);
-        //////
-
-        //////Low resolution
-        if (isLowResolution)
+        private static bool ShouldStartBurst(int frequency)
         {
-            var target = RenderTexture.GetTemporary(src.width / 2, src.height / 2);
-            Graphics.Blit(src, target);
-            Graphics.Blit(target, dest, material);
-            RenderTexture.ReleaseTemporary(target);
+            return frequency > 0 && Random.Range(0, 1000) < frequency;
         }
-        else
-        {
-            Graphics.Blit(src, dest, material);
-        }
-        //////
 
+#pragma warning disable 618, 672
+        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
+        {
+            if (_runtimeMaterial == null)
+            {
+                return;
+            }
+
+            RTHandle source = renderingData.cameraData.renderer.cameraColorTargetHandle;
+            RenderTextureDescriptor descriptor = renderingData.cameraData.cameraTargetDescriptor;
+            descriptor.depthBufferBits = 0;
+            descriptor.depthStencilFormat = GraphicsFormat.None;
+            descriptor.msaaSamples = 1;
+
+            CommandBuffer cmd = CommandBufferPool.Get(PassName);
+            using (new ProfilingScope(cmd, _profilingSampler))
+            {
+                if (_isLowResolution)
+                {
+                    RenderTextureDescriptor lowResolutionDescriptor = GetLowResolutionDescriptor(descriptor);
+                    RenderingUtils.ReAllocateHandleIfNeeded(
+                        ref _lowResolutionHandle,
+                        lowResolutionDescriptor,
+                        _lowResolutionFilterMode,
+                        TextureWrapMode.Clamp,
+                        name: LowResolutionTextureName);
+
+                    Blitter.BlitCameraTexture(cmd, source, _lowResolutionHandle, 0f, false);
+                    Blitter.BlitCameraTexture(cmd, _lowResolutionHandle, source, _runtimeMaterial, ShaderPassIndex);
+                }
+                else
+                {
+                    RenderingUtils.ReAllocateHandleIfNeeded(
+                        ref _fullResolutionHandle,
+                        descriptor,
+                        FilterMode.Bilinear,
+                        TextureWrapMode.Clamp,
+                        name: FullResolutionTextureName);
+
+                    Blitter.BlitCameraTexture(cmd, source, _fullResolutionHandle, _runtimeMaterial, ShaderPassIndex);
+                    Blitter.BlitCameraTexture(cmd, _fullResolutionHandle, source, 0f, false);
+                }
+            }
+
+            context.ExecuteCommandBuffer(cmd);
+            CommandBufferPool.Release(cmd);
+        }
+#pragma warning restore 618, 672
+
+        public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
+        {
+            if (_runtimeMaterial == null)
+            {
+                return;
+            }
+
+            UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
+            if (resourceData.isActiveTargetBackBuffer)
+            {
+                return;
+            }
+
+            TextureHandle source = resourceData.activeColorTexture;
+            if (!source.IsValid())
+            {
+                return;
+            }
+
+            TextureHandle effectSource = source;
+            if (_isLowResolution)
+            {
+                TextureDesc lowResolutionDescriptor = GetLowResolutionTextureDesc(renderGraph.GetTextureDesc(source));
+                TextureHandle lowResolutionTexture = renderGraph.CreateTexture(lowResolutionDescriptor);
+
+                RenderGraphUtils.BlitMaterialParameters downsampleParameters =
+                    new(source, lowResolutionTexture, Blitter.GetBlitMaterial(TextureDimension.Tex2D), 0);
+                renderGraph.AddBlitPass(downsampleParameters, $"{PassName} Downsample");
+
+                effectSource = lowResolutionTexture;
+            }
+
+            TextureDesc destinationDescriptor = renderGraph.GetTextureDesc(source);
+            destinationDescriptor.name = FullResolutionTextureName;
+            destinationDescriptor.clearBuffer = false;
+            destinationDescriptor.depthBufferBits = DepthBits.None;
+            destinationDescriptor.msaaSamples = MSAASamples.None;
+            TextureHandle destination = renderGraph.CreateTexture(destinationDescriptor);
+
+            RenderGraphUtils.BlitMaterialParameters effectParameters =
+                new(effectSource, destination, _runtimeMaterial, ShaderPassIndex);
+            renderGraph.AddBlitPass(effectParameters, PassName);
+
+            resourceData.cameraColor = destination;
+        }
+
+        private RenderTextureDescriptor GetLowResolutionDescriptor(RenderTextureDescriptor sourceDescriptor)
+        {
+            if (_resolutionOverride.x > 0 && _resolutionOverride.y > 0)
+            {
+                sourceDescriptor.width = _resolutionOverride.x;
+                sourceDescriptor.height = _resolutionOverride.y;
+            }
+            else
+            {
+                sourceDescriptor.width = Mathf.Max(1, sourceDescriptor.width / 2);
+                sourceDescriptor.height = Mathf.Max(1, sourceDescriptor.height / 2);
+            }
+
+            sourceDescriptor.depthBufferBits = 0;
+            sourceDescriptor.depthStencilFormat = GraphicsFormat.None;
+            sourceDescriptor.msaaSamples = 1;
+            return sourceDescriptor;
+        }
+
+        private TextureDesc GetLowResolutionTextureDesc(TextureDesc sourceDescriptor)
+        {
+            sourceDescriptor.name = LowResolutionTextureName;
+            sourceDescriptor.clearBuffer = false;
+            sourceDescriptor.depthBufferBits = DepthBits.None;
+            sourceDescriptor.msaaSamples = MSAASamples.None;
+            sourceDescriptor.filterMode = _lowResolutionFilterMode;
+            sourceDescriptor.wrapMode = TextureWrapMode.Clamp;
+
+            if (_resolutionOverride.x > 0 && _resolutionOverride.y > 0)
+            {
+                sourceDescriptor.sizeMode = TextureSizeMode.Explicit;
+                sourceDescriptor.width = _resolutionOverride.x;
+                sourceDescriptor.height = _resolutionOverride.y;
+            }
+            else if (sourceDescriptor.sizeMode == TextureSizeMode.Explicit)
+            {
+                sourceDescriptor.width = Mathf.Max(1, sourceDescriptor.width / 2);
+                sourceDescriptor.height = Mathf.Max(1, sourceDescriptor.height / 2);
+            }
+            else
+            {
+                sourceDescriptor.sizeMode = TextureSizeMode.Scale;
+                sourceDescriptor.scale *= 0.5f;
+            }
+
+            return sourceDescriptor;
+        }
+
+        public void Dispose()
+        {
+            CoreUtils.Destroy(_runtimeMaterial);
+            _runtimeMaterial = null;
+            _sourceMaterial = null;
+
+            _fullResolutionHandle?.Release();
+            _fullResolutionHandle = null;
+
+            _lowResolutionHandle?.Release();
+            _lowResolutionHandle = null;
+        }
     }
 }

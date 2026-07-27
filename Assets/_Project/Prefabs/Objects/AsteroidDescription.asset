@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e4d245a09f6be640ba9d47b02ec7c66, type: 3}
+  m_Name: AsteroidDescription
+  m_EditorClassIdentifier: 
+  _templates:
+  - {fileID: 11400000, guid: c52a3ae0148d0e545b28a3f233f55d08, type: 2}
+  _componentTemplates:
+  - rid: 4213516781011599473
+  - rid: 4213516789838774824
+  ViewPrefab: {fileID: 4855989034719792431, guid: e5c34071f3d24b642ad1839a2d41ad14, type: 3}
+  BoundsRadius: 2
+  DeathsCount: 2
+  references:
+    version: 2
+    RefIds:
+    - rid: 4213516781011599473
+      type: {class: Template_35CA21CB95018BE256CAA78659C23B59, ns: ComponentTemplates, asm: Assembly-CSharp}
+      data:
+        component:
+          Mode: 1
+        _offset: 0
+    - rid: 4213516789838774824
+      type: {class: Template_E2272BB99501499999DA540D0B04344B, ns: ComponentTemplates, asm: Assembly-CSharp}
+      data:
+        component:
+          LineralDrag: 0.05
+          AngularDrag: 0.05
+          Mass: 1
+        _offset: 0

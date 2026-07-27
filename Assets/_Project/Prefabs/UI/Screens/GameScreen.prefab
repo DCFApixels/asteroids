@@ -69,13 +69,13 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 26c97742a69e02943ae0e5ff819fb15b, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
-  m_UseSpriteMesh: 0
+  m_UseSpriteMesh: 1
   m_PixelsPerUnitMultiplier: 1
 --- !u!114 &8774505675165062674
 MonoBehaviour:
@@ -130,10 +130,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 794376915497689003}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 361577729d2744309db1c485b76e90ed, type: 3}
+  m_Script: {fileID: 11500000, guid: 0257c623bb8622445a6dc80f2c2673de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isClickButton: 1
+  isClickButton: 0
   IsDown: 0
 --- !u!1 &2258978843353335672
 GameObject:
@@ -204,13 +204,13 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: efa2e16292314ee4a9fb3377392451d5, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
-  m_UseSpriteMesh: 0
+  m_UseSpriteMesh: 1
   m_PixelsPerUnitMultiplier: 1
 --- !u!114 &6377600628123165305
 MonoBehaviour:
@@ -265,7 +265,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2258978843353335672}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 361577729d2744309db1c485b76e90ed, type: 3}
+  m_Script: {fileID: 11500000, guid: 0257c623bb8622445a6dc80f2c2673de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isClickButton: 0
@@ -339,13 +339,13 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: efa2e16292314ee4a9fb3377392451d5, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
-  m_UseSpriteMesh: 0
+  m_UseSpriteMesh: 1
   m_PixelsPerUnitMultiplier: 1
 --- !u!114 &5137876112665911537
 MonoBehaviour:
@@ -400,7 +400,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2721095842727356247}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 361577729d2744309db1c485b76e90ed, type: 3}
+  m_Script: {fileID: 11500000, guid: 0257c623bb8622445a6dc80f2c2673de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isClickButton: 0
@@ -477,7 +477,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -4.999756}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2245163327536230316
@@ -589,6 +589,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2026645573903863124}
   - component: {fileID: 8959328714780461160}
+  - component: {fileID: 2473796147053594066}
   m_Layer: 5
   m_Name: GameScreen
   m_TagString: Untagged
@@ -636,6 +637,18 @@ MonoBehaviour:
   Right: {fileID: 9110860022872466881}
   Acceleration: {fileID: 2041574803816173884}
   Shoot: {fileID: 882901280609773313}
+--- !u!225 &2473796147053594066
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5150607987294355378}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5853619426490926302
 GameObject:
   m_ObjectHideFlags: 0
@@ -670,7 +683,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 9.0095215, y: -4.999756}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7227835250757710398
@@ -878,13 +891,13 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: efa2e16292314ee4a9fb3377392451d5, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
-  m_UseSpriteMesh: 0
+  m_UseSpriteMesh: 1
   m_PixelsPerUnitMultiplier: 1
 --- !u!114 &2334235805121959011
 MonoBehaviour:
@@ -939,7 +952,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6723036513985038903}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 361577729d2744309db1c485b76e90ed, type: 3}
+  m_Script: {fileID: 11500000, guid: 0257c623bb8622445a6dc80f2c2673de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isClickButton: 0
