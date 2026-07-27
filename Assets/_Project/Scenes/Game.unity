@@ -559,6 +559,9 @@ GameObject:
   - component: {fileID: 1322431242}
   - component: {fileID: 1322431241}
   - component: {fileID: 1322431240}
+  - component: {fileID: 1322431245}
+  - component: {fileID: 1322431244}
+  - component: {fileID: 1322431243}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -578,6 +581,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4756ef341bcc4ec4895c1c917ee931e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Game: {fileID: 1322431245}
+  GameField: {fileID: 1322431244}
+  FeatureSceneData:
+  - {fileID: 1322431243}
   SpawnPlayerPosition: {fileID: 653984479}
   Camera: {fileID: 1004401682}
   UI: {fileID: 492268237}
@@ -618,6 +625,46 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1322431243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1322431239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38bf1ccd8b63a6149ab395340bbabc4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SpawnPlayerPosition: {fileID: 653984479}
+  KillOnSpawnRadius: 5
+--- !u!114 &1322431244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1322431239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f155b1f767cbd4428230bb2d6174aaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Camera: {fileID: 1004401682}
+--- !u!114 &1322431245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1322431239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcd41f8624d27c64e9987dd06fcfa93a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UI: {fileID: 492268237}
 --- !u!224 &1494349923 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2026645573903863124, guid: 5557578b8c2048444b7beaff96de408f, type: 3}

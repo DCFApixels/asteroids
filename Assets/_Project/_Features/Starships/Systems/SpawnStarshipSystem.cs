@@ -9,7 +9,7 @@ namespace Asteroids.StarshipsFeature
     internal class SpawnStarshipSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
-        [DI] ConfigData c;
+        [DI] StarshipsFeatureConfig c;
 
         class RequestAspect : EcsAspect
         {

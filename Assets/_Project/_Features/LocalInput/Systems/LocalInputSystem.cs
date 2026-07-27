@@ -9,8 +9,8 @@ namespace Asteroids.LocalInputFeature
     internal class LocalInputSystem : IEcsRun, IEcsInit
     {
         [DI] EcsDefaultWorld _world;
-        [DI] SceneData s;
-        [DI] ConfigData c;
+        [DI] GameSceneData s;
+        [DI] LocalInputModuleConfig c;
 
         class InputAspect : EcsAspect
         {

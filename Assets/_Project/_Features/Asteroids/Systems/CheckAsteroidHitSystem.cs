@@ -10,8 +10,8 @@ namespace Asteroids.AsteroidsFeature
 {
     internal class CheckAsteroidHitSystem : IEcsRun
     {
-        [DI] RuntimeData r;
-        [DI] ConfigData c;
+        [DI] GameRuntimeData gameRuntimeData;
+        [DI] AsteroidsFeatureConfig c;
         [DI] EntityGraph _graph;
 
         private class OtherAspect : EcsAspect
@@ -80,7 +80,7 @@ namespace Asteroids.AsteroidsFeature
                 ref var boundsSphere = ref asteroidA.BoundsSpheres[asteroidE];
                 ref var transform = ref asteroidA.Transforms[asteroidE];
 
-                r.Score++;
+                gameRuntimeData.Score++;
                 asteroidA.KillRequests.TryAddOrGet(asteroidE);
                 ShakeCamera();
 

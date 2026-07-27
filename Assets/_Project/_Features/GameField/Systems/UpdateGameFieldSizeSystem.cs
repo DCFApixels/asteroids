@@ -11,9 +11,9 @@ namespace Asteroids.GameFieldFeature
     {
         public AddParams AddParams => EcsConsts.PRE_BEGIN_LAYER;
 
-        [DI] RuntimeData r;
-        [DI] SceneData s;
-        [DI] ConfigData c;
+        [DI] GameFieldRuntimeData r;
+        [DI] GameFieldModuleSceneData s;
+        [DI] GameFieldModuleConfig c;
         float _prevAspect = -1f;
 
         public void Run()

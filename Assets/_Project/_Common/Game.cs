@@ -24,8 +24,6 @@ namespace Asteroids
         private ConfigData StaticData;
         [SerializeField] 
         private SceneData SceneData;
-        [SerializeField]
-        private RuntimeData RuntimeData;
 
         private void Start()
         {
@@ -59,7 +57,7 @@ namespace Asteroids
                 .Add(new DeleteKilledEntitesSystem())
 
                 // Injecting into systems.
-                .Inject(_world, _graphWorld, graph, StaticData, SceneData, RuntimeData)
+                .Inject(_world, _graphWorld, graph, StaticData, SceneData)
                 .AddUnityDebug(_world, _graphWorld)
                 .Add(new DebugEntitiesSystem())
                 .AutoInject()

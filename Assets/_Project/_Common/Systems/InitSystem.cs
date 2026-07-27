@@ -8,10 +8,7 @@ namespace Asteroids.Systems
         public AddParams AddParams => EcsConsts.PRE_BEGIN_LAYER;
 
         [DI] EcsDefaultWorld _world;
-        [DI] ConfigData c;
-        [DI] SceneData s;
-        [DI] RuntimeData r;
-
+        [DI] GameSceneData s;
         public void Init()
         {
             s.UI.LoseScreen.InjectWorld(_world);

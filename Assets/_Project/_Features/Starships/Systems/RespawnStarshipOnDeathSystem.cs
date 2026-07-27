@@ -6,7 +6,8 @@ namespace Asteroids.StarshipsFeature
     internal class RespawnStarshipOnDeathSystem : IEcsRun
     {
         [DI] private EcsDefaultWorld _world;
-        [DI] private RuntimeData r;
+        [DI] private GameRuntimeData gameRuntimeData;
+        [DI] private StarshipsRuntimeData starshipsRuntimeData;
 
         class StarshipAspect : EcsAspect
         {
@@ -17,13 +18,13 @@ namespace Asteroids.StarshipsFeature
         {
             var starshipA = _world.GetAspect<StarshipAspect>();
 
-            if (starshipA.Starships.Count != 0 || r.GameState != GameState.Play)
+            if (starshipA.Starships.Count != 0 || gameRuntimeData.GameState != GameState.Play)
             {
                 return;
             }
 
-            r.LifeLeft--;
-            if (r.LifeLeft == 0)
+            starshipsRuntimeData.LifeLeft--;
+            if (starshipsRuntimeData.LifeLeft == 0)
             {
                 _world.GetPool<ChangeState>().Add(_world.NewEntity()).NextState = GameState.Lose;
                 return;

@@ -1,4 +1,5 @@
 using Asteroids.LocalInputFeature;
+using Asteroids.BulletsFeature;
 using DCFApixels.DragonECS;
 using Modules.FX;
 using Modules.Motion;
@@ -10,7 +11,7 @@ namespace Asteroids.StarshipsFeature
     internal class SpawnBulletSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
-        [DI] ConfigData c;
+        [DI] BulletsFeatureConfig c;
 
         class StarshipAspect : EcsAspect
         {

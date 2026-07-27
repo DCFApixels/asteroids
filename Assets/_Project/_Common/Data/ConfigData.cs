@@ -1,43 +1,45 @@
-using Asteroids.StarshipsFeature;
-using Asteroids.BulletsFeature;
-using Asteroids.AsteroidsFeature;
-using Modules.FX;
+using Asteroids.GameFieldFeature;
+using Asteroids.LocalInputFeature;
+using DCFApixels.DragonECS;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Asteroids
 {
     [CreateAssetMenu]
-    internal class ConfigData : ScriptableObject
+    internal class ConfigData : ScriptableObject, IInjectionBlock
     {
-        [Header("Player")]
-        public StarshipDescription PlayerStarshipTemplate;
-        public int Lifes = 3;
-        public float StarshipSpawnImmunityTime = 1;
+        [Header("Module Configs")]
+        public LocalInputModuleConfig LocalInput;
+        public GameFieldModuleConfig GameField;
 
-    
-        [Header("Bullets")]
-        public BulletDescription ProjectileDescription;
-        public float BulletSpeed = 10;
-        public ShortVFXView ShootVFX;
-        public float ShootVFXForwardOffset = 0.45f;
-    
-        [Header("Asteroid")]
-        public AsteroidDescription AsteroidDescription;
-        public int SpawnFrequency = 3;
-        public int SpawnAmount = 10;
-        public float AsteroidMaxSpeed = 1;
-        public float AsteroidMinSpeed = 5;
-        public float AsteroidSplitMultiplier = 0.70f;
-        [Range(1.1f, 2)]
-        public float AdditionalKillOffset = 1.1f;
+        [Header("Feature Configs")]
+        public ScriptableObject[] FeatureConfigs;
 
-        [Header("Other")]
-        public float ScreenBorderOffset = 0.5f;
+        public void InjectTo(Injector inj)
+        {
+            inj.Inject(new GameRuntimeData());
 
-        [Header("Input")]
-        public bool ShowMobileControlsOnTouchDevices = true;
-        public InputActionReference MoveAction;
-        public InputActionReference FireAction;
+            InjectIfNotNull(inj, LocalInput);
+            InjectIfNotNull(inj, GameField);
+
+            if (FeatureConfigs == null)
+            {
+                return;
+            }
+
+            foreach (ScriptableObject featureConfig in FeatureConfigs)
+            {
+                InjectIfNotNull(inj, featureConfig);
+            }
+        }
+
+        private static void InjectIfNotNull<T>(Injector inj, T data)
+            where T : Object
+        {
+            if (data != null)
+            {
+                inj.Inject(data);
+            }
+        }
     }
 }

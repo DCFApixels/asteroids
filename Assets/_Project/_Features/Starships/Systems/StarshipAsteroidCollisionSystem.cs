@@ -10,7 +10,7 @@ namespace Asteroids.StarshipsFeature
     internal class StarshipAsteroidCollisionSystem : IEcsRun
     {
         [DI] private EntityGraph _graph;
-        [DI] private RuntimeData _runtimeData;
+        [DI] private GameRuntimeData _gameRuntimeData;
 
         private class RelationAspect : EcsAspect
         {
@@ -33,7 +33,7 @@ namespace Asteroids.StarshipsFeature
 
         public void Run()
         {
-            if (_runtimeData.GameState != GameState.Play)
+            if (_gameRuntimeData.GameState != GameState.Play)
             {
                 return;
             }

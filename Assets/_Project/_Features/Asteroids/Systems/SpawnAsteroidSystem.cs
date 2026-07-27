@@ -8,7 +8,7 @@ namespace Asteroids.AsteroidsFeature
 {
     internal class SpawnAsteroidSystem : IEcsRun
     {
-        [DI] ConfigData c;
+        [DI] AsteroidsFeatureConfig c;
         [DI] EcsDefaultWorld _world;
 
         class EventAspect : EcsAspect

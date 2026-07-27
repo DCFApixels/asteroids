@@ -1,4 +1,5 @@
 using Asteroids.Components;
+using Asteroids.GameFieldFeature;
 using DCFApixels.DragonECS;
 using UnityEngine;
 
@@ -7,19 +8,21 @@ namespace Asteroids.AsteroidsFeature
     public class AutoSpawnAsteroidSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
-        [DI] ConfigData c;
-        [DI] RuntimeData r;
+        [DI] AsteroidsFeatureConfig c;
+        [DI] GameRuntimeData gameRuntimeData;
+        [DI] AsteroidsRuntimeData asteroidsRuntimeData;
+        [DI] GameFieldRuntimeData gameFieldRuntimeData;
 
         int _previousSpawnTime;
         
         public void Run()
         {
-            if (r.GameState != GameState.Play)
+            if (gameRuntimeData.GameState != GameState.Play)
             {
                 return;
             }
 
-            var gameTime = (int)(Time.time - r.LevelStartTime);
+            var gameTime = (int)(Time.time - asteroidsRuntimeData.LevelStartTime);
             if (gameTime != _previousSpawnTime && gameTime >= c.SpawnFrequency &&
                 gameTime % c.SpawnFrequency == 0)
             {
@@ -29,7 +32,7 @@ namespace Asteroids.AsteroidsFeature
                 
                 for (var i = 0; i < c.SpawnAmount; i++)
                 {
-                    var size = r.FieldSize;
+                    var size = gameFieldRuntimeData.FieldSize;
 
                     var startAsteroidRadius = c.AsteroidDescription.BoundsRadius;
 

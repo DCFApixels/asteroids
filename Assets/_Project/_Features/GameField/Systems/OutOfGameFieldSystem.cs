@@ -9,8 +9,8 @@ namespace Asteroids.GameFieldFeature
     internal class OutOfGameFieldSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
-        [DI] RuntimeData r;
-        [DI] ConfigData c;
+        [DI] GameFieldRuntimeData r;
+        [DI] GameFieldModuleConfig c;
 
         private class Aspect : EcsAspect
         {
