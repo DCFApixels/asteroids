@@ -12,10 +12,8 @@ namespace Asteroids.GameFieldFeature
         public void Import(EcsPipeline.Builder b)
         {
             b.Layers.Add(META_GROUP).Before(EcsConsts.END_LAYER);
-            //b.Layers.Insert(EcsConsts.END_LAYER, META_GROUP);
             b.Add(new UpdateGameFieldSizeSystem());
-            b.Add(new OutOfGameFieldDetectionSystem());
-            b.Add(new OutOfGameFieldBehaviorSystem());
+            b.Add(new OutOfGameFieldSystem());
         }
     }
 }

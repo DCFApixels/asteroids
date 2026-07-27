@@ -19,8 +19,8 @@ MonoBehaviour:
       Min: 0.9
       Max: 1.1
     Pitch:
-      Min: 1
-      Max: 1.3
+      Min: 0.9
+      Max: 1.1
     DurationMultiplier: 1
   VolumeMultiplier: 0.9
   PitchMultiplier: 1

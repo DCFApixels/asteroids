@@ -17,6 +17,8 @@ MonoBehaviour:
   StarshipSpawnImmunityTime: 1
   ProjectileDescription: {fileID: 11400000, guid: a0b25c6bd1970d14ab89f4a8fe850a7f, type: 2}
   BulletSpeed: 10
+  ShootVFX: {fileID: 7848642253514846668, guid: 11b626a3919c53744af6ef7532a8a905, type: 3}
+  ShootVFXForwardOffset: 0.45
   AsteroidDescription: {fileID: 11400000, guid: 3632d911de607c54b8db15e757360eb3, type: 2}
   SpawnFrequency: 3
   SpawnAmount: 1
@@ -25,8 +27,6 @@ MonoBehaviour:
   AsteroidSplitMultiplier: 0.45
   AdditionalKillOffset: 1.1
   ScreenBorderOffset: 0.5
-  Features: []
-  Features_2: []
-  references:
-    version: 2
-    RefIds: []
+  ShowMobileControlsOnTouchDevices: 1
+  MoveAction: {fileID: -7755294831250772222, guid: c03cb63109f3d3047acd88a281127409, type: 3}
+  FireAction: {fileID: -8560468155116024047, guid: c03cb63109f3d3047acd88a281127409, type: 3}

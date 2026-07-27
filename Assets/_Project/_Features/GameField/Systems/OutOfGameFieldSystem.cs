@@ -1,5 +1,4 @@
 using Asteroids.Components;
-using Asteroids.GameFieldFeature;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using Modules.Motion;
@@ -7,7 +6,7 @@ using UnityEngine;
 
 namespace Asteroids.GameFieldFeature
 {
-    internal class OutOfGameFieldBehaviorSystem : IEcsRun
+    internal class OutOfGameFieldSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
         [DI] RuntimeData r;
@@ -17,7 +16,6 @@ namespace Asteroids.GameFieldFeature
         {
             public EcsPool<RigidTransform> RigidTransforms = Inc;
             public EcsPool<BoundsSphere> BoundsSpheres = Inc;
-            public EcsPool<OutOfGameFieldEvent> OutOfGameFieldEvents = Inc;
             public EcsPool<OutOfGameFieldBehavior> OutOfGameFieldBehaviors = Inc;
             public EcsPool<KillRequest> KillRequests = Opt;
         }
@@ -28,14 +26,18 @@ namespace Asteroids.GameFieldFeature
             {
                 ref var rigidTransform = ref a.RigidTransforms[e];
                 ref var boundsSphere = ref a.BoundsSpheres[e];
-                ref var outOfGameFieldEvent = ref a.OutOfGameFieldEvents[e];
                 ref var behavior = ref a.OutOfGameFieldBehaviors[e];
+                Vector3 excess = CalculateExcess(rigidTransform.Position, boundsSphere.Radius);
+                if (excess == Vector3.zero)
+                {
+                    continue;
+                }
 
                 switch (behavior.Mode)
                 {
                     case OutOfGameFieldBehaviorMode.Clamp:
                         {
-                            rigidTransform.Position -= outOfGameFieldEvent.Excess;
+                            rigidTransform.Position -= excess;
                         }
                         break;
                     case OutOfGameFieldBehaviorMode.Wrap:
@@ -46,13 +48,13 @@ namespace Asteroids.GameFieldFeature
                             Vector3 gameFieldSize = new Vector3(fieldSize.x, 0, fieldSize.y) + 2f * boundsSphere.Radius * Vector3.one;
 
 
-                            if (outOfGameFieldEvent.Excess.x != 0)
+                            if (excess.x != 0)
                             {
-                                position.x += -Mathf.Sign(outOfGameFieldEvent.Excess.x) * gameFieldSize.x;
+                                position.x += -Mathf.Sign(excess.x) * gameFieldSize.x;
                             }
-                            if (outOfGameFieldEvent.Excess.z != 0)
+                            if (excess.z != 0)
                             {
-                                position.z += -Mathf.Sign(outOfGameFieldEvent.Excess.z) * gameFieldSize.z;
+                                position.z += -Mathf.Sign(excess.z) * gameFieldSize.z;
                             }
 
                             rigidTransform.Position = position;
@@ -80,6 +82,24 @@ namespace Asteroids.GameFieldFeature
 
 
             }
+        }
+
+        private Vector3 CalculateExcess(Vector3 position, float radius)
+        {
+            Vector2 fieldSize = r.FieldSize;
+            Vector3 fieldSizeHalf = new Vector3(fieldSize.x, 0, fieldSize.y) / 2f + Vector3.one * 2f * radius;
+            Vector3 excess = position;
+
+            excess.x = Mathf.Sign(excess.x) * CalculateAxisExcess(Mathf.Abs(excess.x), fieldSizeHalf.x);
+            excess.y = Mathf.Sign(excess.y) * CalculateAxisExcess(Mathf.Abs(excess.y), fieldSizeHalf.y);
+            excess.z = Mathf.Sign(excess.z) * CalculateAxisExcess(Mathf.Abs(excess.z), fieldSizeHalf.z);
+
+            return excess;
+        }
+
+        private float CalculateAxisExcess(float axis, float sizeHalf)
+        {
+            return Mathf.Max(0, axis - sizeHalf);
         }
 
         private bool CheckExcess(Vector3 position, Vector2 fieldSize)

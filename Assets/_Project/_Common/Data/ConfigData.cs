@@ -1,11 +1,9 @@
 using Asteroids.StarshipsFeature;
 using Asteroids.BulletsFeature;
 using Asteroids.AsteroidsFeature;
-using DCFApixels.DragonECS;
-using DCFApixels.DragonECS.Unity;
-using DCFApixels.DragonECS.Unity.Attributes;
-using Modules.BoundsOverlaps;
+using Modules.FX;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Asteroids
 {
@@ -21,6 +19,8 @@ namespace Asteroids
         [Header("Bullets")]
         public BulletDescription ProjectileDescription;
         public float BulletSpeed = 10;
+        public ShortVFXView ShootVFX;
+        public float ShootVFXForwardOffset = 0.45f;
     
         [Header("Asteroid")]
         public AsteroidDescription AsteroidDescription;
@@ -35,16 +35,9 @@ namespace Asteroids
         [Header("Other")]
         public float ScreenBorderOffset = 0.5f;
 
-
-        [DragonMetaBlock]
-        [ReferenceDropDown(typeof(IEcsModule))]
-        [SerializeReference]
-        public IEcsModule[] Features;
-
-
-
-        [DragonMetaBlock]
-        [ReferenceDropDown(typeof(IEcsModule))]
-        public BoundsOverlapsModule[] Features_2;
+        [Header("Input")]
+        public bool ShowMobileControlsOnTouchDevices = true;
+        public InputActionReference MoveAction;
+        public InputActionReference FireAction;
     }
 }

@@ -1,6 +1,7 @@
 ﻿<Solution>
   <Project Path="Unity.ShaderGraph.Editor.csproj" />
   <Project Path="Unity.RenderPipelines.GPUDriven.Runtime.csproj" />
+  <Project Path="Unity.InputSystem.csproj" />
   <Project Path="Unity.Localization.csproj" />
   <Project Path="Unity.ProjectAuditor.Editor.UI.csproj" />
   <Project Path="DCFApixels.DragonECS.csproj" />
@@ -19,11 +20,11 @@
   <Project Path="Unity.RenderPipelines.Universal.2D.Runtime.csproj" />
   <Project Path="TriInspector.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="DCFApixels.DragonECS.Graphs.csproj" />
   <Project Path="Unity.RenderPipelines.Universal.Editor.csproj" />
   <Project Path="Unity.PerformanceTesting.Editor.csproj" />
   <Project Path="Unity.Localization.Editor.csproj" />
   <Project Path="UnityEngine.TestRunner.csproj" />
-  <Project Path="DCFApixels.DragonECS.Graphs.csproj" />
   <Project Path="Unity.Searcher.Editor.csproj" />
   <Project Path="Unity.Burst.csproj" />
   <Project Path="Assembly-CSharp-firstpass.csproj" />
@@ -52,9 +53,12 @@
   <Project Path="Unity.Burst.Editor.csproj" />
   <Project Path="Unity.Addressables.csproj" />
   <Project Path="Unity.InternalAPIEditorBridge.013.csproj" />
+  <Project Path="Unity.InputSystem.DocCodeSamples.csproj" />
   <Project Path="Unity.2D.Sprite.Editor.csproj" />
+  <Project Path="Unity.InputSystem.ForUI.csproj" />
   <Project Path="Unity.Collections.CodeGen.csproj" />
   <Project Path="Unity.Mathematics.Editor.csproj" />
+  <Project Path="Unity.InputSystem.TestFramework.csproj" />
   <Project Path="Unity.ShaderGraph.Utilities.csproj" />
   <Project Path="Unity.ProjectAuditor.Editor.Tests.Common.csproj" />
   <Project Path="Unity.Profiling.Core.csproj" />

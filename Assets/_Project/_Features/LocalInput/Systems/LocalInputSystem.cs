@@ -1,5 +1,6 @@
 ﻿using DCFApixels.DragonECS;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Asteroids.LocalInputFeature
 {
@@ -9,6 +10,7 @@ namespace Asteroids.LocalInputFeature
     {
         [DI] EcsDefaultWorld _world;
         [DI] SceneData s;
+        [DI] ConfigData c;
 
         class InputAspect : EcsAspect
         {
@@ -18,41 +20,28 @@ namespace Asteroids.LocalInputFeature
         }
         public void Run()
         {
-            var horizontal = Input.GetAxis("Horizontal");
-            var vertical = Input.GetAxis("Vertical");
-            if (Input.touchSupported && horizontal == 0 && vertical == 0)
-            {
-                var gameScreen = s.UI.GameScreen;
-                horizontal = gameScreen.Left.IsDown ? -1f : gameScreen.Right.IsDown ? 1f : 0f;
-                vertical = gameScreen.Acceleration.IsDown ? 1f : 0f;
-            }
-            bool isSpaceDown = Input.GetKeyDown(KeyCode.Space);
-            if (Input.touchSupported && isSpaceDown == false)
-            {
-                var gameScreen = s.UI.GameScreen;
-                isSpaceDown = gameScreen.Shoot.IsDown;
-            }
+            Vector2 moveAxis = ReadMoveAxis();
+            bool isFirePressed = ReadFirePressedThisFrame();
 
             _world.GetAspects(out InputAspect a);
             a.FireInputBeginEvents.ClearAll();
 
-            bool hasMoveInput = horizontal != 0 || vertical != 0;
+            bool hasMoveInput = moveAxis != Vector2.zero;
             foreach (var e in _world.Where(a))
             {
-                if (isSpaceDown)
+                if (isFirePressed)
                 {
                     a.FireInputBeginEvents.TryAddOrGet(e);
                 }
-                else 
-                { 
+                else
+                {
                     a.FireInputBeginEvents.TryDel(e);
                 }
 
                 if (hasMoveInput)
                 {
                     ref var moveEvent = ref a.MoveAxisInputEvents.TryAddOrGet(e);
-                    moveEvent.Horizontal = horizontal;
-                    moveEvent.Vertical = vertical;
+                    moveEvent.Axis = moveAxis;
                 }
                 else if (a.MoveAxisInputEvents.Has(e))
                 {
@@ -71,8 +60,82 @@ namespace Asteroids.LocalInputFeature
 
         public void Init()
         {
-            Input.simulateMouseWithTouches = false;
-            s.UI.GameScreen.MobileControlRoot.SetActive(Input.touchSupported);
+            c.MoveAction?.action?.Enable();
+            c.FireAction?.action?.Enable();
+            s.UI.GameScreen.MobileControlRoot.SetActive(c.ShowMobileControlsOnTouchDevices && IsTouchSupported());
+        }
+
+        private Vector2 ReadMoveAxis()
+        {
+            Vector2 axis = c.MoveAction != null && c.MoveAction.action != null
+                ? c.MoveAction.action.ReadValue<Vector2>()
+                : ReadMoveAxisFromDevices();
+            return axis != Vector2.zero ? axis : ReadMoveAxisFromMobileUi();
+        }
+
+        private bool ReadFirePressedThisFrame()
+        {
+            bool isPressed = c.FireAction != null && c.FireAction.action != null
+                ? c.FireAction.action.WasPressedThisFrame()
+                : ReadFirePressedFromDevices();
+            return isPressed || ReadFirePressedFromMobileUi();
+        }
+
+        private Vector2 ReadMoveAxisFromMobileUi()
+        {
+            if (IsTouchSupported() == false)
+            {
+                return Vector2.zero;
+            }
+
+            var gameScreen = s.UI.GameScreen;
+            float horizontal = gameScreen.Left.IsDown ? -1f : gameScreen.Right.IsDown ? 1f : 0f;
+            float vertical = gameScreen.Acceleration.IsDown ? 1f : 0f;
+            return new Vector2(horizontal, vertical);
+        }
+
+        private bool ReadFirePressedFromMobileUi()
+        {
+            return IsTouchSupported() && s.UI.GameScreen.Shoot.IsDown;
+        }
+
+        private Vector2 ReadMoveAxisFromDevices()
+        {
+            Vector2 axis = default;
+
+            var keyboard = Keyboard.current;
+            if (keyboard != null)
+            {
+                axis.x += keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed ? -1f : 0f;
+                axis.x += keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed ? 1f : 0f;
+                axis.y += keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed ? 1f : 0f;
+                axis.y += keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed ? -1f : 0f;
+            }
+
+            var gamepad = Gamepad.current;
+            if (gamepad != null && axis == Vector2.zero)
+            {
+                axis = gamepad.leftStick.ReadValue();
+            }
+
+            return Vector2.ClampMagnitude(axis, 1f);
+        }
+
+        private bool ReadFirePressedFromDevices()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard != null && keyboard.spaceKey.wasPressedThisFrame)
+            {
+                return true;
+            }
+
+            var gamepad = Gamepad.current;
+            return gamepad != null && gamepad.buttonSouth.wasPressedThisFrame;
+        }
+
+        private bool IsTouchSupported()
+        {
+            return Touchscreen.current != null;
         }
     }
 }

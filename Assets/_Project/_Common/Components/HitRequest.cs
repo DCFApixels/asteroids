@@ -10,12 +10,4 @@ namespace Asteroids.Components
         public Vector3 DirectionNormal;
         public Vector3 CollisionNormal;
     }
-
-    [AllowedInWorlds("Graph", "Event")]
-    [System.Serializable]
-    public struct HitAnswer : IEcsComponent
-    {
-        public Vector3 DirectionNormal;
-        public Vector3 CollisionNormal;
-    }
 }

@@ -10,7 +10,7 @@ namespace Asteroids.StarshipsFeature
             b.Add(new ImmunitySystem());
             b.Add(new StarshipAsteroidCollisionSystem());
             b.Add(new SpawnBulletSystem());
-            b.Add(new RespawnStarShipOnHitSystem());
+            b.Add(new RespawnStarshipOnDeathSystem());
         }
     }
 }

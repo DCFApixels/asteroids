@@ -34,7 +34,6 @@ namespace Asteroids
             var graph = _world.CreateGraph(_graphWorld);
 
             _pipeline = EcsPipeline.New()
-                .AddUnityDebug(_world, _graphWorld)
                 // Adding systems.
                 .Add(new InitSystem())
                 .Add(new ChangeStateSystem())
@@ -60,16 +59,10 @@ namespace Asteroids
                 .Add(new DeleteKilledEntitesSystem())
 
                 // Injecting into systems.
-                .Inject(_world)
-                .Inject(_graphWorld)
-                .Inject(graph)
-                .Inject(StaticData)
-                .Inject(SceneData)
-                .Inject(RuntimeData)
-                .AutoInject()
-
+                .Inject(_world, _graphWorld, graph, StaticData, SceneData, RuntimeData)
+                .AddUnityDebug(_world, _graphWorld)
                 .Add(new DebugEntitiesSystem())
-
+                .AutoInject()
                 .BuildAndInit();
 
         }

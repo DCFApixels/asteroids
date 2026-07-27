@@ -845,7 +845,7 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 1
   scriptingDefineSymbols:
-    Standalone: DEBUGX_DISABLE_INBUILD;DRAGONECS_DEEP_DEBUG
+    Standalone: DEBUGX_DISABLE_INBUILD;DRAGONECS_DISABLE_CATH_EXCEPTIONS;DRAGONECS_DEEP_DEBUG
     WebGL: DRAGONECS_DEEP_DEBUG
   additionalCompilerArguments: {}
   platformArchitecture: {}
@@ -946,7 +946,7 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 0
+  activeInputHandler: 1
   windowsGamepadBackendHint: 0
   cloudProjectId: 62b46ea6-264c-45b9-b53a-b4e08fee5e0e
   framebufferDepthMemorylessMode: 0
