@@ -6,14 +6,16 @@ using UnityEngine;
 
 namespace Asteroids.AsteroidsFeature
 {
-    internal class SpawnAsteroidSystem : IEcsRun
+    [MetaGroup(AsteroidsModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
+    [MetaColor(AsteroidsModule.META_COLOR)]
+    class SpawnAsteroidSystem : IEcsRun
     {
-        [DI] AsteroidsFeatureConfig c;
+        [DI] AsteroidsFeatureConfig _config;
         [DI] EcsDefaultWorld _world;
 
         class EventAspect : EcsAspect
         {
-            public EcsPool<SpawnAsteroidRequest> Requests = Inc;
+            public EcsPool<SpawnAsteroidRequest> SpawnAsteroidRequests = Inc;
         }
         class SpawnAspect : EcsAspect
         {
@@ -28,7 +30,7 @@ namespace Asteroids.AsteroidsFeature
             _world.GetAspects(out SpawnAspect spawnA, out EventAspect eventA);
             foreach (var newE in _world.Where(eventA))
             {
-                var req = eventA.Requests.Get(newE);
+                var req = eventA.SpawnAsteroidRequests.Get(newE);
 
                 req.Description.Apply(_world, newE);
                 spawnA.Apply(_world, newE);
@@ -46,9 +48,9 @@ namespace Asteroids.AsteroidsFeature
                 newTransformData.Rotation = req.Rotation;
 
                 ref var newVelocity = ref spawnA.Velocities.TryAddOrGet(newE);
-                newVelocity.Lineral = newTransformData.ToLocalVector(Vector3.forward) * Random.Range(c.AsteroidMinSpeed, c.AsteroidMaxSpeed);
+                newVelocity.Lineral = newTransformData.ToLocalVector(Vector3.forward) * Random.Range(_config.AsteroidMinSpeed, _config.AsteroidMaxSpeed);
             }
-            eventA.Requests.ClearAll();
+            eventA.SpawnAsteroidRequests.ClearAll();
         }
 
     }

@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace Asteroids.AsteroidsFeature
 {
+    [MetaGroup(AsteroidsModule.META_GROUP, EcsConsts.COMPONENTS_GROUP)]
+    [MetaColor(AsteroidsModule.META_COLOR)]
     internal struct SpawnAsteroidRequest : IEcsComponent
     {
         public AsteroidDescription Description;

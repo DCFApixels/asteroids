@@ -4,13 +4,15 @@ using UnityEngine;
 
 namespace Asteroids.BulletsFeature
 {
-    public class BulletLifeTimeSystem : IEcsRun
+    [MetaGroup(BulletsModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
+    [MetaColor(BulletsModule.META_COLOR)]
+    class BulletLifetimeSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
         class Aspect : EcsAspect
         {
             public EcsPool<Bullet> Bullets = Inc;
-            public EcsPool<BulletLifeTime> BulletLifetimes = Inc;
+            public EcsPool<BulletLifetime> BulletLifetimes = Inc;
 
             public EcsPool<OutOfGameFieldBehavior> OutOfGameFieldBehaviors = Opt;
         }

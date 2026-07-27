@@ -19,7 +19,7 @@ using UnityEngine;
 
 namespace ComponentTemplates
 {
-    [MetaID("Template_89922AB99501C6637E5655E8ABB1F04A")] class Template_89922AB99501C6637E5655E8ABB1F04A : ComponentTemplate<StarshipMovmentData> { }
+    [MetaID("Template_89922AB99501C6637E5655E8ABB1F04A")] class Template_89922AB99501C6637E5655E8ABB1F04A : ComponentTemplate<StarshipMovementData> { }
     [MetaID("Template_50752EB99501945F2BDC43F6F3BFA134")] class Template_50752EB99501945F2BDC43F6F3BFA134 : ComponentTemplate<LocalInputReceiver> { }
     [MetaID("Template_E2272BB99501499999DA540D0B04344B")] class Template_E2272BB99501499999DA540D0B04344B : ComponentTemplate<VelocityDrag> { }
     [MetaID("Template_E9522BB9950115AD62A48B42DEA0B5ED")] class Template_E9522BB9950115AD62A48B42DEA0B5ED : ComponentTemplate<RigidTransform> { }
@@ -31,7 +31,7 @@ namespace ComponentTemplates
     [MetaID("Template_395668D195011D0C128ED015E17731C5")] class Template_395668D195011D0C128ED015E17731C5 : ComponentTemplate<BoundsSphere> { }
     [MetaID("Template_60B433E69501E56AA53E7EED0A72BA83")] class Template_60B433E69501E56AA53E7EED0A72BA83 : ComponentTemplate<HitImmunity> { }
     
-    [MetaID("Tempalte_B4F66F791607DD802EC7793F70E6D6D9")] class Tempalte_B4F66F791607DD802EC7793F70E6D6D9 : TagComponentTemplate<TouchToHitEmmiter> { }
+    [MetaID("Tempalte_B4F66F791607DD802EC7793F70E6D6D9")] class Tempalte_B4F66F791607DD802EC7793F70E6D6D9 : TagComponentTemplate<TouchToHitEmitter> { }
     [MetaID("Template_35CA21CB95018BE256CAA78659C23B59")] class Template_35CA21CB95018BE256CAA78659C23B59 : ComponentTemplate<OutOfGameFieldBehavior> { }
 
     [MetaID("Template_9419F76F9D013E770643E72DB705C9F8")]

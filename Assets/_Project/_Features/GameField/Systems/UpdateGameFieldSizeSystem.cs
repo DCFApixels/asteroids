@@ -5,20 +5,20 @@ using UnityEngine;
 
 namespace Asteroids.GameFieldFeature
 {
-    [MetaGroup(GameFieldModule.META_GROUP)]
+    [MetaGroup(GameFieldModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
     [MetaColor(GameFieldModule.META_COLOR)]
     internal class UpdateGameFieldSizeSystem : IEcsRun, IEcsDefaultAddParams
     {
         public AddParams AddParams => EcsConsts.PRE_BEGIN_LAYER;
 
-        [DI] GameFieldRuntimeData r;
-        [DI] GameFieldModuleSceneData s;
-        [DI] GameFieldModuleConfig c;
+        [DI] GameFieldRuntimeData _runtime;
+        [DI] GameFieldModuleSceneData _sceneData;
+        [DI] GameFieldModuleConfig _config;
         float _prevAspect = -1f;
 
         public void Run()
         {
-            var camera = s.Camera.Camera;
+            var camera = _sceneData.Camera.Camera;
             Vector2 size;
             if (camera.orthographic)
             {
@@ -44,9 +44,9 @@ namespace Asteroids.GameFieldFeature
             }
 
             DebugX.Draw().WireQuad(Vector3.zero, Quaternion.LookRotation(Vector3.up), size);
-            r.FieldSize = size + Vector2.one * c.ScreenBorderOffset;
-            DebugX.Draw().WireQuad(Vector3.zero, Quaternion.LookRotation(Vector3.up), r.FieldSize);
-            r.BoundsOverlapsRuntime.AreaGrid = new(size.x / 4, -size.x / 2f, -size.y / 2f, size.x / 2f, size.y / 2f);
+            _runtime.FieldSize = size + Vector2.one * _config.ScreenBorderOffset;
+            DebugX.Draw().WireQuad(Vector3.zero, Quaternion.LookRotation(Vector3.up), _runtime.FieldSize);
+            _runtime.BoundsOverlapsRuntime.AreaGrid = new(size.x / 4, -size.x / 2f, -size.y / 2f, size.x / 2f, size.y / 2f);
         }
     }
 }

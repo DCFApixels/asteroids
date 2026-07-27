@@ -4,13 +4,13 @@ using UnityEngine.InputSystem;
 
 namespace Asteroids.LocalInputFeature
 {
-    [MetaGroup(LocalInputModule.META_GROUP)]
+    [MetaGroup(LocalInputModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
     [MetaColor(LocalInputModule.META_COLOR)]
     internal class LocalInputSystem : IEcsRun, IEcsInit
     {
         [DI] EcsDefaultWorld _world;
-        [DI] GameSceneData s;
-        [DI] LocalInputModuleConfig c;
+        [DI] GameSceneData _sceneData;
+        [DI] LocalInputModuleConfig _config;
 
         class InputAspect : EcsAspect
         {
@@ -60,46 +60,46 @@ namespace Asteroids.LocalInputFeature
 
         public void Init()
         {
-            c.MoveAction?.action?.Enable();
-            c.FireAction?.action?.Enable();
-            s.UI.GameScreen.MobileControlRoot.SetActive(c.ShowMobileControlsOnTouchDevices && IsTouchSupported());
+            _config.MoveAction?.action?.Enable();
+            _config.FireAction?.action?.Enable();
+            _sceneData.UI.GameScreen.MobileControlRoot.SetActive(_config.ShowMobileControlsOnTouchDevices && IsTouchSupported());
         }
 
-        private Vector2 ReadMoveAxis()
+        Vector2 ReadMoveAxis()
         {
-            Vector2 axis = c.MoveAction != null && c.MoveAction.action != null
-                ? c.MoveAction.action.ReadValue<Vector2>()
+            Vector2 axis = _config.MoveAction != null && _config.MoveAction.action != null
+                ? _config.MoveAction.action.ReadValue<Vector2>()
                 : ReadMoveAxisFromDevices();
             return axis != Vector2.zero ? axis : ReadMoveAxisFromMobileUi();
         }
 
-        private bool ReadFirePressedThisFrame()
+        bool ReadFirePressedThisFrame()
         {
-            bool isPressed = c.FireAction != null && c.FireAction.action != null
-                ? c.FireAction.action.WasPressedThisFrame()
+            bool isPressed = _config.FireAction != null && _config.FireAction.action != null
+                ? _config.FireAction.action.WasPressedThisFrame()
                 : ReadFirePressedFromDevices();
             return isPressed || ReadFirePressedFromMobileUi();
         }
 
-        private Vector2 ReadMoveAxisFromMobileUi()
+        Vector2 ReadMoveAxisFromMobileUi()
         {
             if (IsTouchSupported() == false)
             {
                 return Vector2.zero;
             }
 
-            var gameScreen = s.UI.GameScreen;
+            var gameScreen = _sceneData.UI.GameScreen;
             float horizontal = gameScreen.Left.IsDown ? -1f : gameScreen.Right.IsDown ? 1f : 0f;
             float vertical = gameScreen.Acceleration.IsDown ? 1f : 0f;
             return new Vector2(horizontal, vertical);
         }
 
-        private bool ReadFirePressedFromMobileUi()
+        bool ReadFirePressedFromMobileUi()
         {
-            return IsTouchSupported() && s.UI.GameScreen.Shoot.IsDown;
+            return IsTouchSupported() && _sceneData.UI.GameScreen.Shoot.IsDown;
         }
 
-        private Vector2 ReadMoveAxisFromDevices()
+        Vector2 ReadMoveAxisFromDevices()
         {
             Vector2 axis = default;
 
@@ -121,7 +121,7 @@ namespace Asteroids.LocalInputFeature
             return Vector2.ClampMagnitude(axis, 1f);
         }
 
-        private bool ReadFirePressedFromDevices()
+        bool ReadFirePressedFromDevices()
         {
             var keyboard = Keyboard.current;
             if (keyboard != null && keyboard.spaceKey.wasPressedThisFrame)
@@ -133,7 +133,7 @@ namespace Asteroids.LocalInputFeature
             return gamepad != null && gamepad.buttonSouth.wasPressedThisFrame;
         }
 
-        private bool IsTouchSupported()
+        bool IsTouchSupported()
         {
             return Touchscreen.current != null;
         }

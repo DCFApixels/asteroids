@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Asteroids.LocalInputFeature
 {
-    [MetaGroup(LocalInputModule.META_GROUP)]
+    [MetaGroup(LocalInputModule.META_GROUP, EcsConsts.COMPONENTS_GROUP)]
     [MetaColor(LocalInputModule.META_COLOR)]
     [System.Serializable]
     public struct MoveAxisInputEvent : IEcsComponent
@@ -20,6 +20,8 @@ namespace Asteroids.LocalInputFeature
         }
         public Vector2 Axis;
     }
+    [MetaGroup(LocalInputModule.META_GROUP, EcsConsts.COMPONENTS_GROUP)]
+    [MetaColor(LocalInputModule.META_COLOR)]
     [System.Serializable]
     public struct FireInputBeginEvent : IEcsComponent { }
 }

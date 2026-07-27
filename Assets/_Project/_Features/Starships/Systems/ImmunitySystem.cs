@@ -3,12 +3,14 @@ using UnityEngine;
 
 namespace Asteroids.StarshipsFeature
 {
-    internal class ImmunitySystem : IEcsRun
+    [MetaGroup(StarshipsModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
+    [MetaColor(StarshipsModule.META_COLOR)]
+    class ImmunitySystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private EcsGraphWorld _graphWorld;
+        [DI] EcsDefaultWorld _world;
+        [DI] EcsGraphWorld _graphWorld;
 
-        private class Aspect : EcsAspect
+        class Aspect : EcsAspect
         {
             public readonly EcsPool<HitImmunity> Immunities = Inc;
             public readonly EcsPool<Starship> Starships = Opt;

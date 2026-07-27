@@ -14,7 +14,7 @@ namespace Asteroids
             public EcsRefPool<ViewBase> Views = Inc;
             public EcsPool<KillRequest> KillRequests = Inc;
 
-            public EcsPool<ShortVFXSpawnRequest> ShortVFXSpawnRequest = Opt;
+            public EcsPool<ShortVFXSpawnRequest> ShortVFXSpawnRequests = Opt;
         }
         public void Run()
         {
@@ -25,13 +25,13 @@ namespace Asteroids
                 if (view.DeathVFX)
                 {
     
-                    ref var r = ref a.ShortVFXSpawnRequest.NewEntity();
-                    r.Prefab = view.DeathVFX;
-                    r.Position = view.transform.position;
-                    r.Scale = view.GetScale();
+                    ref var request = ref a.ShortVFXSpawnRequests.NewEntity();
+                    request.Prefab = view.DeathVFX;
+                    request.Position = view.transform.position;
+                    request.Scale = view.GetScale();
                     if (rec.Normal != null)
                     {
-                        r.Direction = rec.Normal.Value;
+                        request.Direction = rec.Normal.Value;
                     }
                 }
             }

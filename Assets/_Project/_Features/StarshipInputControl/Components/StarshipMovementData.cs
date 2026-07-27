@@ -2,13 +2,13 @@
 
 namespace Asteroids.StarshipInputControlFeature
 {
-    [MetaGroup(StarshipInputControlModule.META_GROUP)]
+    [MetaGroup(StarshipInputControlModule.META_GROUP, EcsConsts.COMPONENTS_GROUP)]
     [MetaColor(StarshipInputControlModule.META_COLOR)]
     [MetaID("89922AB99501C6637E5655E8ABB1F04A")]
     [System.Serializable]
-    public struct StarshipMovmentData : IEcsComponent
+    public struct StarshipMovementData : IEcsComponent
     {
-        public static readonly StarshipMovmentData Default = new StarshipMovmentData
+        public static readonly StarshipMovementData Default = new StarshipMovementData
         {
             MaxSpeed = 10,
             Acceleration = 10,

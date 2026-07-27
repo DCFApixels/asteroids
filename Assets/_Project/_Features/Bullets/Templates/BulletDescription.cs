@@ -26,8 +26,8 @@ namespace Asteroids.BulletsFeature
             sphere.Radius = BoundsRadius;
             ref var projectile = ref world.GetPool<Bullet>().TryAddOrGet(e);
             projectile.Description = this;
-            ref var lifeTime = ref world.GetPool<BulletLifeTime>().TryAddOrGet(e);
-            lifeTime.Time = LifeTime;
+            ref var lifetime = ref world.GetPool<BulletLifetime>().TryAddOrGet(e);
+            lifetime.Time = LifeTime;
         }
     }
 }

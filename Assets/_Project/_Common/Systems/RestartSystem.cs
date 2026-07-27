@@ -5,9 +5,9 @@ namespace Asteroids.Systems
 {
     internal class RestartSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
+        [DI] EcsDefaultWorld _world;
 
-        private class Aspect : EcsAspect
+        class Aspect : EcsAspect
         {
             public EcsTagPool<RestartEvent> RestartEvents = Inc;
         }

@@ -5,28 +5,26 @@ using UnityEngine;
 
 namespace Asteroids.StarshipInputControlFeature
 {
-    [MetaGroup(StarshipInputControlModule.META_GROUP)]
+    [MetaGroup(StarshipInputControlModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
     [MetaColor(StarshipInputControlModule.META_COLOR)]
-    public class StarshipMovmentSystem : IEcsRun
+    class StarshipMovementSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
         class Aspect : EcsAspect
         {
             public EcsPool<RigidTransform> RigidTransforms = Inc;
             public EcsPool<Velocity> Velocities = Inc;
-            public EcsPool<StarshipMovmentData> MovementDatas = Inc;
-            public EcsPool<MoveAxisInputEvent> MoveAxisInputSignals = Inc;
+            public EcsPool<StarshipMovementData> MovementDatas = Inc;
+            public EcsPool<MoveAxisInputEvent> MoveAxisInputEvents = Inc;
         }
         public void Run()
         {
-            _world.GetAspects(out Aspect a);
-
-            foreach (var e in _world.Where(a))
+            foreach (var e in _world.Where(out Aspect a))
             {
                 ref var rigidTransform = ref a.RigidTransforms[e];
                 ref var velocity = ref a.Velocities[e];
                 ref var movementData = ref a.MovementDatas[e];
-                ref var moveAxisInputSignal = ref a.MoveAxisInputSignals[e];
+                ref var moveAxisInput = ref a.MoveAxisInputEvents[e];
 
                 var forward = rigidTransform.Rotation * Vector3.forward;
                 forward.y = 0;
@@ -38,15 +36,15 @@ namespace Asteroids.StarshipInputControlFeature
 
                 if (forwardProjectSqrMag < maxSpeedSqr)
                 {
-                    var forwardAcceleration = forward * movementData.Acceleration * Time.deltaTime * Mathf.Clamp01(moveAxisInputSignal.Vertical);
+                    var forwardAcceleration = forward * movementData.Acceleration * Time.deltaTime * Mathf.Clamp01(moveAxisInput.Vertical);
                     velocity.Lineral += forwardAcceleration;
                 }
 
-                float rotangle = movementData.MaxRotationSpeed;
+                var maxRotationSpeed = movementData.MaxRotationSpeed;
 
-                if (rotangle > 0 && velocity.Angular.y < rotangle || velocity.Angular.y > rotangle)
+                if ((maxRotationSpeed > 0 && velocity.Angular.y < maxRotationSpeed) || velocity.Angular.y > maxRotationSpeed)
                 {
-                    velocity.Angular.y += rotangle * moveAxisInputSignal.Horizontal * Time.deltaTime;
+                    velocity.Angular.y += maxRotationSpeed * moveAxisInput.Horizontal * Time.deltaTime;
                 }
             }
         }

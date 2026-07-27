@@ -6,18 +6,20 @@ using Modules.Motion;
 
 namespace Asteroids.StarshipsFeature
 {
-    internal class SpawnStarshipSystem : IEcsRun
+    [MetaGroup(StarshipsModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
+    [MetaColor(StarshipsModule.META_COLOR)]
+    class SpawnStarshipSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
-        [DI] StarshipsFeatureConfig c;
+        [DI] StarshipsFeatureConfig _config;
 
         class RequestAspect : EcsAspect
         {
-            public readonly EcsPool<SpawnStarshipRequest> Requests = Inc;
+            public readonly EcsPool<SpawnStarshipRequest> SpawnStarshipRequests = Inc;
         }
         class SpawnAspect : EcsAspect
         {
-            public readonly EcsPool<RigidTransform> TransformDatas = Inc;
+            public readonly EcsPool<RigidTransform> RigidTransforms = Inc;
             public readonly EcsPool<Starship> Starships = Inc;
             public readonly EcsPool<HitImmunity> Immunities = Inc;
             public readonly EcsPool<OutOfGameFieldBehavior> OutOfGameFieldBehaviors = Inc;
@@ -28,20 +30,20 @@ namespace Asteroids.StarshipsFeature
             _world.GetAspects(out SpawnAspect spawnA, out RequestAspect eventA);
             foreach (var eventE in _world.Where(eventA))
             {
-                ref var req = ref eventA.Requests[eventE];
+                ref var req = ref eventA.SpawnStarshipRequests[eventE];
 
-                var newE = _world.NewEntity(c.PlayerStarshipTemplate);
+                var newE = _world.NewEntity(_config.PlayerStarshipTemplate);
                 spawnA.Apply(_world, newE);
 
-                spawnA.Immunities[newE].TimeLeft = c.StarshipSpawnImmunityTime;
+                spawnA.Immunities[newE].TimeLeft = _config.StarshipSpawnImmunityTime;
 
-                ref var newTransformData = ref spawnA.TransformDatas[newE];
-                newTransformData.Position = req.Position;
-                newTransformData.Rotation = req.Rotation;
+                ref var newRigidTransform = ref spawnA.RigidTransforms[newE];
+                newRigidTransform.Position = req.Position;
+                newRigidTransform.Rotation = req.Rotation;
 
             }
 
-            eventA.Requests.ClearAll();
+            eventA.SpawnStarshipRequests.ClearAll();
         }
     }
 }

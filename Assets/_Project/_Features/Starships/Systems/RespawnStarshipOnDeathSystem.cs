@@ -3,11 +3,13 @@ using DCFApixels.DragonECS;
 
 namespace Asteroids.StarshipsFeature
 {
-    internal class RespawnStarshipOnDeathSystem : IEcsRun
+    [MetaGroup(StarshipsModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
+    [MetaColor(StarshipsModule.META_COLOR)]
+    class RespawnStarshipOnDeathSystem : IEcsRun
     {
-        [DI] private EcsDefaultWorld _world;
-        [DI] private GameRuntimeData gameRuntimeData;
-        [DI] private StarshipsRuntimeData starshipsRuntimeData;
+        [DI] EcsDefaultWorld _world;
+        [DI] GameRuntimeData _gameRuntime;
+        [DI] StarshipsRuntimeData _runtime;
 
         class StarshipAspect : EcsAspect
         {
@@ -18,13 +20,13 @@ namespace Asteroids.StarshipsFeature
         {
             var starshipA = _world.GetAspect<StarshipAspect>();
 
-            if (starshipA.Starships.Count != 0 || gameRuntimeData.GameState != GameState.Play)
+            if (starshipA.Starships.Count != 0 || _gameRuntime.GameState != GameState.Play)
             {
                 return;
             }
 
-            starshipsRuntimeData.LifeLeft--;
-            if (starshipsRuntimeData.LifeLeft == 0)
+            _runtime.LifeLeft--;
+            if (_runtime.LifeLeft == 0)
             {
                 _world.GetPool<ChangeState>().Add(_world.NewEntity()).NextState = GameState.Lose;
                 return;

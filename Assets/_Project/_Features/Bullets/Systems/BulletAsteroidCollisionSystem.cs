@@ -8,27 +8,29 @@ using UnityEngine;
 
 namespace Asteroids.BulletsFeature
 {
-    internal class BulletAsteroidCollisionSystem : IEcsRun, IEcsDefaultAddParams
+    [MetaGroup(BulletsModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
+    [MetaColor(BulletsModule.META_COLOR)]
+    class BulletAsteroidCollisionSystem : IEcsRun, IEcsDefaultAddParams
     {
         public AddParams AddParams => -1;
 
-        [DI] private EntityGraph _graph;
+        [DI] EntityGraph _graph;
 
-        private class RelationAspect : EcsAspect
+        class RelationAspect : EcsAspect
         {
             public EcsPool<OverlapsEvent> Overlaps = Inc;
             public EcsPool<HitRequest> HitRequests = Opt;
             public EcsPool<HitImmunity> Immunities = Opt;
         }
 
-        private class BulletAspect : EcsAspect
+        class BulletAspect : EcsAspect
         {
             public EcsPool<Velocity> Velocities = Inc;
-            public EcsTagPool<TouchToHitEmmiter> TouchToHitEmmiters = Inc;
+            public EcsTagPool<TouchToHitEmitter> TouchToHitEmitters = Inc;
             public EcsPool<KillRequest> KillRequests = Exc;
         }
 
-        private class AsteroidAspect : EcsAspect
+        class AsteroidAspect : EcsAspect
         {
             public EcsPool<Asteroid> Asteroids = Inc;
         }

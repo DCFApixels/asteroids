@@ -9,15 +9,15 @@ namespace Asteroids.Systems
 {
     internal class ChangeStateSystem : IEcsRun
     {
-        [DI] private GameSceneData s;
-        [DI] private StarshipsFeatureSceneData starshipsSceneData;
-        [DI] private GameRuntimeData gameRuntimeData;
-        [DI] private StarshipsRuntimeData starshipsRuntimeData;
-        [DI] private AsteroidsRuntimeData asteroidsRuntimeData;
-        [DI] private StarshipsFeatureConfig c;
-        [DI] private EcsDefaultWorld _world;
+        [DI] GameSceneData _sceneData;
+        [DI] StarshipsFeatureSceneData _starshipsSceneData;
+        [DI] GameRuntimeData _gameRuntime;
+        [DI] StarshipsRuntimeData _starshipsRuntime;
+        [DI] AsteroidsRuntimeData _asteroidsRuntime;
+        [DI] StarshipsFeatureConfig _starshipsConfig;
+        [DI] EcsDefaultWorld _world;
 
-        private class Aspect : EcsAspect
+        class Aspect : EcsAspect
         {
             public readonly EcsPool<ChangeState> ChangeStates = Inc;
         }
@@ -27,31 +27,31 @@ namespace Asteroids.Systems
             foreach (var e in _world.Where(out Aspect a))
             {
                 ref var changeState = ref a.ChangeStates.Get(e);
-                if (gameRuntimeData.GameState != changeState.NextState)
+                if (_gameRuntime.GameState != changeState.NextState)
                 {
                     switch (changeState.NextState)
                     {
                         case GameState.Play:
                             _world.GetPool<SpawnStarshipRequest>().NewEntity() = new()
                             {
-                                Position = starshipsSceneData.SpawnPlayerPosition.position,
-                                Rotation = starshipsSceneData.SpawnPlayerPosition.rotation,
+                                Position = _starshipsSceneData.SpawnPlayerPosition.position,
+                                Rotation = _starshipsSceneData.SpawnPlayerPosition.rotation,
                             };
-                            asteroidsRuntimeData.LevelStartTime = Time.time;
-                            starshipsRuntimeData.LifeLeft = c.Lifes;
-                            gameRuntimeData.Score = 0;
-                            s.UI.GameScreen.Show(true);
-                            s.UI.LoseScreen.Show(false);
+                            _asteroidsRuntime.LevelStartTime = Time.time;
+                            _starshipsRuntime.LifeLeft = _starshipsConfig.Lifes;
+                            _gameRuntime.Score = 0;
+                            _sceneData.UI.GameScreen.Show(true);
+                            _sceneData.UI.LoseScreen.Show(false);
                             break;
                         case GameState.Lose:
-                            s.UI.GameScreen.Show(false);
-                            s.UI.LoseScreen.Show(gameRuntimeData.Score);
+                            _sceneData.UI.GameScreen.Show(false);
+                            _sceneData.UI.LoseScreen.Show(_gameRuntime.Score);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
 
-                    gameRuntimeData.GameState = changeState.NextState;
+                    _gameRuntime.GameState = changeState.NextState;
                 }
 
                 a.ChangeStates.Del(e);

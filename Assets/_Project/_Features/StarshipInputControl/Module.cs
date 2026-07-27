@@ -12,8 +12,7 @@ namespace Asteroids.StarshipInputControlFeature
         public void Import(EcsPipeline.Builder b)
         {
             b.Layers.Add(META_GROUP).After(EcsConsts.BASIC_LAYER);
-            //b.Layers.InsertAfter(EcsConsts.BASIC_LAYER, META_GROUP);
-            b.Add(new StarshipMovmentSystem());
+            b.Add(new StarshipMovementSystem());
         }
     }
 }

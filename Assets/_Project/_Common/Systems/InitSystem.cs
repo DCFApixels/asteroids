@@ -8,10 +8,10 @@ namespace Asteroids.Systems
         public AddParams AddParams => EcsConsts.PRE_BEGIN_LAYER;
 
         [DI] EcsDefaultWorld _world;
-        [DI] GameSceneData s;
+        [DI] GameSceneData _sceneData;
         public void Init()
         {
-            s.UI.LoseScreen.InjectWorld(_world);
+            _sceneData.UI.LoseScreen.InjectWorld(_world);
 
             _world.GetPool<ChangeState>().Add(_world.NewEntity()).NextState = GameState.Play;
         }

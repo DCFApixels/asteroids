@@ -7,33 +7,35 @@ using UnityEngine;
 
 namespace Asteroids.StarshipsFeature
 {
-    internal class StarshipAsteroidCollisionSystem : IEcsRun
+    [MetaGroup(StarshipsModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
+    [MetaColor(StarshipsModule.META_COLOR)]
+    class StarshipAsteroidCollisionSystem : IEcsRun
     {
-        [DI] private EntityGraph _graph;
-        [DI] private GameRuntimeData _gameRuntimeData;
+        [DI] EntityGraph _graph;
+        [DI] GameRuntimeData _gameRuntime;
 
-        private class RelationAspect : EcsAspect
+        class RelationAspect : EcsAspect
         {
             public EcsPool<OverlapsEvent> Overlaps = Inc;
         }
 
-        private class StarshipAspect : EcsAspect
+        class StarshipAspect : EcsAspect
         {
             public EcsPool<Starship> Starships = Inc;
-            public EcsPool<RigidTransform> Transforms = Inc;
+            public EcsPool<RigidTransform> RigidTransforms = Inc;
             public EcsPool<HitImmunity> Immunities = Exc;
             public EcsPool<KillRequest> KillRequests = Opt;
         }
 
-        private class AsteroidAspect : EcsAspect
+        class AsteroidAspect : EcsAspect
         {
             public EcsPool<Asteroid> Asteroids = Inc;
-            public EcsPool<RigidTransform> Transforms = Inc;
+            public EcsPool<RigidTransform> RigidTransforms = Inc;
         }
 
         public void Run()
         {
-            if (_gameRuntimeData.GameState != GameState.Play)
+            if (_gameRuntime.GameState != GameState.Play)
             {
                 return;
             }
@@ -52,7 +54,7 @@ namespace Asteroids.StarshipsFeature
                 }
 
                 ref KillRequest killRequest = ref starshipAspect.KillRequests.TryAddOrGet(starshipEntity);
-                Vector3 normal = starshipAspect.Transforms[starshipEntity].Position - asteroidAspect.Transforms[asteroidEntity].Position;
+                Vector3 normal = starshipAspect.RigidTransforms[starshipEntity].Position - asteroidAspect.RigidTransforms[asteroidEntity].Position;
                 killRequest.Normal = normal.sqrMagnitude > 0.0001f ? normal.normalized : Vector3.forward;
             }
         }

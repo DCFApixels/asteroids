@@ -3,7 +3,7 @@ using DCFApixels.DragonECS;
 
 namespace Asteroids.Systems
 {
-    internal class DeleteKilledEntitesSystem : IEcsRun, IEcsDefaultAddParams
+    class DeleteKilledEntitiesSystem : IEcsRun, IEcsDefaultAddParams
     {
         public AddParams AddParams => EcsConsts.POST_END_LAYER;
 
@@ -11,11 +11,11 @@ namespace Asteroids.Systems
 
         class Aspect : EcsAspect
         {
-            public EcsPool<KillRequest> Requests = Inc;
+            public EcsPool<KillRequest> KillRequests = Inc;
         }
         public void Run()
         {
-            foreach (var e in _world.Where(out Aspect a))
+            foreach (var e in _world.Where(out Aspect _))
             {
                 _world.DelEntity(e);
             }

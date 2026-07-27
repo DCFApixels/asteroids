@@ -2,37 +2,38 @@ using Asteroids.Components;
 using DCFApixels.DragonECS;
 using Modules.BoundsOverlaps;
 using Modules.CameraController;
-using Modules.FX;
 using Modules.Motion;
 using UnityEngine;
 
 namespace Asteroids.AsteroidsFeature
 {
-    internal class CheckAsteroidHitSystem : IEcsRun
+    [MetaGroup(AsteroidsModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
+    [MetaColor(AsteroidsModule.META_COLOR)]
+    class CheckAsteroidHitSystem : IEcsRun
     {
-        [DI] GameRuntimeData gameRuntimeData;
-        [DI] AsteroidsFeatureConfig c;
+        [DI] GameRuntimeData _gameRuntime;
+        [DI] AsteroidsFeatureConfig _config;
         [DI] EntityGraph _graph;
 
-        private class OtherAspect : EcsAspect
+        class OtherAspect : EcsAspect
         {
             public EcsPool<Asteroid> Asteroids = Exc;
         }
 
-        private class RelAspect : EcsAspect
+        class RelAspect : EcsAspect
         {
             public EcsPool<HitRequest> HitRequests = Inc;
         }
 
-        private class AsteroidAspect : EcsAspect
+        class AsteroidAspect : EcsAspect
         {
             public EcsPool<Asteroid> Asteroids = Inc;
             public EcsPool<BoundsSphere> BoundsSpheres = Inc;
-            public EcsPool<RigidTransform> Transforms = Inc;
+            public EcsPool<RigidTransform> RigidTransforms = Inc;
             public EcsPool<KillRequest> KillRequests = Opt;
         }
 
-        private class HitSourceAspect : EcsAspect
+        class HitSourceAspect : EcsAspect
         {
             public EcsPool<Asteroid> Asteroids = Exc;
             public EcsPool<KillRequest> KillRequests = Opt;
@@ -78,9 +79,9 @@ namespace Asteroids.AsteroidsFeature
 
                 ref var asteroid = ref asteroidA.Asteroids[asteroidE];
                 ref var boundsSphere = ref asteroidA.BoundsSpheres[asteroidE];
-                ref var transform = ref asteroidA.Transforms[asteroidE];
+                ref var rigidTransform = ref asteroidA.RigidTransforms[asteroidE];
 
-                gameRuntimeData.Score++;
+                _gameRuntime.Score++;
                 asteroidA.KillRequests.TryAddOrGet(asteroidE);
                 ShakeCamera();
 
@@ -90,11 +91,11 @@ namespace Asteroids.AsteroidsFeature
                 }
 
                 asteroid.DeathsLeft--;
-                SpawnFragments(asteroid, boundsSphere.Radius, transform.Position, hitNormal);
+                SpawnFragments(asteroid, boundsSphere.Radius, rigidTransform.Position, hitNormal);
             }
         }
 
-        private void SpawnFragments(Asteroid asteroid, float parentRadius, Vector3 position, Vector3 hitNormal)
+        void SpawnFragments(Asteroid asteroid, float parentRadius, Vector3 position, Vector3 hitNormal)
         {
             var requestsPool = _graph.World.GetPool<SpawnAsteroidRequest>();
             for (var i = 0; i < 2; i++)
@@ -103,14 +104,14 @@ namespace Asteroids.AsteroidsFeature
 
                 ref var req = ref requestsPool.NewEntity();
                 req.Description = asteroid.Description;
-                req.OverrideRadius = parentRadius * c.AsteroidSplitMultiplier;
+                req.OverrideRadius = parentRadius * _config.AsteroidSplitMultiplier;
                 req.OverrideDeathsCount = asteroid.DeathsLeft;
                 req.Position = position;
                 req.Rotation = Quaternion.LookRotation(startForward);
             }
         }
 
-        private void ShakeCamera()
+        void ShakeCamera()
         {
             ref var shake = ref _graph.World.GetPool<CameraShakeRequest>().NewEntity();
             shake.Strength = 1f;

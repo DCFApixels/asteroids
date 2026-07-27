@@ -38,7 +38,7 @@ namespace Asteroids
 
                 .AddModule(new LocalInputModule())
 
-                .AddModule(new AsteroidModule())
+                .AddModule(new AsteroidsModule())
 
                 .Add(new UIUpdateSystem())
                 .Add(new RestartSystem())
@@ -54,7 +54,7 @@ namespace Asteroids
                 .AddModule(new BoundsOverlapsModule())
 
                 .AddModule(new StarshipsModule())
-                .Add(new DeleteKilledEntitesSystem())
+                .Add(new DeleteKilledEntitiesSystem())
 
                 // Injecting into systems.
                 .Inject(_world, _graphWorld, graph, StaticData, SceneData)

@@ -6,13 +6,15 @@ using UnityEngine;
 
 namespace Asteroids.GameFieldFeature
 {
-    internal class OutOfGameFieldSystem : IEcsRun
+    [MetaGroup(GameFieldModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
+    [MetaColor(GameFieldModule.META_COLOR)]
+    class OutOfGameFieldSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
-        [DI] GameFieldRuntimeData r;
-        [DI] GameFieldModuleConfig c;
+        [DI] GameFieldRuntimeData _runtime;
+        [DI] GameFieldModuleConfig _config;
 
-        private class Aspect : EcsAspect
+        class Aspect : EcsAspect
         {
             public EcsPool<RigidTransform> RigidTransforms = Inc;
             public EcsPool<BoundsSphere> BoundsSpheres = Inc;
@@ -43,11 +45,9 @@ namespace Asteroids.GameFieldFeature
                     case OutOfGameFieldBehaviorMode.Wrap:
                         {
                             Vector3 position = rigidTransform.Position;
-                            Vector2 fieldSize = r.FieldSize;
+                            Vector2 fieldSize = _runtime.FieldSize;
 
                             Vector3 gameFieldSize = new Vector3(fieldSize.x, 0, fieldSize.y) + 2f * boundsSphere.Radius * Vector3.one;
-
-
                             if (excess.x != 0)
                             {
                                 position.x += -Mathf.Sign(excess.x) * gameFieldSize.x;
@@ -62,7 +62,7 @@ namespace Asteroids.GameFieldFeature
                         break;
                     case OutOfGameFieldBehaviorMode.KillImmediate:
                         {
-                            var fieldSize = r.FieldSize * c.AdditionalKillOffset;
+                            var fieldSize = _runtime.FieldSize * _config.AdditionalKillOffset;
                             if (CheckExcess(rigidTransform.Position, fieldSize))
                             {
                                 _world.DelEntity(e);
@@ -71,7 +71,7 @@ namespace Asteroids.GameFieldFeature
                         break;
                     case OutOfGameFieldBehaviorMode.Kill:
                         {
-                            var fieldSize = r.FieldSize * c.AdditionalKillOffset;
+                            var fieldSize = _runtime.FieldSize * _config.AdditionalKillOffset;
                             if (CheckExcess(rigidTransform.Position, fieldSize))
                             {
                                 a.KillRequests.TryAddOrGet(e);
@@ -79,14 +79,12 @@ namespace Asteroids.GameFieldFeature
                         }
                         break;
                 }
-
-
             }
         }
 
-        private Vector3 CalculateExcess(Vector3 position, float radius)
+        Vector3 CalculateExcess(Vector3 position, float radius)
         {
-            Vector2 fieldSize = r.FieldSize;
+            Vector2 fieldSize = _runtime.FieldSize;
             Vector3 fieldSizeHalf = new Vector3(fieldSize.x, 0, fieldSize.y) / 2f + Vector3.one * 2f * radius;
             Vector3 excess = position;
 
@@ -97,16 +95,16 @@ namespace Asteroids.GameFieldFeature
             return excess;
         }
 
-        private float CalculateAxisExcess(float axis, float sizeHalf)
+        float CalculateAxisExcess(float axis, float sizeHalf)
         {
             return Mathf.Max(0, axis - sizeHalf);
         }
 
-        private bool CheckExcess(Vector3 position, Vector2 fieldSize)
+        bool CheckExcess(Vector3 position, Vector2 fieldSize)
         {
-            return 
-                position.x <= -fieldSize.x / 2f || position.x > fieldSize.x / 2f || 
+            return
+                position.x <= -fieldSize.x / 2f || position.x > fieldSize.x / 2f ||
                 position.z <= -fieldSize.y / 2f || position.z > fieldSize.y / 2f;
-        }          
+        }
     }
 }

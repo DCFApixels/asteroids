@@ -5,36 +5,38 @@ using UnityEngine;
 
 namespace Asteroids.AsteroidsFeature
 {
-    public class AutoSpawnAsteroidSystem : IEcsRun
+    [MetaGroup(AsteroidsModule.META_GROUP, EcsConsts.SYSTEMS_GROUP)]
+    [MetaColor(AsteroidsModule.META_COLOR)]
+    class AutoSpawnAsteroidSystem : IEcsRun
     {
         [DI] EcsDefaultWorld _world;
-        [DI] AsteroidsFeatureConfig c;
-        [DI] GameRuntimeData gameRuntimeData;
-        [DI] AsteroidsRuntimeData asteroidsRuntimeData;
-        [DI] GameFieldRuntimeData gameFieldRuntimeData;
+        [DI] AsteroidsFeatureConfig _config;
+        [DI] GameRuntimeData _gameRuntime;
+        [DI] AsteroidsRuntimeData _runtime;
+        [DI] GameFieldRuntimeData _gameFieldRuntime;
 
         int _previousSpawnTime;
         
         public void Run()
         {
-            if (gameRuntimeData.GameState != GameState.Play)
+            if (_gameRuntime.GameState != GameState.Play)
             {
                 return;
             }
 
-            var gameTime = (int)(Time.time - asteroidsRuntimeData.LevelStartTime);
-            if (gameTime != _previousSpawnTime && gameTime >= c.SpawnFrequency &&
-                gameTime % c.SpawnFrequency == 0)
+            var gameTime = (int)(Time.time - _runtime.LevelStartTime);
+            if (gameTime != _previousSpawnTime && gameTime >= _config.SpawnFrequency &&
+                gameTime % _config.SpawnFrequency == 0)
             {
                 _previousSpawnTime = gameTime;
 
                 var spawnRequests = _world.GetPool<SpawnAsteroidRequest>();
                 
-                for (var i = 0; i < c.SpawnAmount; i++)
+                for (var i = 0; i < _config.SpawnAmount; i++)
                 {
-                    var size = gameFieldRuntimeData.FieldSize;
+                    var size = _gameFieldRuntime.FieldSize;
 
-                    var startAsteroidRadius = c.AsteroidDescription.BoundsRadius;
+                    var startAsteroidRadius = _config.AsteroidDescription.BoundsRadius;
 
                     var spawnPosition = new Vector3(
                         Random.value > 0.5f
@@ -45,10 +47,10 @@ namespace Asteroids.AsteroidsFeature
 
                     var startRotation = Quaternion.LookRotation(-spawnPosition);
                     ref var spawnRequest = ref spawnRequests.Add(_world.NewEntity());
-                    spawnRequest.Description = c.AsteroidDescription;
+                    spawnRequest.Description = _config.AsteroidDescription;
                     spawnRequest.Position = spawnPosition;
                     spawnRequest.Rotation = startRotation;
-                    spawnRequest.OverrideDeathsCount = c.AsteroidDescription.DeathsCount;
+                    spawnRequest.OverrideDeathsCount = _config.AsteroidDescription.DeathsCount;
                     spawnRequest.OverrideRadius = startAsteroidRadius;
                 }
             }
