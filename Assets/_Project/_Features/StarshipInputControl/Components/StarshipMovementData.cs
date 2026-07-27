@@ -12,10 +12,14 @@ namespace Asteroids.StarshipInputControlFeature
         {
             MaxSpeed = 10,
             Acceleration = 10,
+            MinRotationSpeed = 90,
+            MaxRotationSpeedVelocityThreshold = 10,
             MaxRotationSpeed = 360
         };
         public float MaxSpeed;
+        public float MinRotationSpeed;
         public float MaxRotationSpeed;
+        public float MaxRotationSpeedVelocityThreshold;
         public float Acceleration;
 
         public float Power;

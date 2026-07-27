@@ -40,13 +40,25 @@ namespace Asteroids.StarshipInputControlFeature
                     velocity.Lineral += forwardAcceleration;
                 }
 
-                var maxRotationSpeed = movementData.MaxRotationSpeed;
+                var rotationSpeed = CalculateRotationSpeed(movementData, velocity.Lineral);
 
-                if ((maxRotationSpeed > 0 && velocity.Angular.y < maxRotationSpeed) || velocity.Angular.y > maxRotationSpeed)
-                {
-                    velocity.Angular.y += maxRotationSpeed * moveAxisInput.Horizontal * Time.deltaTime;
-                }
+                velocity.Angular.y += rotationSpeed * moveAxisInput.Horizontal * Time.deltaTime;
+                velocity.Angular.y = Mathf.Clamp(velocity.Angular.y, -rotationSpeed, rotationSpeed);
             }
+        }
+
+        float CalculateRotationSpeed(StarshipMovementData movementData, Vector3 velocity)
+        {
+            var minRotationSpeed = Mathf.Max(0f, movementData.MinRotationSpeed);
+            var maxRotationSpeed = Mathf.Max(minRotationSpeed, movementData.MaxRotationSpeed);
+
+            var velocityOnGamePlane = new Vector2(velocity.x, velocity.z).magnitude;
+            var threshold = movementData.MaxRotationSpeedVelocityThreshold > 0f
+                ? movementData.MaxRotationSpeedVelocityThreshold
+                : movementData.MaxSpeed;
+            var speedT = threshold > 0f ? Mathf.Clamp01(velocityOnGamePlane / threshold) : 1f;
+
+            return Mathf.Lerp(minRotationSpeed, maxRotationSpeed, speedT);
         }
     }
 }
