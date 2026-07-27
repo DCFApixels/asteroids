@@ -30,8 +30,8 @@ MonoBehaviour:
       data:
         component:
           MaxSpeed: 10
-          MinRotationSpeed: 45
-          MaxRotationSpeed: 360
+          MinRotationSpeed: 15
+          MaxRotationSpeed: 450
           MaxRotationSpeedVelocityThreshold: 10
           Acceleration: 5
           Power: 0
