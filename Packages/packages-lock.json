@@ -14,14 +14,14 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "d0bc60edbd3ca210464eb9b1c23b10a43d7b39b7"
+      "hash": "ef87aec2403edff18e7af9cb2dcf3cc35445559e"
     },
     "com.dcfa_pixels.dragonecs": {
       "version": "https://github.com/DCFApixels/DragonECS.git",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "630978d276c130e73d2f50a990814894ab4d54ed"
+      "hash": "d3bc0d995b2e0eb50c00ca6f6677f3830574b57c"
     },
     "com.dcfa_pixels.dragonecs-auto_injections": {
       "version": "https://github.com/DCFApixels/DragonECS-AutoInjections.git",

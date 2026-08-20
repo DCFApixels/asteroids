@@ -47,25 +47,53 @@ namespace DCFApixels
     [Serializable]
     public abstract class UPool
     {
+        private readonly struct UPoolObjectId : IEquatable<UPoolObjectId>
+        {
+#if UNITY_6000_2_OR_NEWER
+            private readonly EntityId _value;
+
+            private UPoolObjectId(EntityId value)
+#else
+            private readonly int _value;
+
+            private UPoolObjectId(int value)
+#endif
+            {
+                _value = value;
+            }
+            public static UPoolObjectId From(UnityObject obj)
+            {
+#if UNITY_6000_2_OR_NEWER
+                return new UPoolObjectId(obj.GetEntityId());
+#else
+                return new UPoolObjectId(obj.GetInstanceID());
+#endif
+            }
+            public bool Equals(UPoolObjectId other) { return _value.Equals(other._value); }
+            public override bool Equals(object obj) { return obj is UPoolObjectId other && Equals(other); }
+            public override int GetHashCode() { return _value.GetHashCode(); }
+            public override string ToString() { return _value.ToString(); }
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void StaticCleanup()
         {
             _pools.Clear();
         }
-        private static readonly Dictionary<int, UPool> _pools = new Dictionary<int, UPool>(256);
-        private static readonly List<int> _instIDsBuffer = new List<int>(32);
+        private static readonly Dictionary<UPoolObjectId, UPool> _pools = new Dictionary<UPoolObjectId, UPool>(256);
+        private static readonly List<UPoolObjectId> _idsBuffer = new List<UPoolObjectId>(32);
         public static void UnloadAllEmpty()
         {
-            _instIDsBuffer.Clear();
+            _idsBuffer.Clear();
             foreach (var (id, pool) in _pools)
             {
                 if (pool.CheckEmpty())
                 {
                     pool.OnUnload(true);
-                    _instIDsBuffer.Add(id);
+                    _idsBuffer.Add(id);
                 }
             }
-            foreach (var id in _instIDsBuffer)
+            foreach (var id in _idsBuffer)
             {
                 _pools.Remove(id);
             }
@@ -75,12 +103,12 @@ namespace DCFApixels
             if(TryGetExistPool(prefab, out UPool poolRaw))
             {
                 poolRaw.OnUnload(withDestroy);
-                _pools.Remove(prefab.GetInstanceID());
+                _pools.Remove(UPoolObjectId.From(prefab));
             }
         }
         public static bool TryGetExistPool(UnityObject prefabRaw, out UPool poolRaw)
         {
-            int id = prefabRaw.GetInstanceID();
+            UPoolObjectId id = UPoolObjectId.From(prefabRaw);
             return _pools.TryGetValue(id, out poolRaw);
         }
         public static bool TryGetExistPool<T>(T prefab, out UPool<T> pool) where T : Component
@@ -99,7 +127,7 @@ namespace DCFApixels
             //if (checkPrefab && UnityEditor.PrefabUtility.IsPartOfPrefabAsset(prefab.gameObject) == false) { Debug.LogWarning($"Соспавнен объект не из префаба. {prefab.name}"); }
 #endif
             UPool<T> result = null;
-            int id = prefab.GetInstanceID();
+            UPoolObjectId id = UPoolObjectId.From(prefab);
             bool createNew = true;
             if (_pools.TryGetValue(id, out UPool poolRaw))
             {
