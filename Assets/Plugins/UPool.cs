@@ -121,11 +121,8 @@ namespace DCFApixels
             pool = null;
             return false;
         }
-        public static UPool<T> GetFor<T>(T prefab, bool checkPrefab = true) where T : Component
+        public static UPool<T> GetFor<T>(T prefab) where T : Component
         {
-#if UNITY_EDITOR
-            //if (checkPrefab && UnityEditor.PrefabUtility.IsPartOfPrefabAsset(prefab.gameObject) == false) { Debug.LogWarning($"Соспавнен объект не из префаба. {prefab.name}"); }
-#endif
             UPool<T> result = null;
             UPoolObjectId id = UPoolObjectId.From(prefab);
             bool createNew = true;
@@ -190,13 +187,113 @@ namespace DCFApixels
         public abstract void DespawnRaw(UnityObject obj);
         protected abstract void OnUnload(bool withDestroy);
     }
-    public static class UPoolExt 
+    [Serializable]
+    public struct UPrefab<T> where T : Component
     {
-        public static void Despawn<T>(this T prefab, T instance)
-            where T : Component
+        [SerializeField]
+        private T _prefab;
+        [NonSerialized]
+        private UPool<T> _pool;
+        public UPrefab(T prefab)
         {
-            UPool.GetFor(prefab).Despawn(instance);
+            _prefab = prefab;
+            _pool = null;
         }
+        public T Value { get { return _prefab; } }
+        public bool IsAssigned { get { return _prefab; } }
+        public UPool<T> Pool { get { return GetPool(); } }
+
+        public UPool<T> GetPool()
+        {
+            if (!_prefab)
+            {
+                throw new InvalidOperationException($"{typeof(T).Name} prefab is missing.");
+            }
+            if (_pool == null || _pool.IsUnloaded || _pool.Prefab != _prefab)
+            {
+                _pool = UPool.GetFor(_prefab);
+            }
+            return _pool;
+        }
+
+        public bool TryGetExistingPool(out UPool<T> pool)
+        {
+            if (_pool != null && !_pool.IsUnloaded && _pool.Prefab == _prefab)
+            {
+                pool = _pool;
+                return true;
+            }
+            if (!_prefab)
+            {
+                pool = null;
+                return false;
+            }
+            if (UPool.TryGetExistPool(_prefab, out pool))
+            {
+                _pool = pool;
+                return true;
+            }
+            return false;
+        }
+        public void Prewarm(int count) { GetPool().Prewarm(count); }
+        public void DontDestroyOnLoad() { GetPool().DontDestroyOnLoad(); }
+
+        public void Unload(bool withDestroy = true)
+        {
+            if (!_prefab)
+            {
+                _pool = null;
+                return;
+            }
+            UPool.UnloadFor(_prefab, withDestroy);
+            _pool = null;
+        }
+        public T Spawn(Transform parent = null)
+        {
+            return GetPool().Spawn(parent);
+        }
+        public T Spawn(Transform parent, Vector3 localPos)
+        {
+            return GetPool().Spawn(parent, localPos);
+        }
+        public T Spawn(Transform parent, Vector3 localPos, Quaternion localRot)
+        {
+            return GetPool().Spawn(parent, localPos, localRot);
+        }
+        public T Spawn(Transform parent, Vector3 localPos, Quaternion localRot, Vector3 scale)
+        {
+            return GetPool().Spawn(parent, localPos, localRot, scale);
+        }
+        public UPoolSpawnScope SpawnTemp(out T unit, Transform parent = null)
+        {
+            return GetPool().SpawnTemp(out unit, parent);
+        }
+        public UPoolSpawnScope SpawnTemp(out T unit, Transform parent, Vector3 localPos)
+        {
+            return GetPool().SpawnTemp(out unit, parent, localPos);
+        }
+        public UPoolSpawnScope SpawnTemp(out T unit, Transform parent, Vector3 localPos, Quaternion localRot)
+        {
+            return GetPool().SpawnTemp(out unit, parent, localPos, localRot);
+        }
+
+        public void Despawn(T instance)
+        {
+            if (!instance) { return; }
+            GetPool().Despawn(instance);
+        }
+        public override string ToString()
+        {
+            return _prefab ? _prefab.name : "None";
+        }
+        public static implicit operator UPrefab<T>(T prefab)
+        {
+            return new UPrefab<T>(prefab);
+        }
+    }
+    public static class UPoolExt
+    {
+
         public static T Spawn<T>(this T prefab, Transform parent = null)
             where T : Component
         {
@@ -262,43 +359,82 @@ namespace DCFApixels
     [Serializable]
     public sealed class UPool<T> : UPool where T : Component
     {
+        private interface IUPoolUnitProxy
+        {
+            void Static_InitPool(UPool pool);
+            void Static_InitPoolUnit(T self, UPool pool);
+            void Static_ResetUnit(T self, T prefab);
+        }
+
+        private sealed class UPoolUnitProxy<TUnit> : IUPoolUnitProxy where TUnit : Component
+        {
+            private readonly IUPoolUnit<TUnit> _prefabInterface;
+
+            public UPoolUnitProxy(IUPoolUnit<TUnit> prefabInterface)
+            {
+                _prefabInterface = prefabInterface;
+            }
+
+            public void Static_InitPool(UPool pool)
+            {
+                _prefabInterface.Static_InitPool(pool);
+            }
+
+            public void Static_InitPoolUnit(T self, UPool pool)
+            {
+                _prefabInterface.Static_InitPoolUnit((TUnit)(Component)self, pool);
+            }
+
+            public void Static_ResetUnit(T self, T prefab)
+            {
+                _prefabInterface.Static_ResetUnit((TUnit)(Component)self, (TUnit)(Component)prefab);
+            }
+        }
+
+        private static IUPoolUnitProxy TryCreatePoolUnitProxy(T prefab)
+        {
+            if (prefab is IUPoolUnit<T> directInterface)
+            {
+                return new UPoolUnitProxy<T>(directInterface);
+            }
+
+            Type prefabType = prefab.GetType();
+            Type unitType = typeof(T).BaseType;
+            while (unitType != null && typeof(Component).IsAssignableFrom(unitType))
+            {
+                Type interfaceType = typeof(IUPoolUnit<>).MakeGenericType(unitType);
+                if (interfaceType.IsAssignableFrom(prefabType))
+                {
+                    Type proxyType = typeof(UPoolUnitProxy<>).MakeGenericType(unitType);
+                    return (IUPoolUnitProxy)Activator.CreateInstance(proxyType, prefab);
+                }
+                unitType = unitType.BaseType;
+            }
+            return null;
+        }
         [SerializeField]
         private Transform _root;
         [SerializeField]
         private T _prefab;
-        private IUPoolUnit<T> _prefabInterface;
-        private readonly bool _isHasInterface;
+        private IUPoolUnitProxy _prefabInterface;
         private readonly List<T> _pool = new List<T>(128);
         [SerializeField]
         private int _spawnedCount;
-        public T Prefab
-        {
-            get { return _prefab; }
-        }
-        public override UnityObject PrefabRaw
-        {
-            get { return _prefab; }
-        }
-        protected override Transform Root
-        {
-            get { return _root; }
-        }
-        public override int PrewarmedCount
-        {
-            get { return _pool.Count; }
-        }
+        public T Prefab { get { return _prefab; } }
+        public override UnityObject PrefabRaw { get { return _prefab; } }
+        protected override Transform Root { get { return _root; } }
+        public override int PrewarmedCount { get { return _pool.Count; } }
 
         public UPool(Transform root, T prefab)
         {
             _root = root;
             _prefab = prefab;
-            _prefabInterface = prefab as IUPoolUnit<T>;
-            _isHasInterface = _prefabInterface != null;
+            _prefabInterface = TryCreatePoolUnitProxy(prefab);
             _isUnloaded = false;
             var debug = _root.gameObject.AddComponent<UPoolRoot>();
             debug.pool = this;
 
-            if (_isHasInterface)
+            if (_prefabInterface != null)
             {
                 _prefabInterface.Static_InitPool(this);
             }
@@ -332,7 +468,7 @@ namespace DCFApixels
         private T Create()
         {
             T result = UnityObject.Instantiate(_prefab, _root);
-            if (_isHasInterface)
+            if (_prefabInterface != null)
             {
                 _prefabInterface.Static_InitPoolUnit(result, this);
             }
@@ -467,10 +603,33 @@ namespace DCFApixels
             obj.transform.SetParent(_root);
             obj.gameObject.SetActive(false);
             _pool.Add(obj);
-            if (_isHasInterface)
+            if (_prefabInterface != null)
             {
                 _prefabInterface.Static_ResetUnit(obj, _prefab);
             }
         }
     }
 }
+#if UNITY_EDITOR
+namespace DCFApixels.Editors
+{
+    using UnityEditor;
+    using UnityEngine;
+
+    [CustomPropertyDrawer(typeof(UPrefab<>))]
+    internal sealed class UPrefabDrawer : PropertyDrawer
+    {
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            SerializedProperty prefabProperty = property.FindPropertyRelative("_prefab");
+            EditorGUI.PropertyField(position, prefabProperty, label, false);
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            SerializedProperty prefabProperty = property.FindPropertyRelative("_prefab");
+            return EditorGUI.GetPropertyHeight(prefabProperty, label, false);
+        }
+    }
+}
+#endif

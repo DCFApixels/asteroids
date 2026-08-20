@@ -7,8 +7,8 @@ namespace Modules.FX
     [CreateAssetMenu]
     public class VFXDescription : ScriptableEntityTemplate
     {
-        public ShortVFXView ViewRefab;
-        public float Duration => ViewRefab.Duration;
+        public UPrefab<ShortVFXView> ViewRefab;
+        public float Duration => ViewRefab.Value.Duration;
         public (ShortVFXView view, int entityID) Spawn(EcsWorld world, Vector3 position, Quaternion rotation)
         {
             var e = world.NewEntity();
@@ -31,9 +31,8 @@ namespace Modules.FX
 
             ref var fx = ref world.GetPool<FX>().TryAddOrGet(e);
 
-            var pool = UPool.GetFor(ViewRefab);
-            fx.Pool = pool;
-            fx.PooledInstance = pool.Spawn(null, Vector3.zero, Quaternion.identity);
+            fx.Pool = ViewRefab.Pool;
+            fx.PooledInstance = ViewRefab.Spawn(null, Vector3.zero, Quaternion.identity);
         }
     }
 }

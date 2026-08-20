@@ -10,7 +10,7 @@ namespace Asteroids.BulletsFeature
     [CreateAssetMenu]
     public class BulletDescription : ScriptableEntityTemplate
     {
-        public ProjectileView ViewPrefab;
+        public UPrefab<ViewBase> ViewPrefab;
         public float BoundsRadius = 1;
         public float LifeTime = 3;
 
@@ -18,8 +18,7 @@ namespace Asteroids.BulletsFeature
         {
             var world = EcsWorld.GetWorld(worldID);
             base.Apply(worldID, e);
-            var viewRaw = ViewPrefab.Spawn<ViewBase>(null, Vector3.zero, Quaternion.identity);
-            var view = (ProjectileView)viewRaw;
+            var view = (ProjectileView)ViewPrefab.Spawn(null, Vector3.zero, Quaternion.identity);
             world.GetPool<ViewBase>().Set(e, view);
             world.GetPool<Transform>().Set(e, view.transform);
             ref var sphere = ref world.GetPool<BoundsSphere>().TryAddOrGet(e);

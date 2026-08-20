@@ -20,7 +20,8 @@ MonoBehaviour:
   - rid: 4213516781011599511
   - rid: 4213516781011599512
   - rid: 4213516781011599559
-  ViewPrefab: {fileID: 646751663581237465, guid: 863b4d63a5413314197562c04df1f781, type: 3}
+  ViewPrefab:
+    _prefab: {fileID: 646751663581237465, guid: 863b4d63a5413314197562c04df1f781, type: 3}
   BoundsRadius: 0.76
   references:
     version: 2

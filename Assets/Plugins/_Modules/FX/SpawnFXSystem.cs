@@ -22,8 +22,6 @@ namespace Modules.FX
             foreach (var reqE in _world.Where(reqA))
             {
                 ref var req = ref reqA.Requests[reqE];
-                var pool = UPool.GetFor(req.Prefab);
-
                 Quaternion rot;
                 if(req.Direction == null || req.Direction == Vector3.zero)
                 {
@@ -34,7 +32,7 @@ namespace Modules.FX
                     rot = Quaternion.LookRotation(req.Direction.Value);
                 }
 
-                var view = pool.Spawn(null, req.Position, rot);
+                var view = req.Prefab.Spawn(null, req.Position, rot);
                 view.Play(req.Scale, req.Color);
                 reqA.LifeTimes.Add(reqE) = new()
                 {
@@ -43,7 +41,7 @@ namespace Modules.FX
                 };
                 reqA.FXs.Add(reqE) = new()
                 {
-                    Pool = pool,
+                    Pool = req.Prefab.Pool,
                     PooledInstance = view,
                 };
 

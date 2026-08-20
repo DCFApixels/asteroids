@@ -10,7 +10,7 @@ namespace Asteroids.AsteroidsFeature
     [CreateAssetMenu]
     public class AsteroidDescription : ScriptableEntityTemplate
     {
-        public AsteroidView ViewPrefab;
+        public UPrefab<ViewBase> ViewPrefab;
         public float BoundsRadius = 1;
         public int DeathsCount = 2;
 
@@ -18,8 +18,7 @@ namespace Asteroids.AsteroidsFeature
         {
             var world = EcsWorld.GetWorld(worldID);
             base.Apply(worldID, e);
-            var viewRaw = ViewPrefab.Spawn<ViewBase>(null, Vector3.zero, Quaternion.identity);
-            var view = (AsteroidView)viewRaw;
+            var view = (AsteroidView)ViewPrefab.Spawn(null, Vector3.zero, Quaternion.identity);
             world.GetPool<ViewBase>().Set(e, view);
             world.GetPool<Transform>().Set(e, view.transform);
             view.SetRadius(BoundsRadius);

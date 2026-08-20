@@ -39,7 +39,7 @@ namespace ComponentTemplates
     class Template_9419F76F9D013E770643E72DB705C9F8 : ITemplateNode, IEcsComponentMember
     {
         [SerializeField]
-        private ViewBase _viewPrefab;
+        private UPrefab<ViewBase> _viewPrefab;
 
         public void Apply(short worldID, int entityID)
         {

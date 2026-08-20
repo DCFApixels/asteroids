@@ -1,5 +1,6 @@
 using DCFApixels.DragonECS;
 using DCFApixels.DragonECS.Core;
+using DCFApixels;
 using UnityEngine;
 using Utils;
 
@@ -15,7 +16,7 @@ namespace Modules.FX
             Scale = Nlb<float>.Manual(1f, true),
             Color = Nlb<Color>.Manual(UnityEngine.Color.white, true),
         };
-        public ShortVFXView Prefab;
+        public UPrefab<ShortVFXView> Prefab;
         public Vector3 Position;
         public Quaternion Rotation;
         public Nlb<float> Scale;
